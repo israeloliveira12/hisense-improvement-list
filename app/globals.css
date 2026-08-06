@@ -89,7 +89,23 @@ a { color: inherit; }
 .nav-item:hover { background: var(--purple-tint); color: var(--text); }
 .nav-item.active { background: var(--purple); color: #fff; }
 .nav-item.active svg { opacity: 1; }
-.sidebar-foot { margin-top: auto; padding: 10px 8px; }
+.sidebar-foot { margin-top: auto; padding: 10px 8px; display: flex; flex-direction: column; gap: 8px; }
+.theme-toggle {
+  display: flex; gap: 2px; padding: 3px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border);
+}
+.theme-toggle-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 0; border-radius: 6px;
+  border: none; background: none; color: var(--text-faint); cursor: pointer;
+}
+.theme-toggle-btn:hover { color: var(--text); }
+.theme-toggle-btn.active { background: var(--surface); color: var(--purple); box-shadow: var(--shadow); }
+
+.logout-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: none;
+  color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.logout-btn:hover { background: var(--purple-tint); color: var(--text); border-color: var(--purple); }
 .doc-pill {
   display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px;
   background: var(--green-tint); color: var(--green); font-size: 11.5px; font-weight: 700;

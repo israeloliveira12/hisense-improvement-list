@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "./ThemeToggle";
+import LogoutButton from "./LogoutButton";
 
 const ITEMS = [
   {
@@ -60,10 +62,12 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="sidebar-foot">
+        <ThemeToggle />
         <div className="doc-pill">
           <span className="dot" />
-          Sincronizado agora
+          Dados de demonstração
         </div>
+        <LogoutButton />
       </div>
     </aside>
   );
