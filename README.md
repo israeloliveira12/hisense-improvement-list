@@ -8,11 +8,12 @@ O que já funciona de verdade (não é mais mock):
 - As 3 telas, com a marca Multilaser, protegidas por senha única, com seletor de idioma (PT/EN/ZH) e tema claro/escuro/sistema no topbar.
 - **Dado ao vivo do Google Sheets** — Apresentação, Banco de Dados e Dashboard leem direto da planilha a cada carregamento, sem cache/JSON estático.
 - **Edição na tabela grava de verdade no Sheets** — mudar Item/Departamento/Responsável/Prazo na tela de Banco de Dados escreve na célula certa da planilha (com indicador visual de salvando/salvo/erro).
-- **Upload de foto vai pro Google Drive** — clicar/arrastar nas caixas Before/After da Apresentação sobe a imagem pro Drive e guarda a referência na aba `PPT_Detalhes` (colunas `Foto Before`/`Foto Improvement`, criadas automaticamente no primeiro upload).
 - Modo "Apresentar" agora usa a Fullscreen API de verdade do navegador (antes era só uma camada por cima da página).
 - "Abrir no Google Sheets" já linka pra planilha real.
+- Layout responsivo pra celular/tablet.
 
 O que ainda **não** está pronto:
+- **Upload de foto pro Drive** — o código está pronto, mas precisa da autorização OAuth de uma vez só (ver seção "Configurar o OAuth do Drive" abaixo) — a service account não tem cota de armazenamento pra criar arquivo novo numa conta pessoal do Google, só descobrimos isso testando em produção.
 - **Botão "Baixar PPT"** — ainda mostra um aviso em vez de gerar o arquivo. Motivo: o modelo de slide (`template_seed.pptx`, usado pelo gerador Python) ainda está no layout ANTIGO (14 tabelas), não no design novo aprovado que a tela "Apresentação" já usa. Gerar o PPT agora produziria um arquivo com aparência diferente da tela — combinamos deixar isso pra próxima etapa, depois de reconstruir o modelo no layout novo.
 - "+ Nova ação" (criar uma ação nova direto pelo site).
 
@@ -29,6 +30,24 @@ Na Vercel (Project Settings → Environment Variables), configure:
 | `GOOGLE_DRIVE_FOLDER_ID` | `1OI0RTwQ_nPxMu-z8rzcbWJAc8YCKOMvG` (pasta "Evidências"). |
 
 Depois de adicionar/mudar variáveis de ambiente na Vercel, é preciso fazer um **novo deploy** pra elas passarem a valer (a Vercel geralmente oferece um botão "Redeploy" nas configurações, ou basta dar outro `git push`).
+
+## Configurar o OAuth do Drive (upload de foto)
+
+O upload de foto **não pode usar a service account** — contas de serviço não têm cota de armazenamento própria no Google Drive, e a única forma disso funcionar numa conta pessoal (não-Workspace) é o upload acontecer autenticado como você mesmo, via OAuth. Passo a passo:
+
+1. **Criar a credencial OAuth no Google Cloud** (mesmo projeto de antes: `hisense-improvement-list`):
+   - Console → **APIs e Serviços → Tela de consentimento OAuth**. Tipo de usuário: **Externo**. Preencha nome do app, e-mail de suporte e e-mail de contato do desenvolvedor (pode ser o seu mesmo). Salve.
+   - Na etapa **"Usuários de teste"**, adicione o seu próprio e-mail do Google — sem isso o Google bloqueia a autorização, já que o app não passou pela revisão pública (não precisa passar, é só uso seu).
+   - Console → **APIs e Serviços → Credenciais → + Criar Credenciais → ID do cliente OAuth**. Tipo de aplicativo: **Aplicativo da Web**. Em **URIs de redirecionamento autorizados**, adicione: `https://SEU-DOMINIO-VERCEL/api/auth/google/callback` (troque pelo domínio real do seu site na Vercel).
+   - Copie o **Client ID** e o **Client Secret** gerados.
+
+2. **Configurar na Vercel** (Environment Variables): adicione `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` e `GOOGLE_OAUTH_REDIRECT_URI` (o mesmo valor exato usado no passo acima) — e faça um **Redeploy**.
+
+3. **Autorizar uma vez**: acesse `https://SEU-DOMINIO-VERCEL/api/auth/google/start` (logado no site). Você vai cair na tela de consentimento do Google — entre com sua conta e autorize o acesso ao Drive. A página final mostra um texto longo (o `refresh_token`) — copie ele.
+
+4. **Guardar o token**: cole esse valor na variável `GOOGLE_OAUTH_REFRESH_TOKEN` na Vercel, e faça outro **Redeploy**. A partir daí o upload de foto passa a funcionar de verdade.
+
+⚠️ O `refresh_token` equivale a uma senha de acesso ao seu Drive — nunca cole ele no chat comigo, nunca commite no GitHub.
 
 ### Erro comum: `error:1E08010C:DECODER routines::unsupported`
 
