@@ -38,6 +38,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
         <div className="config-banner">
           <b>{t("config.title")}</b>
           {t("config.desc")}
+          <code className="config-raw">{error}</code>
         </div>
       </>
     );
@@ -73,6 +74,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
         <div className="config-banner">
           <b>{t("config.title")}</b>
           {t("config.desc")}
+          <code className="config-raw">{error}</code>
         </div>
       )}
 

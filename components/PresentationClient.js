@@ -116,6 +116,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
         <div className="config-banner">
           <b>{t("config.title")}</b>
           {t("config.desc")}
+          <code className="config-raw">{error}</code>
         </div>
       )}
 

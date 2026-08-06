@@ -26,7 +26,7 @@ Na Vercel (Project Settings → Environment Variables), configure:
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` do JSON da service account — no seu caso: `site-hisense-improvement@hisense-improvement-list.iam.gserviceaccount.com`. |
 | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `private_key` do mesmo JSON — cole o valor inteiro (com `-----BEGIN PRIVATE KEY-----` etc.), exatamente como está no arquivo. |
 | `GOOGLE_SHEET_ID` | `1NwRVmtB-jJWOEshYthvP2sUjIy2TtXVv` (já é o ID da planilha que você converteu). |
-| `GOOGLE_DRIVE_FOLDER_ID` | O ID da pasta "Evidências" que você criou no Drive — abra a pasta no navegador e copie o trecho da URL depois de `/folders/`. |
+| `GOOGLE_DRIVE_FOLDER_ID` | `1OI0RTwQ_nPxMu-z8rzcbWJAc8YCKOMvG` (pasta "Evidências"). |
 
 Depois de adicionar/mudar variáveis de ambiente na Vercel, é preciso fazer um **novo deploy** pra elas passarem a valer (a Vercel geralmente oferece um botão "Redeploy" nas configurações, ou basta dar outro `git push`).
 
