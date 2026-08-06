@@ -2,43 +2,38 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ThemeToggle from "./ThemeToggle";
 import LogoutButton from "./LogoutButton";
+import { useLanguage } from "../lib/i18n";
+
+const ICONS = {
+  apresentacao: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 21h8M12 17v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  banco: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3 10h18M9 10v10" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  ),
+  dashboard: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+};
 
 const ITEMS = [
-  {
-    href: "/apresentacao",
-    label: "Apresentação",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M8 21h8M12 17v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    href: "/banco-de-dados",
-    label: "Banco de Dados",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M3 10h18M9 10v10" stroke="currentColor" strokeWidth="1.8" />
-      </svg>
-    ),
-  },
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
+  { href: "/apresentacao", key: "apresentacao" },
+  { href: "/banco-de-dados", key: "banco" },
+  { href: "/dashboard", key: "dashboard" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="sidebar">
@@ -48,7 +43,7 @@ export default function Sidebar() {
           grupo<b>Multilaser</b>
         </div>
       </div>
-      <div className="nav-label">Improvement List · Hisense</div>
+      <div className="nav-label">{t("nav.tag")}</div>
       <nav className="nav">
         {ITEMS.map((item) => (
           <Link
@@ -56,16 +51,15 @@ export default function Sidebar() {
             href={item.href}
             className={"nav-item" + (pathname.startsWith(item.href) ? " active" : "")}
           >
-            {item.icon}
-            {item.label}
+            {ICONS[item.key]}
+            {t("nav." + item.key)}
           </Link>
         ))}
       </nav>
       <div className="sidebar-foot">
-        <ThemeToggle />
         <div className="doc-pill">
           <span className="dot" />
-          Dados de demonstração
+          {t("common.demo")}
         </div>
         <LogoutButton />
       </div>

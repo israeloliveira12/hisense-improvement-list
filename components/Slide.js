@@ -1,4 +1,61 @@
-export default function Slide({ acao }) {
+"use client";
+
+import { useRef } from "react";
+import { useLanguage } from "../lib/i18n";
+
+function DropZone({ fotoId, uploading, onFile, label }) {
+  const inputRef = useRef(null);
+  const { t } = useLanguage();
+
+  if (fotoId) {
+    return (
+      <div className="drop drop-photo" onClick={() => inputRef.current?.click()}>
+        <img src={`/api/drive/file/${fotoId}`} alt={label} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => e.target.files[0] && onFile(e.target.files[0])}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="drop"
+      onClick={() => inputRef.current?.click()}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]);
+      }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => e.target.files[0] && onFile(e.target.files[0])}
+      />
+      {uploading ? (
+        <span>{t("pres.enviando")}</span>
+      ) : (
+        <>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="M21 15l-5-5L5 21" />
+          </svg>
+          <span>{t("pres.enviarFoto")}</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Slide({ acao, onUploadFoto, uploadingSlot }) {
   if (!acao) return null;
 
   return (
@@ -86,28 +143,24 @@ export default function Slide({ acao }) {
         </div>
         <div className="ba-photos">
           <div className="ba-col">
-            <div className="drop">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-              <span>Clique ou arraste pra enviar</span>
-            </div>
+            <DropZone
+              fotoId={acao.fotoBeforeId}
+              uploading={uploadingSlot === "before"}
+              onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
+              label="Before"
+            />
             <div className="ba-caption">
               <b>FACTORY COMMENT</b>
               {acao.factory || "—"}
             </div>
           </div>
           <div className="ba-col">
-            <div className="drop">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-              <span>Clique ou arraste pra enviar</span>
-            </div>
+            <DropZone
+              fotoId={acao.fotoImprovementId}
+              uploading={uploadingSlot === "improvement"}
+              onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
+              label="After"
+            />
             <div className="ba-caption">
               <b>HISENSE COMMENT</b>
               {acao.hisense || "—"}

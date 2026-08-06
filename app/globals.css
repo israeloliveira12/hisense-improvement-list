@@ -135,8 +135,23 @@ a { color: inherit; }
 .btn-ghost:hover { background: var(--purple-tint); color: var(--text); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.topbar-divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+.lang-switch { display: flex; gap: 2px; padding: 3px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
+.lang-switch-btn {
+  padding: 6px 9px; border-radius: 6px; border: none; background: none; color: var(--text-faint);
+  font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: .02em;
+}
+.lang-switch-btn:hover { color: var(--text); }
+.lang-switch-btn.active { background: var(--surface); color: var(--purple); box-shadow: var(--shadow); }
+
 .view { flex: 1; min-height: 0; overflow: auto; }
 .view-inner { padding: 22px 26px 40px; }
+
+.config-banner {
+  margin: 22px 26px; padding: 14px 16px; border-radius: 10px; background: var(--amber-tint);
+  border: 1px solid var(--amber); color: var(--amber); font-size: 12.5px; line-height: 1.5;
+}
+.config-banner b { display: block; font-size: 13px; margin-bottom: 3px; }
 
 /* ================= APRESENTAÇÃO ================= */
 .pres-layout { display: flex; height: 100%; }
@@ -166,7 +181,9 @@ a { color: inherit; }
 .status-dot.closed { background: var(--green); }
 .status-dot.open { background: var(--amber); }
 
-.pres-canvas-wrap { flex: 1; min-width: 0; overflow: auto; padding: 24px; display: flex; justify-content: center; }
+.pres-canvas-wrap { flex: 1; min-width: 0; overflow: auto; padding: 24px; display: flex; justify-content: center; position: relative; }
+.pres-canvas-wrap:fullscreen { background: #17151f; align-items: center; padding: 40px; }
+.pres-canvas-wrap:fullscreen .slide { width: min(1400px, 92vw); box-shadow: none; }
 .slide {
   width: 960px; max-width: 100%; aspect-ratio: 16 / 9; background: #fff; color: #17151f;
   border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; position: relative;
@@ -216,6 +233,8 @@ a { color: inherit; }
 .drop:hover { background: var(--purple-tint); border-color: var(--purple); }
 .drop svg { opacity: 0.55; }
 .drop span { font-size: 9px; font-weight: 600; }
+.drop.drop-photo { padding: 0; border-style: solid; overflow: hidden; }
+.drop.drop-photo img { width: 100%; height: 100%; object-fit: cover; }
 .ba-caption { font-size: 8.6px; color: var(--text-muted); font-style: italic; margin-top: 4px; line-height: 1.25; }
 .ba-caption b { font-style: normal; color: var(--text); display: block; font-size: 7.6px; letter-spacing: 0.04em; }
 
@@ -245,7 +264,12 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .db-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12.5px; vertical-align: middle; }
 .db-table tbody tr:hover { background: var(--purple-tint); }
 .db-table tbody tr:last-child td { border-bottom: none; }
-.cell-no { font-variant-numeric: tabular-nums; color: var(--text-muted); font-weight: 700; }
+.cell-no { font-variant-numeric: tabular-nums; color: var(--text-muted); font-weight: 700; position: relative; }
+.save-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+.save-dot.saving { background: var(--blue-light); animation: pulse 1s infinite ease-in-out; }
+.save-dot.saved { background: var(--green); }
+.save-dot.error { background: var(--red); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 .cell-item { font-weight: 600; max-width: 260px; }
 .cell-editable { cursor: text; border-radius: 5px; padding: 3px 6px; margin: -3px -6px; }
 .cell-editable:hover { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--blue-light); }
@@ -307,12 +331,8 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .login-error { font-size: 12px; color: var(--red); margin: -4px 0 12px; }
 
 /* ================= APRESENTAR (tela cheia) ================= */
-.present-fullscreen {
-  position: fixed; inset: 0; background: #17151f; display: flex; align-items: center;
-  justify-content: center; z-index: 50; padding: 40px;
-}
-.present-fullscreen .slide { width: min(1200px, 92vw); box-shadow: none; }
 .present-hint {
   position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
-  color: #a99cd6; font-size: 12px; font-weight: 600;
+  color: #a99cd6; font-size: 12px; font-weight: 600; background: rgba(23,21,31,.7);
+  padding: 5px 12px; border-radius: 20px;
 }

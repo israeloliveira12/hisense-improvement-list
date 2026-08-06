@@ -1,19 +1,36 @@
 # (Hisense) Improvement List — site
 
-Site que substitui o par Excel + PPT por 3 telas: **Apresentação** (o slide de cada ação, no mesmo visual do PPT), **Banco de Dados** (a tabela editável) e **Dashboard** (calculado ao vivo, sem precisar de "Atualizar tudo").
+Site que substitui o par Excel + PPT por 3 telas: **Apresentação** (o slide de cada ação), **Banco de Dados** (a tabela editável) e **Dashboard** (calculado ao vivo).
 
-## Estado atual: Fase 1 — interface completa, dado real, sem integração viva ainda
+## Estado atual: Fase 2 — Google Sheets e Drive conectados, PPT ainda pendente
 
-O que já funciona:
-- As 3 telas, com a marca Multilaser, protegidas por senha única.
-- Dado **real** das 50 ações (exportado uma vez da planilha de produção pra `data/acoes.json`/`data/dashboard.json` — não é mais texto de exemplo).
-- Navegação, busca, filtros, edição de célula na tabela (só localmente, ainda não grava em lugar nenhum), modo "Apresentar" em tela cheia com seta do teclado.
+O que já funciona de verdade (não é mais mock):
+- As 3 telas, com a marca Multilaser, protegidas por senha única, com seletor de idioma (PT/EN/ZH) e tema claro/escuro/sistema no topbar.
+- **Dado ao vivo do Google Sheets** — Apresentação, Banco de Dados e Dashboard leem direto da planilha a cada carregamento, sem cache/JSON estático.
+- **Edição na tabela grava de verdade no Sheets** — mudar Item/Departamento/Responsável/Prazo na tela de Banco de Dados escreve na célula certa da planilha (com indicador visual de salvando/salvo/erro).
+- **Upload de foto vai pro Google Drive** — clicar/arrastar nas caixas Before/After da Apresentação sobe a imagem pro Drive e guarda a referência na aba `PPT_Detalhes` (colunas `Foto Before`/`Foto Improvement`, criadas automaticamente no primeiro upload).
+- Modo "Apresentar" agora usa a Fullscreen API de verdade do navegador (antes era só uma camada por cima da página).
+- "Abrir no Google Sheets" já linka pra planilha real.
 
-O que ainda **não** está ligado (Fase 2, ver "Próximos passos" abaixo):
-- Google Sheets como banco de dados de verdade (hoje é um `.json` estático, gerado 1x).
-- Google Drive pra upload de foto (o botão de soltar imagem existe visualmente, ainda não envia nada).
-- Botão "Baixar PPT" (hoje só mostra um aviso — a função serverless que gera o `.pptx` de verdade ainda não foi escrita).
-- Botão "+ Nova ação" e "Abrir no Google Sheets" (visuais, sem ação ainda).
+O que ainda **não** está pronto:
+- **Botão "Baixar PPT"** — ainda mostra um aviso em vez de gerar o arquivo. Motivo: o modelo de slide (`template_seed.pptx`, usado pelo gerador Python) ainda está no layout ANTIGO (14 tabelas), não no design novo aprovado que a tela "Apresentação" já usa. Gerar o PPT agora produziria um arquivo com aparência diferente da tela — combinamos deixar isso pra próxima etapa, depois de reconstruir o modelo no layout novo.
+- "+ Nova ação" (criar uma ação nova direto pelo site).
+
+## Configurar as credenciais (Fase 2)
+
+Na Vercel (Project Settings → Environment Variables), configure:
+
+| Variável | De onde vem |
+|---|---|
+| `SITE_PASSWORD` | Escolhida por você (já configurada na Fase 1). |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | `client_email` do JSON da service account — no seu caso: `site-hisense-improvement@hisense-improvement-list.iam.gserviceaccount.com`. |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `private_key` do mesmo JSON — cole o valor inteiro (com `-----BEGIN PRIVATE KEY-----` etc.), exatamente como está no arquivo. |
+| `GOOGLE_SHEET_ID` | `1NwRVmtB-jJWOEshYthvP2sUjIy2TtXVv` (já é o ID da planilha que você converteu). |
+| `GOOGLE_DRIVE_FOLDER_ID` | O ID da pasta "Evidências" que você criou no Drive — abra a pasta no navegador e copie o trecho da URL depois de `/folders/`. |
+
+Depois de adicionar/mudar variáveis de ambiente na Vercel, é preciso fazer um **novo deploy** pra elas passarem a valer (a Vercel geralmente oferece um botão "Redeploy" nas configurações, ou basta dar outro `git push`).
+
+⚠️ Nunca cole essas credenciais no chat comigo nem commite elas no GitHub — o `.gitignore` já bloqueia `.env*`, mas a chave privada em si (o `.json` baixado do Google Cloud) também não deve entrar na pasta do projeto.
 
 ## Rodar localmente
 
@@ -25,30 +42,14 @@ npm install
 cp .env.example .env.local
 ```
 
-Edite `.env.local` e troque `SITE_PASSWORD` pela senha que você quiser usar. Depois:
+Edite `.env.local` com os mesmos valores da tabela acima. Depois:
 
 ```bash
 npm run dev
 ```
 
-Abre em `http://localhost:3000` — vai pedir a senha antes de mostrar qualquer tela.
+Abre em `http://localhost:3000`.
 
-## Próximos passos (Fase 2) — o que só você consegue fazer (contas/credenciais)
+## Próximo passo: reconstruir o template do PPT
 
-Nenhuma dessas contas pode ser criada por mim — são da sua conta Google/GitHub/Vercel. Quando quiser seguir pra Fase 2 (ligar Google Sheets/Drive de verdade e publicar), os passos são:
-
-1. **Google Cloud — criar a "service account" (a credencial que o site usa pra falar com Sheets/Drive em seu nome, sem ser sua conta pessoal)**
-   - Criar um projeto em [console.cloud.google.com](https://console.cloud.google.com).
-   - Ativar as APIs "Google Sheets API" e "Google Drive API" nesse projeto.
-   - Criar uma "Service Account" (IAM & Admin → Service Accounts → Create), gerar uma chave JSON pra ela.
-   - Na planilha do Google Sheets (a versão migrada do Excel) e na pasta do Google Drive (evidências), compartilhar com o e-mail dessa service account como Editor — do mesmo jeito que se compartilha com uma pessoa, só que é uma "pessoa robô".
-
-2. **GitHub — criar o repositório**
-   - Criar um repositório novo (pode ser privado) e subir a pasta `site-web/` pra lá.
-
-3. **Vercel — conectar e publicar**
-   - Criar conta na Vercel (dá pra entrar direto com GitHub), importar o repositório.
-   - Nas configurações do projeto na Vercel, adicionar as variáveis de ambiente (`SITE_PASSWORD`, e as credenciais da service account que vêm do passo 1) — nunca commitar essas credenciais no GitHub.
-   - Cada `git push` depois disso publica uma versão nova automaticamente.
-
-Assim que você tiver os itens 1–3 prontos (ou quiser ajuda decidindo algum detalhe deles), me avise que eu sigo com o código da Fase 2: as rotas que de fato leem/escrevem no Google Sheets e Drive, e a função de gerar o `.pptx`.
+Pra ligar o botão "Baixar PPT" de verdade, falta reconstruir `gerador_slides/template_seed.pptx` no layout novo (o mesmo da tela Apresentação: Issue+Description fundidos, sem tabela de Recheck, 1 prazo só) e portar `gerador_slides/gerar_ppt.py` pra ler os dados vindos do Sheets (via uma função serverless) em vez do Excel local. Isso fica pra uma próxima etapa — combine comigo quando quiser seguir com isso.

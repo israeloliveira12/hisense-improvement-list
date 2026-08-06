@@ -1,18 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Topbar from "./Topbar";
+import { useLanguage } from "../lib/i18n";
 
-const FILTROS = [
-  { key: "todas", label: "Todas" },
-  { key: "open", label: "Open" },
-  { key: "closed", label: "Closed" },
-  { key: "investimento", label: "Com investimento" },
-];
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1NwRVmtB-jJWOEshYthvP2sUjIy2TtXVv/edit";
 
-export default function DatabaseTable({ acoes }) {
+export default function DatabaseTable({ acoes: initialAcoes, error }) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState("todas");
-  const [linhas, setLinhas] = useState(acoes);
+  const [linhas, setLinhas] = useState(initialAcoes);
+  const [status, setStatus] = useState({}); // { [no]: "saving" | "saved" | "error" }
 
   const contagens = useMemo(
     () => ({
@@ -40,27 +39,45 @@ export default function DatabaseTable({ acoes }) {
     );
   }, [linhas, filtro, query]);
 
-  function editarCampo(no, campo, valor) {
+  async function editarCampo(no, campo, valor) {
     setLinhas((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
+    if (error) return; // sem Sheets conectado ainda -- so muda localmente
+    setStatus((s) => ({ ...s, [no]: "saving" }));
+    try {
+      const res = await fetch(`/api/acoes/${encodeURIComponent(no)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: campo, value: valor }),
+      });
+      if (!res.ok) throw new Error();
+      setStatus((s) => ({ ...s, [no]: "saved" }));
+      setTimeout(() => setStatus((s) => ({ ...s, [no]: undefined })), 2000);
+    } catch {
+      setStatus((s) => ({ ...s, [no]: "error" }));
+    }
   }
 
   return (
     <>
-      <div className="topbar">
-        <h1>
-          Banco de Dados <span className="sub">aba &quot;Improvement List&quot;</span>
-        </h1>
-        <div className="topbar-actions">
-          <button className="btn btn-outline">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <rect x="4" y="17" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
-            </svg>
-            Abrir no Google Sheets
-          </button>
-          <button className="btn btn-primary">+ Nova ação</button>
+      <Topbar title={t("db.title")} sub={t("db.sub")}>
+        <a className="btn btn-outline" href={SHEET_URL} target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="4" y="17" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+          {t("db.abrirSheets")}
+        </a>
+        <button className="btn btn-primary" disabled title={t("db.novaAcaoEmBreve")}>
+          {t("db.novaAcao")}
+        </button>
+      </Topbar>
+
+      {error && (
+        <div className="config-banner">
+          <b>{t("config.title")}</b>
+          {t("config.desc")}
         </div>
-      </div>
+      )}
 
       <div className="view">
         <div className="view-inner">
@@ -71,25 +88,30 @@ export default function DatabaseTable({ acoes }) {
                 <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
               </svg>
               <input
-                placeholder="Buscar por nº, item ou responsável…"
+                placeholder={t("db.buscar")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            {FILTROS.map((f) => (
+            {[
+              ["todas", t("db.todas")],
+              ["open", t("db.open")],
+              ["closed", t("db.closed")],
+              ["investimento", t("db.comInvestimento")],
+            ].map(([key, label]) => (
               <button
-                key={f.key}
-                className={"filter-chip" + (filtro === f.key ? " active" : "")}
-                onClick={() => setFiltro(f.key)}
+                key={key}
+                className={"filter-chip" + (filtro === key ? " active" : "")}
+                onClick={() => setFiltro(key)}
               >
-                {f.label} ({contagens[f.key]})
+                {label} ({contagens[key]})
               </button>
             ))}
             <div className="sync-note">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Editar aqui atualiza o Google Sheets instantaneamente
+              {error ? t("common.demo") : t("db.syncNote")}
             </div>
           </div>
 
@@ -98,19 +120,24 @@ export default function DatabaseTable({ acoes }) {
               <table className="db-table">
                 <thead>
                   <tr>
-                    <th>No.</th>
-                    <th>Item</th>
-                    <th>Dept. in charge</th>
-                    <th>Person in charge</th>
-                    <th>Status</th>
-                    <th>Deadline</th>
-                    <th>Investment</th>
+                    <th>{t("db.col.no")}</th>
+                    <th>{t("db.col.item")}</th>
+                    <th>{t("db.col.dept")}</th>
+                    <th>{t("db.col.person")}</th>
+                    <th>{t("db.col.status")}</th>
+                    <th>{t("db.col.deadline")}</th>
+                    <th>{t("db.col.investment")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtradas.map((a) => (
                     <tr key={a.no}>
-                      <td className="cell-no">{a.no}</td>
+                      <td className="cell-no">
+                        {a.no}
+                        {status[a.no] === "saving" && <span className="save-dot saving" title={t("common.saving")} />}
+                        {status[a.no] === "saved" && <span className="save-dot saved" title={t("common.saved")} />}
+                        {status[a.no] === "error" && <span className="save-dot error" title={t("common.error")} />}
+                      </td>
                       <td
                         className="cell-item cell-editable"
                         contentEditable
@@ -138,7 +165,7 @@ export default function DatabaseTable({ acoes }) {
                       <td>
                         <span className={"chip " + a.status}>
                           <span className="dot" />
-                          {a.status === "closed" ? "Closed" : "Open"}
+                          {a.status === "closed" ? t("db.closed") : t("db.open")}
                         </span>
                       </td>
                       <td
