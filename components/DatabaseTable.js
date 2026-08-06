@@ -49,11 +49,13 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ field: campo, value: valor }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setStatus((s) => ({ ...s, [no]: "saved" }));
       setTimeout(() => setStatus((s) => ({ ...s, [no]: undefined })), 2000);
-    } catch {
+    } catch (e) {
       setStatus((s) => ({ ...s, [no]: "error" }));
+      alert(`${t("common.error")} (${no} · ${campo}): ${e.message}`);
     }
   }
 
