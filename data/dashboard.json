@@ -1,0 +1,38 @@
+{
+  "total": 50,
+  "closed": 30,
+  "open": 20,
+  "delayed": 16,
+  "porDepartamento": [
+    {
+      "label": "Process Eng.",
+      "count": 17
+    },
+    {
+      "label": "Quality",
+      "count": 11
+    },
+    {
+      "label": "Production",
+      "count": 6
+    },
+    {
+      "label": "SMT Eng.",
+      "count": 4
+    },
+    {
+      "label": "Product Eng.",
+      "count": 3
+    },
+    {
+      "label": "Outros",
+      "count": 9
+    }
+  ],
+  "investimento": {
+    "totalItens": 14,
+    "valorTotal": 581692.96,
+    "aprovado": 149664.4,
+    "recusado": 432028.56
+  }
+}

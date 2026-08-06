@@ -1,0 +1,52 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+export default function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Não foi possível entrar.");
+        return;
+      }
+      const next = searchParams.get("next") || "/apresentacao";
+      router.push(next);
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit}>
+      <input
+        type="password"
+        className="login-input"
+        placeholder="Senha"
+        autoFocus
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      {error && <div className="login-error">{error}</div>}
+      <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
+        {loading ? "Entrando…" : "Entrar"}
+      </button>
+    </form>
+  );
+}

@@ -1,0 +1,1988 @@
+[
+  {
+    "no": "2031",
+    "item": "Prevent Birds Entering Warehouse",
+    "dept": "Logistics",
+    "person": "Marcia",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "02/03/2026",
+    "target": "Target",
+    "investment": "R$ 51.740,00 · Released",
+    "description": "Warehouse roof is opened with gap，some birds live inside, will cause TV dirty, need to make control plan to avoid bird inside.",
+    "expectation": "Prevent birds and dirt from entering the product boxes.",
+    "abrangency": "CD Multi Torquato.",
+    "steps": [
+      [
+        "1",
+        "Conduct quotation and supplier/price research for containment grid installation.",
+        "Márcia O.",
+        "Sep, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Submit approval request to Management .",
+        "Márcia O.",
+        "Sep, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Purchase Requisition.",
+        "Márcia O.",
+        "Sep, 25”",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Aplication.",
+        "Márcia O.",
+        "Mar, 02”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "Measures will be taken to prevent birds from entering.",
+    "hisense": "The improvement has been confirmed and applied to all other warehouses.",
+    "auditor": "Mr. Rocky"
+  },
+  {
+    "no": "2205",
+    "item": "CFTV Cameras improve positions",
+    "dept": "Facilities",
+    "person": "Alexandre",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "30/01/2026",
+    "target": "Target",
+    "investment": "R$ 5.000,00 · Released",
+    "description": "Verify possibility to reposition Cameras to better view doubts about process or installation new one.",
+    "expectation": "Information regarding the conditions upon arrival LCD packaging and handling procedures, to implement identified improvements.",
+    "abrangency": "All TV Lines.",
+    "steps": [
+      [
+        "1",
+        "Quotation new cameras (LTV01, LTV02 and LTV03).",
+        "Alexandre",
+        "Nov, 25",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Purchase approval.",
+        "Adriano",
+        "Jan, 26",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Installation and confirmation Angle and Position.",
+        "Alexandre",
+        "Jan, 30",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This matter has been identified and improvements will be made.",
+    "hisense": "Applied - This improvement will be an important tool for addressing LCD packaging problems.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2040",
+    "item": "Push-pull loading suggest",
+    "dept": "Logistics",
+    "person": "Marcia",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "02/02/2026",
+    "target": "Target",
+    "investment": "R$ 348.381,36 · On Hold",
+    "description": "Paper pallet movement equipment invest;\n Save labor and improve efficiency.",
+    "expectation": "Streamline the movement of LCDs (which already come with plastic protection) and finished products in Logistics.",
+    "abrangency": "Set loading \non Multi Warehouse and Torquato CD",
+    "steps": [
+      [
+        "1",
+        "Analysis application Push-pull device loading suggestion study.",
+        "Márcia O.",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Application.",
+        "Márcia O.",
+        "Fev, 26”",
+        "DECLINED"
+      ]
+    ],
+    "factory": "A cost-benefit analysis of this application will be conducted.",
+    "hisense": "A specific report will be made regarding the manual unloading (next arrival).",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2202",
+    "item": "Risk to SCRATCHED due in the backcover is placed on the backplane",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "30/06/2026",
+    "target": "Target",
+    "investment": "R$ 38.707,20 · On Hold",
+    "description": "To consider an alternative that reduces the possibility of risk in an office or study where this condition does not cause problems.",
+    "expectation": "To ensure that there is no possibility of risk with this operation.",
+    "abrangency": "All TV Lines.",
+    "steps": [
+      [
+        "1",
+        "Analysis and include to SOP key point to check Backcover issues scratch",
+        "Deines",
+        "2026-06-30",
+        "DECLINED"
+      ]
+    ],
+    "factory": "The suggested improvement will be analyzed and reported result.",
+    "hisense": "",
+    "auditor": "Mr. Forest"
+  },
+  {
+    "no": "2027",
+    "item": "Belt machine low efficiency setup and adjust",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "02/02/2026",
+    "target": "Target",
+    "investment": "R$ 44.940,00 · On Hold",
+    "description": "Check the possibility of replacing the TV arching equipment..",
+    "expectation": "If update to automatic，will reduce labor and increase capacity.",
+    "abrangency": "Line production Hisense and Toshiba models.",
+    "steps": [
+      [
+        "1",
+        "Check China reference and share.",
+        "Mr. Carson",
+        "Aug, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Quotation and Purchase request.",
+        "Janaína",
+        "Oct, 25”",
+        "DECLINED"
+      ]
+    ],
+    "factory": "The implementation of the improvement is still under review.",
+    "hisense": "A decision is needed regarding whether to implement the improvements or decline them.",
+    "auditor": "Mr. Rocky"
+  },
+  {
+    "no": "1149",
+    "item": "CTQ – Functional matrix training ",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "16/03/2026",
+    "target": "Target",
+    "investment": "R$ 2.880,00 · Released",
+    "description": "Engineering must provide proper training to selected CTQ workstation staff, including both theoretical and practical assessments.",
+    "expectation": "All key quality-critical points must be mapped, controlled, and operators regularly trained..",
+    "abrangency": "Production of all Hisense and Toshiba models produced.",
+    "steps": [
+      [
+        "1",
+        "Workstation identifications.",
+        "Karina",
+        "Dec, 24”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "CTQ flow chart for PTH, Test, FA and SMT.",
+        "Karina",
+        "Dec, 24”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Creation of a CTQ procedure. Included rules to procedure regarding new staff",
+        "Karina",
+        "Dec, 24”",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Training material (contents)",
+        "Karina",
+        "Dec, 24”",
+        "CLOSED"
+      ],
+      [
+        "5",
+        "Define the employee identification (armband)",
+        "Janaína",
+        "Mar, 26”",
+        "CLOSED"
+      ],
+      [
+        "6",
+        "Training plan and schedule for employees (current and future) Improve the flowchart according standard",
+        "Karina",
+        "Mar, 26”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "Improvements will be made to the application of CTQ activity throughout the manufacturing process.",
+    "hisense": "Improvements are being implemented; only the cyclical review is pending.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2041",
+    "item": "100 inch production line modify UPH 18",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "26/02/2026",
+    "target": "Target",
+    "investment": "R$ 40.000,00 · Released",
+    "description": "Suggestion for implementing improvements throughout the process in order to achieve a UPH above 18.",
+    "expectation": "Improve UPH 10 → 18 by line modifications.",
+    "abrangency": "LTV02 100” inches",
+    "steps": [
+      [
+        "1",
+        "Process analysis and improvement generation to rotating fixture to mitigate risks.",
+        "T. Quemel",
+        "Sep, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "modify the hanging machine.",
+        "T. Quemel",
+        "Nov, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Finish jig and tools, update UPH 28 (only function check section can be the bottle neck",
+        "T. Quemel",
+        "Dec, 17rd",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Aplication and confirmation",
+        "T. Quemel",
+        "Feb, 26”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The suggested improvement will be performed with development adequate jig",
+    "hisense": "Improvement verified and applied, reaching UPH >18, with 20 HC's, 100-inch model.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "1681",
+    "item": "Bench Testing Setup with Ionizing Fans",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "29/04/2025",
+    "deadline": "05/02/2026",
+    "target": "Target",
+    "investment": "R$ 24.180,00 · Released",
+    "description": "In the future, consider gradually configuring ionizing fans for the workbench to reduce static electricity interference and improve the accuracy of the testing process.",
+    "expectation": "Improved and stricter ESD control on test boards.",
+    "abrangency": "Production of all Hisense and Toshiba models produced.",
+    "steps": [
+      [
+        "1",
+        "Mapping the needs.",
+        "T. Quemel",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Equipment acquisition.",
+        "T. Quemel",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Implementation by order of priority.",
+        "T. Quemel",
+        "Jan, 26”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "Improvements will be implemented according to the equipments suggested by the client.",
+    "hisense": "Ionizers were applied to important areas without coverage.",
+    "auditor": "Mr. Hill"
+  },
+  {
+    "no": "2034",
+    "item": "LTV02 Hanging Jig  with risk to Scratch TV",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "31/01/2026",
+    "target": "Target",
+    "investment": "R$ 15.000,00 · Released",
+    "description": "Large-sized product lifting and hanging jig easy to damage backplate LTV02.",
+    "expectation": "Improved handling of TVs, with protected jigs and materials that prevent the risk of impacts to the cabinet.",
+    "abrangency": "LTV02 Jig Hanging (x3).",
+    "steps": [
+      [
+        "1",
+        "Development of a jig (hook) for lifting the device.",
+        "T. Quemel",
+        "Aug, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Purchase quotation and Approval.",
+        "T. Quemel",
+        "Aug, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Application.",
+        "T. Quemel",
+        "Jan, 31”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The suggested improvement will be implemented.",
+    "hisense": "Eyelets were applied to secure the straps for lifting the device, making it practical for production line conditions.",
+    "auditor": "Mr. Forest"
+  },
+  {
+    "no": "2035",
+    "item": "SET ROTATION: Risk damage TV Set during re-position TV on Pallet LTV03.",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "open",
+    "occur": "08/08/2025",
+    "deadline": "10/07/2026",
+    "target": "Target",
+    "investment": "R$ 4.888,00 · Released",
+    "description": "LTV03 Post Preparation at the TV vertical positioning station, manual handling of the rotating TV poses a risk of panel broken or scratched should be improve.",
+    "expectation": "To minimize the possibility of the device being hit due to rotation.",
+    "abrangency": "LTV03 Line Process",
+    "steps": [
+      [
+        "1",
+        "Check the line structure and define a new action plan",
+        "Deines",
+        "2026-07-10",
+        "RUN"
+      ]
+    ],
+    "factory": "The suggested improvement will be analyzed and reported result.",
+    "hisense": "Awaiting analysis and result",
+    "auditor": "Mr. Forest"
+  },
+  {
+    "no": "2036",
+    "item": "LTV03 Preparation TV to Packing with Risk damaged",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "26/02/2025",
+    "target": "Target",
+    "investment": "R$ 4.888,00 · Released",
+    "description": "At the packaging off-line station, placing the screen in a top-down position poses risks of panel broken  and light leakage issue and should develop jig for this packing process.",
+    "expectation": "Reduce product handling and improve the pre-packaging process in the box.",
+    "abrangency": "LTV03 Production Packing Off preparation",
+    "steps": [
+      [
+        "1",
+        "Process analysis and improvement generation to rotating fixture to mitigate risks.",
+        "T. Quemel",
+        "Sep, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Purchase approval.",
+        "T. Quemel",
+        "Nov, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Aplication",
+        "T. Quemel",
+        "Dec, 17rd",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The suggested improvement will be performed with development adequate jig",
+    "hisense": "Rotational jig was applied, resulting in improvement, but the bag placement still needs to be checked.",
+    "auditor": "Mr. Forest"
+  },
+  {
+    "no": "2691",
+    "item": "OQC application inspection",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "open",
+    "occur": "09/06/2026",
+    "deadline": "10/07/2026",
+    "target": "Target",
+    "investment": "R$ 1.088,40 · Em cotação",
+    "description": "OQC should enter TV apps using an account to reach full inspection",
+    "expectation": "OQC inspectors shall log in to TV applications with a valid account and verify key functions, ensuring complete functional inspection.",
+    "abrangency": "All TV models with pre-installed applications requiring user login during OQC inspection.",
+    "steps": [
+      [
+        "1",
+        "Request streamers quotation",
+        "Israel",
+        "2026-06-09",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Analysis quotation for 3 streamers (Netflix, Amazon, Globo)",
+        "Carla",
+        "2026-06-12",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Management approval",
+        "Wilson",
+        "2026-06-18",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Create corporative email to access the streamers",
+        "Carla",
+        "2026-06-26",
+        "CLOSED"
+      ],
+      [
+        "5",
+        "Create account on Each streaming service",
+        "Israel/Carla",
+        "2026-07-10",
+        "RUN"
+      ],
+      [
+        "6",
+        "Implementation and training",
+        "Israel",
+        "2020-07-10",
+        "OPEN"
+      ]
+    ],
+    "factory": "The request will be evaluated and, if accepted, the improvement will be made.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2635",
+    "item": "Car storage stencil, not fully covered.",
+    "dept": "Production",
+    "person": "Wagner",
+    "status": "open",
+    "occur": "30/04/2026",
+    "deadline": "10/09/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "Carts were found storing stencils without any cover on the back of the cart, leaving part of the stencil exposed.",
+    "expectation": "Check for a comprehensive coverage plan in the shopping carts and verify exchanges if necessary.",
+    "abrangency": "SMT \nProduction",
+    "steps": [
+      [
+        "1",
+        "Protective mats have been added to the stencil storage areas to prevent dirt accumulation and contamination.",
+        "Aldeci",
+        "2026-06-19",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Buy new plastic cover",
+        "Aldeci",
+        "2026-07-31",
+        "RUN"
+      ],
+      [
+        "3",
+        "Buy new cars",
+        "Aldeci",
+        "2026-09-10",
+        "OPEN"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2130",
+    "item": "DEFECT RAW DATA - Improve A & R raw data content reasonable.",
+    "dept": "Quality",
+    "person": "Mauricio",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "01/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "There are many ways to describe defects, which can be difficult to filter during analysis, requiring re-analysis of the descriptions in the system and the inclusion of others that are not cataloged.",
+    "expectation": "Standardize the filling out of defects, ensuring correct descriptions, improving filtering, and including more precise visualization in BI.",
+    "abrangency": "SPM system defect input.",
+    "steps": [
+      [
+        "1",
+        "Define 1 staff by shift to monitoring AT data.",
+        "Maurício",
+        "Nov, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Review and optimize the current failure list.",
+        "Israel/Josi",
+        "Nov, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Review Hisense failure list and apply the failure description.",
+        "Israel/Josi",
+        "Nov, 25”",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Hisense evaluation of new failure list",
+        "Adriano Cortes",
+        "Jul, 26”",
+        "ON HOLD"
+      ]
+    ],
+    "factory": "This matter has been identified and improvements will be made.",
+    "hisense": "Defect data will be revised by Hisense – W22",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2206",
+    "item": "LCD BOX HANDLING – Improve handling unloading in line process.",
+    "dept": "Production",
+    "person": "Bruno",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "30/05/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "A special forklift must be used to move boxes with plastic pallets or another way to improve this kind of handling.",
+    "expectation": "To minimize the possibility of broken panels throughout the LCD box handling chain.",
+    "abrangency": "All TV Lines. (Master boxes and LCD > 58“)",
+    "steps": [
+      [
+        "1",
+        "Check possibility of a solution without investment.",
+        "Bruno",
+        "2026-05-30",
+        "ON HOLD"
+      ]
+    ],
+    "factory": "The factory will put this action on hold for future improvements.",
+    "hisense": "The risk of the box falling is a possibility. Improvements should be considered.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2208",
+    "item": "TRAINING SYSTEM - Promote the establishment of training improvement.",
+    "dept": "HR",
+    "person": "Joziane",
+    "status": "open",
+    "occur": "20/10/2026",
+    "deadline": "30/07/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "No professional training management or training courses need to develop.",
+    "expectation": "A training system and process documents (training management documents and annual training plan).",
+    "abrangency": "Factory Departments",
+    "steps": [
+      [
+        "1",
+        "Define what training the employee needs",
+        "Thiago",
+        "2026-07-01",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Define the plan",
+        "Joziane",
+        "2026-07-03",
+        "RUN"
+      ],
+      [
+        "3",
+        "Training Application (PQC should attend)",
+        "Thiago",
+        "TBD",
+        "OPEN"
+      ],
+      [
+        "4",
+        "PQC audit",
+        "Wilson",
+        "TBD",
+        "OPEN"
+      ]
+    ],
+    "factory": "The factory will analyze the application.",
+    "hisense": "This is an important improvement, as it helps to control the necessary training throughout the year.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2728",
+    "item": "EPS mold purchase procedure not complete and release",
+    "dept": "Projects",
+    "person": "Glaucio",
+    "status": "open",
+    "occur": "08/08/2025",
+    "deadline": "30/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "2025-year order mold was seriously delayed, and the process was not established at beginning.\nIt has now been written, but it has not yet been officially released within MULTI, and the two teams have not been connected.",
+    "expectation": "All new businesses must confirm process integrity, and plant managers must have\nprocess awareness.",
+    "abrangency": "Factory Departments",
+    "steps": [
+      [
+        "1",
+        "Creation of flow chart",
+        "Cezar",
+        "2026-06-03",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Create procedure and QMS approval request",
+        "Cezar",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "The factory will analyze this request.",
+    "hisense": "We pushed to tidy the procedure, but until now, procedure is not approved and published.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2227",
+    "item": "LCD Screen defect separation",
+    "dept": "A&R",
+    "person": "Mauricio",
+    "status": "closed",
+    "occur": "08/08/2025",
+    "deadline": "25/01/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "For LCD screen defects, it is necessary to distinguish between repairable (glass OK) and nonrepairable (glass NG). All defective screens are stored as SCRAP, which lacks effective protection and is not conducive to future maintenance efficiency.",
+    "expectation": "Sort out the classification and handling process of poor maintenance.",
+    "abrangency": "All Hisense and Toshiba products",
+    "steps": [
+      [
+        "1",
+        "Define flow how to allocate the LCD in Warehouse (schedule meeting with logistics team).",
+        "Maurício\nLeonardo\nBruno",
+        "Jan, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Separation LCD Screen defect (Glass OK/Glass NG).\nWarehouse different locations.",
+        "Maurício",
+        "Dec, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Defining allocation within the warehouse and defining workflow.",
+        "Maurício",
+        "Jan, 25”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will analyze this request.",
+    "hisense": "This activity, already well-established in the automotive repair industry, facilitates future repairs and replacements.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2692",
+    "item": "Inventory Clearance management",
+    "dept": "PCM",
+    "person": "Nathan",
+    "status": "closed",
+    "occur": "10/11/2025",
+    "deadline": "23/03/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Someone push repeatedly then will arrange PO clearance，but still slow.",
+    "expectation": "Monthly output list material details and formulate solutions.",
+    "abrangency": "Factory Departments",
+    "steps": [
+      [
+        "1",
+        "PCM sends inventory clearance report every two months to Hisense team",
+        "Natan/\nLeandro",
+        "2026-06-03",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will analyze this request.",
+    "hisense": "The procedural steps will greatly help with the issue of predictability and on-time PO clearance.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2572",
+    "item": "Nailing operation is not a normal operation of Hisense",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "closed",
+    "occur": "11/07/2025",
+    "deadline": "20/04/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "The nailing operation is not a normal operation of Hisense, and other brands on the market do not have this operation. Packaging box needs to be nailed, and the cover is bulging, appearance is very bad.",
+    "expectation": "Cancel nailing process, reduce costs and improve esthetics.",
+    "abrangency": "Hisense and Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Modify the sop，should have staff to folder the carton，must be clear operation standard and 100% operation;",
+        "Manoel",
+        "Dec, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "we can do first trail(normally should be done in oct),suggest to test in 32-50, We can choose 50 inch; then we try 55-75, We can choose 75 inch to do the test;",
+        "Alexandre/Denilson",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "remember, we can change to new tape which with high quality glue;",
+        "Alexandre/Denilson",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "factory test suggest transportation + high temp and humidity+ stack on pallet.",
+        "Alexandre/Denilson",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "5",
+        "Start on 43” and then cover all models one by one.",
+        "Alexandre",
+        "April, 26”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will conduct tests to verify the elimination of staples.",
+    "hisense": "The elimination process has been completed on all Hisense models.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2693",
+    "item": "Consistent recurrence Carton Box problems, causing issues with PO closing",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "closed",
+    "occur": "28/01/2026",
+    "deadline": "30/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "What is the reason the Carton Box problems happen repeatedly? When got the 8D report, many time the solution could not solve the problem, just collect the report to finish the task probably; Sometimes, IQC fails to filter out the problems to production line, what is the reason, how we solve it, also a problem should be studied.",
+    "expectation": "Definitely, avoid recurrence of the same problems with Carton Box and minimize losses in PO closing.",
+    "abrangency": "All Hisense and Toshiba products",
+    "steps": [
+      [
+        "1",
+        "Decline Hevi supplier as carton box vendor.",
+        "Vanessa",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Make contract with new carton box supplier - Klabin.",
+        "Vanessa",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Meeting with Carton Box suppliers (Managers and Directors).",
+        "Multilaser / Klabin",
+        "Oct, 25”",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Share quality report for all the produced orders.",
+        "Wilson",
+        "Nov, 25”",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will make every effort to minimize this issue.",
+    "hisense": "It is important to have strict control over the supplier and to identify consistent root causes.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2694",
+    "item": "Inventory Accuracy improvement",
+    "dept": "SMT",
+    "person": "Wagner",
+    "status": "closed",
+    "occur": "28/01/2026",
+    "deadline": "06/03/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "There is room for some improvement regarding inventory accuracy, and these should be proposed by the factory.",
+    "expectation": "Improved controls and increasingly accurate inventory results.",
+    "abrangency": "All Hisense and Toshiba Material",
+    "steps": [
+      [
+        "1",
+        "Analysis of possibilities for improvement",
+        "SMT",
+        "06/03/2026",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Improved the control of kits with distinct locations for the entry, production, and exit of materials for each line;",
+        "SMT",
+        "06/03/2026",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Change in the procedure for receiving non-standard materials with counting via X-ray machine to ensure the physical quantity is the same as the system quantity;",
+        "SMT",
+        "06/03/2026",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "List the worst material loss in machine",
+        "SMT",
+        "06/03/2026",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will make every effort to minimize this issue.",
+    "hisense": "Please check and share the solution.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2695",
+    "item": "Standardization in the position and strength of the Strapping Band.",
+    "dept": "Process Eng.",
+    "person": "Thalia",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "29/05/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Standardization is required in both the strength and position of the tape on the packaging box. The tape should be centered between the perforations on the top of the box.",
+    "expectation": "Avoid tearing the box in the areas where tape is applied and standardization (SOP) is performed.",
+    "abrangency": "All Hisense and Toshiba models use Strapping Band.",
+    "steps": [
+      [
+        "1",
+        "Update SOP - Position the strapping band centered between the perforations and adjust the tightening force.",
+        "Thalia",
+        "2026-05-29",
+        "CLOSED"
+      ]
+    ],
+    "factory": "Assessment of the applicability of the request.",
+    "hisense": "Training information and records were entered to ensure the correct placement of the stretch tape.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2450",
+    "item": "Solder flux contamination on PCI",
+    "dept": "Quality",
+    "person": "Wandemberg",
+    "status": "closed",
+    "occur": "05/02/2026",
+    "deadline": "27/03/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Remote control doesn’t working due to solder flux contamination on PCI",
+    "expectation": "Solder flux process control",
+    "abrangency": "Hisense models",
+    "steps": [
+      [
+        "1",
+        "Process matrix revalidation for the wave soldering process must be performed whenever there is a change in the production target.",
+        "Karina",
+        "2026-03-16",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Include the parameter in the Wave Soldering process matrix.",
+        "Edian",
+        "2026-03-27",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Add the flux specified by Hisense, Alpha EF-8000 (code MA0001AA).",
+        "Karina",
+        "2026-03-27",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Include visual inspection in the process to identify impurities and/or contamination, followed by cleaning.",
+        "Edian",
+        "2026-03-27",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The problem has been confirmed, and actions will be taken to prevent recurrence.",
+    "hisense": "Actions have been implemented and verified. We will maintain constant checks.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2696",
+    "item": "LINE STOPPED - 5S standardization to line stopped long time ",
+    "dept": "Production",
+    "person": "Sirlane",
+    "status": "closed",
+    "occur": "30/05/2026",
+    "deadline": "26/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "It was found that there is no standardized 5S process on the production line (checklist, standard) related to lines that remain inactive for a long period. This includes testing the proper conditions of equipment and machines to avoid compromising the first production run.",
+    "expectation": "Standardization and controls of production lines that have been inactive for long periods, in order to avoid problems when they resume operation.",
+    "abrangency": "Multilaser Lines Productions SMT, PTH, Line Test, Final Assembly",
+    "steps": [
+      [
+        "1",
+        "The line is emptied after long periods of inactivity, covering the blankets with plastic and other items from the production line.",
+        "Rodrigo",
+        "2026-06-15",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Include key point to pay attention to 5S checklist",
+        "Sirlane",
+        "2026-06-23",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Training of operation",
+        "Sirlane",
+        "2026-06-26",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The improvement requested will be evaluated, as well as whether standardization and procedures already exist.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2697",
+    "item": "CHECK LIST (SMT) – not filled in (Ionizer equipment)",
+    "dept": "SMT Eng.",
+    "person": "Nélio",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "06/05/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "It was verified that the Ionizer Checklist had not been completed for at least 6 weeks. This task is performed by the Maintenance team.",
+    "expectation": "Strengthen the execution of the Checklist items throughout the entire SMT process and reinforce its importance.",
+    "abrangency": "Productions SMT, PTH, Line Test",
+    "steps": [
+      [
+        "1",
+        "Analysis route cause : staff didn’t fill the document as procedure and quality didn’t audit (SMT door checklist)",
+        "Aldeci",
+        "2026-05-04",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Check the ionizer and fill the document",
+        "Aldeci",
+        "2026-05-04",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "PQC training – guide all PQC team to continuous audit these items and apply NC if staff don’t follow the procedure",
+        "Renato",
+        "2026-05-06",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The factory will review the regularity of execution and completion in a timely manner.",
+    "hisense": "We will conduct periodic checks, and repeat offenses will require more effective action.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2698",
+    "item": "Using Marfinite x Original Tray",
+    "dept": "Process Eng.",
+    "person": "Deines",
+    "status": "open",
+    "occur": "05/05/2026",
+    "deadline": "20/08/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "Some components that arrive in trays are placed on marfinite, which can cause bent terminals or other damage during placement on the marfinite.",
+    "expectation": "To determine through studies whether it is possible to place these components in these marfinites or to use the original tray.",
+    "abrangency": "PTH Storage Components",
+    "steps": [
+      [
+        "1",
+        "Hisense will send pictures about how Chinese factory organize these components",
+        "Mr. Carson",
+        "2026-05-11",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Define which components are applicable to use trays and which are applicable to use Marfinite.",
+        "Deines",
+        "2026-07-06",
+        "RUN"
+      ],
+      [
+        "3",
+        "Change the front workstation layout to support the proper use of the components.",
+        "Deines",
+        "2026-08-20",
+        "OPEN"
+      ]
+    ],
+    "factory": "The risk to the component in this process, its history, and layout will be analyzed.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2699",
+    "item": "Pallet PCB’s Storage and Cleaning Check List.",
+    "dept": "Production",
+    "person": "Sirlane",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "29/05/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "It wasn't very clear how often the pallets for the plate used in the PTH line are cleaned. Some of them have silicone marks.",
+    "expectation": "Clarify the cleaning frequency (Check List), always ensuring the removal of residue within the appropriate timeframe and storage area protection (cover application).",
+    "abrangency": "PTH \nProduction",
+    "steps": [
+      [
+        "1",
+        "Implement a checklist with clear frequency cleaning/wash",
+        "Aldeci",
+        "2026-05-05",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Improve 5S, define how to storage the pallets and where it should be storage",
+        "Aldeci",
+        "2026-05-05",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Implement checklist to record weekly Wash/cleaning",
+        "Aldeci",
+        "2026-05-05",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Update SOP",
+        "Thiago",
+        "2026-05-29",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "Will you visit the local area, checking the effectiveness of the action - W25",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2700",
+    "item": "PCB RETOUCH-UP – Improve activity resolder and flux remotion.",
+    "dept": "Process Eng.",
+    "person": "Deines",
+    "status": "open",
+    "occur": "30/04/2026",
+    "deadline": "30/07/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "Suggestion to update the SOP to include more details on flux removal on the plate and to include a history of regular adjustments to the soldering machine in the soldering and flux process.",
+    "expectation": "Reduce solder retouching and excess flux through constant operator feedback.",
+    "abrangency": "PTH \nProduction",
+    "steps": [
+      [
+        "1",
+        "PQC training (PQC should check every day if the production staff are follow  the SOP according to procedure)",
+        "Wandemberg",
+        "2026-06-16",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Review the SOP to include verification of flux and solder issues in the top area as a critical inspection point.",
+        "Deines",
+        "2026-07-01",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Conduct benchmarking with other brands to identify best practices.",
+        "Mr. Carson",
+        "2026-07-06",
+        "RUN"
+      ],
+      [
+        "4",
+        "Define and buy a specialized cleaning liquid for use when these issues occur.",
+        "Deines",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "The effectiveness of this suggestion will be verified, and it will be checked whether it is already being implemented.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2701",
+    "item": "Carton Box Flap Draw Flap curves shapes (43A4NV)",
+    "dept": "Product Eng.",
+    "person": "Cezar",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "10/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Two different shapes for the tab curves were found in the 43A4NV model, and it is necessary to determine which one will be used. Carton Box CXVD0216R2",
+    "expectation": "Confirm the Carton Box original draw, apply it to subsequent batches, and check the original Draws on other models. Suggestion use 2nd option (more tape contact).",
+    "abrangency": "Hisense Carton Box’s",
+    "steps": [
+      [
+        "1",
+        "Develop this improvement with Klabin supplier",
+        "Edemar",
+        "2026-05-30",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "The implementation of new cut-point specifications has been aligned with Hisense and will be applied to NPI models only",
+        "Cezar",
+        "2026-06-10",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The draws in this model and others will be confirmed, and improvements will be made according to the original design, if necessary.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2702",
+    "item": "PROFILE - graph showing temperature variation same zone.",
+    "dept": "SMT  Eng.",
+    "person": "Aldeci",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "30/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Comparing 2 Profile Graphs of Line 1 SMT on different days, different temperature peaks were found between points in the same Temperature Zone.",
+    "expectation": "Understanding these variations and verifying temperature uniformity in the same zones.",
+    "abrangency": "SMT \nProduction",
+    "steps": [
+      [
+        "1",
+        "Correction of the profile graph",
+        "Aldeci",
+        "2026-06-08",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Technical report with root cause analysis and way to improve (introduce to Hisense team in meeting)",
+        "Aldeci",
+        "2026-06-30",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The impact of this variation will be verified, and it will be confirmed whether there is a problem.",
+    "hisense": "The effectiveness and continuity of the actions are being verified.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2703",
+    "item": "PTH - Missing Check List to Soldering Machine Parameters",
+    "dept": "SMT  Eng.",
+    "person": "Aldeci",
+    "status": "closed",
+    "occur": "01/03/2026",
+    "deadline": "27/03/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "No checklist for controlling PTH soldering machine parameters, particularly flow control, wasn't found.",
+    "expectation": "Always keep the main parameters of the Soldering Machine under control and at the appropriate times.",
+    "abrangency": "PTH Soldering Machine",
+    "steps": [
+      [
+        "1",
+        "Implement weekly checklist to controlling PTH soldering machine parameters",
+        "Aldeci",
+        "2026-03-20",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Operation training",
+        "Aldeci",
+        "2026-03-27",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This condition will be confirmed, and then the application or filling will be done.",
+    "hisense": "The effectiveness and continuity of the actions will be verified – W25",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2704",
+    "item": "CHEMICAL STORAGE - Unidentified chemical material PTH Line.",
+    "dept": "Production",
+    "person": "Wagner",
+    "status": "closed",
+    "occur": "30/04/2026",
+    "deadline": "15/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Cans containing chemical residue were identified in the production area without proper identification at the storage location.",
+    "expectation": "If it is necessary to leave the waste on site, this must be clearly identified..",
+    "abrangency": "PTH \nProduction",
+    "steps": [
+      [
+        "1",
+        "Apply identification for chemical soldering residues",
+        "PTH",
+        "2026-05-22",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Documentation – SOP",
+        "PTH",
+        "2026-06-03",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Operation training",
+        "PTH",
+        "2026-06-15",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The effectiveness of this suggestion will be verified, and it will be checked whether it is already being implemented.",
+    "hisense": "The effectiveness and continuity of the actions will be verified – W25",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2705",
+    "item": "MATERIAL RETURN – Improve flow material returned by Production to Material",
+    "dept": "Production",
+    "person": "Rodrigo",
+    "status": "open",
+    "occur": "30/04/2026",
+    "deadline": "08/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Materials considered scrap were found, more than 3 days after the model was finalized and still not released in the system and Lot Pallets NG with Goods. Some material returned to production with defect mark and assembly part different model some cases.",
+    "expectation": "Keep production areas organized, following signage and adhering to the appropriate timeframe for material control and scrap disposal.",
+    "abrangency": "Final Assembly \nProduction Area",
+    "steps": [
+      [
+        "1",
+        "Create material return SOP and flowchart",
+        "Cleiton",
+        "2026-06-22",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Create material return procedure",
+        "Cleiton",
+        "2026-07-06",
+        "RUN"
+      ],
+      [
+        "3",
+        "Operation training",
+        "Cleiton",
+        "2026-07-08",
+        "OPEN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "-",
+    "item": "FAI improves application - 2nd Step",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "open",
+    "occur": "30/05/2026",
+    "deadline": "30/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "To make FAI's activity more dynamic, considering one fixed sample and another, kept open per shift, for comparison in case of doubt.",
+    "expectation": "Maintain production by consistently producing systematically and comparing outputs.",
+    "abrangency": "Final Assembly \nProduction",
+    "steps": [
+      [
+        "1",
+        "Built a new FAI table",
+        "Selton",
+        "2026-05-07",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Move the position of FAI table",
+        "Israel",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2706",
+    "item": "T-CON component damaged and scratch issues by the cover back",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "open",
+    "occur": "20/05/2026",
+    "deadline": "15/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Mounting covers sit on top of the LCD and may cause damage to the T-CON board components and backplate scratch issues",
+    "expectation": "Suggest another, but suitable, way to position the lid..",
+    "abrangency": "Final Assembly \nProduction",
+    "steps": [
+      [
+        "1",
+        "Develop special cushion to avoid TCON damage and backplane scratch",
+        "Deines",
+        "2026-06-26",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Begin pilot lot production on 55 inch",
+        "Deines",
+        "2026-07-01",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Apply to all models (abrangency)",
+        "Deines",
+        "2026-07-15",
+        "RUN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "Suggestion Hisense should apply to all models.",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2723",
+    "item": "EPS material comes dirty from the packaging",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "closed",
+    "occur": "11/06/2026",
+    "deadline": "16/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "It was found that some EPS is coming out of the packaging dirty.",
+    "expectation": "Suggest another, but suitable, way to position the lid.",
+    "abrangency": "Local EPS Suppliers",
+    "steps": [
+      [
+        "1",
+        "Issue an 8D report to EPS supplier",
+        "Rosiane/\nIsrael",
+        "2026-06-11",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Root cause analysis : five why and 5M1E",
+        "Supplier",
+        "2026-06-16",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Added plastic protection on the container ground",
+        "Supplier",
+        "2026-06-16",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Packing Improvement : The fragile wall of the EPS, which was previously positioned outward, has been moved inward to improve protection.",
+        "Supplier",
+        "2026-06-16",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2707",
+    "item": "Ionizer with different height positions in the Process",
+    "dept": "Quality",
+    "person": "Carla",
+    "status": "open",
+    "occur": "20/05/2026",
+    "deadline": "10/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "It has been observed that there are different positions for the ionizers in the PTH process. And there is a coverage limit between 300mm and 900mm, with the best effect achieved up to 300mm.",
+    "expectation": "Ensure that all ionizers are within the limits specified in the equipment datasheet. Distance should be included in the SOP.",
+    "abrangency": "PTH\nProduction",
+    "steps": [
+      [
+        "1",
+        "Request Maintenance adjustment to align all the equipments in the same distance",
+        "Sirlane",
+        "2026-05-22",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Standardize the distance and procedure documentation",
+        "Carla",
+        "2026-07-10",
+        "RUN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2710",
+    "item": "CARTON BOX: Flap of the poorly perforated Carton Box.",
+    "dept": "Product Eng.",
+    "person": "Cezar",
+    "status": "open",
+    "occur": "29/04/2026",
+    "deadline": "26/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "The perforated flap on the box does not perform properly, causing tears after closing and deformation of the box after passing through the packaging machine.",
+    "expectation": "The supplier should send suggested samples in order to minimize problems with closure, corner tears, and differences in the size of the perforated tabs..",
+    "abrangency": "Hisense  Models Carton Box",
+    "steps": [
+      [
+        "1",
+        "Start project to improve the cut on the top of carton",
+        "Edemar",
+        "2026-04-29",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Send samples to validade the cut and if it is enough to avoid carton box closure issues (Result : reproved)",
+        "Supplier/\nCezar",
+        "2026-05-14",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Send new samples to validade the cut and if it is enough to avoid carton box closure issues",
+        "Supplier/\nCezar",
+        "2026-06-26",
+        "OPEN"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2711",
+    "item": "Cleaning screen procedure",
+    "dept": "Product Eng.",
+    "person": "Cezar",
+    "status": "open",
+    "occur": "09/05/2026",
+    "deadline": "30/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "① Appearance inspection staff missed defects.\n② Front and rear appearance inspection lighting environment not compliant, process needs adjustment to ensure proper illumination.",
+    "expectation": "To formalize in the SOP the latest version regarding the screen cleaning method in the Final Line, Cloth Type, and Alcohol Type.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Define the cleaning method and implement the use of a cleaning solution when necessary.",
+        "Deines",
+        "2026-07-30",
+        "OPEN"
+      ],
+      [
+        "2",
+        "Introduce a specialized screen-cleaning solution to mitigate smudge and stain defects.",
+        "Cezar",
+        "2026-06-26",
+        "DECLINED"
+      ],
+      [
+        "3",
+        "Add new IPQC checklist specific for TV product and record on electronic storage",
+        "Israel",
+        "2026-05-28",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. David"
+  },
+  {
+    "no": "2617",
+    "item": "MARKET: Remote control wrong in Final Customer",
+    "dept": "Process Eng.",
+    "person": "Deines",
+    "status": "open",
+    "occur": "07/05/2026",
+    "deadline": "15/08/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "The sales team received a complaint regarding a MULTILASER remote control instead of the Hisense one.",
+    "expectation": "Check the complaint details and verify the factory's safety protocols for preventing this type \nof error.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Training : The operator must verify not only the label part number, but also the physical remote control itself to ensure it matches the SOP specification.",
+        "Thalia",
+        "2026-05-25",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Update SOP : and include key verification points: RC model vs. RC physical appearance vs. SOP description.",
+        "Thalia",
+        "2026-05-25",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Improve RC traceability system : check possibility to scan the RC as Only one acessory.",
+        "Deines",
+        "2026-07-15",
+        "RUN"
+      ],
+      [
+        "4",
+        "Improve RC traceability system : check possibility to apply QR code on PCB.",
+        "Deines",
+        "2026-08-15",
+        "RUN"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. David"
+  },
+  {
+    "no": "2712",
+    "item": "ACCESSORY: Packaging standardization",
+    "dept": "Process Eng.",
+    "person": "Thiago",
+    "status": "open",
+    "occur": "25/05/2026",
+    "deadline": "30/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "The packaging sequence for all accessories must follow the same order: Scan the barcode and then place each item in the packaging box, one by one.",
+    "expectation": "It should maintain the same operation across all lines, including rework.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Standardize the SOP to include the accessories one by one",
+        "Deines",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. David"
+  },
+  {
+    "no": "2713",
+    "item": "CHECK LIST: Inspection items covering issues",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "closed",
+    "occur": "18/05/2026",
+    "deadline": "01/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "There is a need to standardize the coverage of checklists used in OOB/OQC/PQC and items that can be referenced in Hisense.",
+    "expectation": "Keep the checklist items updated and using the latest versions of Hisense procedures.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Get all Hisense checklist as standard",
+        "Israel",
+        "2026-05-18",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Update final assembly PQC checklist",
+        "Israel",
+        "2026-05-27",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Update final assembly OOB and OQC checklist",
+        "Israel",
+        "2026-05-18",
+        "CLOSED"
+      ],
+      [
+        "4",
+        "Create Warehouse (stock and Logistics) PQC checklist",
+        "Israel",
+        "2026-05-28",
+        "CLOSED"
+      ],
+      [
+        "5",
+        "Create SMT PQC checklist",
+        "Renato",
+        "2026-05-27",
+        "CLOSED"
+      ],
+      [
+        "6",
+        "Create THT and TEST checklist",
+        "Wandemberg",
+        "2026-06-01",
+        "CLOSED"
+      ]
+    ],
+    "factory": "The request will be evaluated and, if accepted, the improvement will be made.",
+    "hisense": "The effectiveness and Inspection will be verified and confirmed – W25",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2715",
+    "item": "Aging Test Method Improvement",
+    "dept": "Quality",
+    "person": "Alexandre",
+    "status": "open",
+    "occur": "09/06/2026",
+    "deadline": "10/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "The Hisense standard performs Aging Inspection in defined cycles and requires inspection report.",
+    "expectation": "Implement a cycle-based Aging Inspection process with standardized reporting, aligned with Hisense requirements.",
+    "abrangency": "Apply to all products as defined by the Quality team.",
+    "steps": [
+      [
+        "1",
+        "Send Hisense standard Aging SOP",
+        "Mr. Carson",
+        "2026-06-09",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Meeting with Quality team and Hisense to align the expectations and Improvement",
+        "Mr. Carson",
+        "2026-06-09",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Compare Hisense SOP with Multilaser SOP and Standardize a new method separated by cicles",
+        "Alexandre",
+        "2026-06-20",
+        "RUN"
+      ],
+      [
+        "4",
+        "Update flowchat, procedures and SOP",
+        "Alexandre",
+        "2026-06-30",
+        "OPEN"
+      ],
+      [
+        "5",
+        "Inspectors training",
+        "Alexandre",
+        "2026-07-10",
+        "OPEN"
+      ]
+    ],
+    "factory": "The request will be evaluated and, if accepted, the improvement will be made.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2724",
+    "item": "WEIGHT LABEL -  Discrepancies values ​​on the packaging box label.",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "closed",
+    "occur": "18/06/2026",
+    "deadline": "18/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Constant discrepancies between the \"WEIGHT\" values ​​on the packaging box label and the actual weight. This causes sets rework, requiring the label to be reprinted with the correct weight. This issues occurred in models 55Q6QV, 43A4NV, 75Q6QV, 65U6QV, W12",
+    "expectation": "Engineering, Production Quality, define the actual weight of the device to be printed.",
+    "abrangency": "All Hisense and Toshiba models",
+    "steps": [
+      [
+        "1",
+        "The source of the weight information must be set during NPI",
+        "Alexandre",
+        "2026-06-09",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Include Weight during first sample inspection record every setup",
+        "Israel",
+        "2026-06-18",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Monitoring during OQC inspection",
+        "Israel",
+        "2026-06-18",
+        "CLOSED"
+      ]
+    ],
+    "factory": "Assessment of the cause of the occurrence and solution..",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2725",
+    "item": "SET UP: Standardization of time spent and detailing",
+    "dept": "Process Eng.",
+    "person": "Deines",
+    "status": "open",
+    "occur": "30/06/2026",
+    "deadline": "30/06/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "There is still some doubt regarding the setup time of Multilaser's production processes, which can be shared for comparison with Hisense standards.",
+    "expectation": "Possible verify we would have SMT: 90 min (NPI), 40 min (old model), PTH/Test Line: 20 min, and FA: 30 min.",
+    "abrangency": "SMT, PTH, Line Test, FA Lines",
+    "steps": [
+      [
+        "1",
+        "Share the documentation of setup time",
+        "Deines",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "This suggestion will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2726",
+    "item": "FACTORY LOGISTIC: Improve Operation description on SOP",
+    "dept": "Stock",
+    "person": "Thiago Andrade",
+    "status": "open",
+    "occur": "18/06/2026",
+    "deadline": "09/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "Standard Operating Procedures (SOPs) for logistics operations have very limited content, sometimes not truly covering all the variables of the operation, and sometimes, failures occur in the preparation and delivery at the Torquato Warehouse.",
+    "expectation": "Review the factory's Receiving and Logistics operations, including all operations, points of attention, and routine variables.",
+    "abrangency": "Receiving materials and logistics from the factory.",
+    "steps": [
+      [
+        "1",
+        "Meeting with Hisense team to define the action plan",
+        "Israel",
+        "2026-06-19",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Share the ODM reference from Logistics Hisense team",
+        "Carson",
+        "2026-06-19",
+        "CLOSED"
+      ],
+      [
+        "3",
+        "Define Schedule - Review all Logistics SOP systematically, covering processes from receiving to shipping, and define a schedule for their revision and update.",
+        "Thiago Andrade",
+        "2026-07-03",
+        "RUN"
+      ],
+      [
+        "4",
+        "QMS approval SOP’s and training the operation",
+        "Thiago Andrade",
+        "2026-07-10",
+        "OPEN"
+      ]
+    ],
+    "factory": "This suggestion will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2753",
+    "item": "LINE TEST: Short spacing between surfaces Belt Conveyor.",
+    "dept": "Process Eng.",
+    "person": "Deines",
+    "status": "open",
+    "occur": "26/06/2026",
+    "deadline": "30/08/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "The gap between the two desktop surfaces used for testing the motherboard is too small. Handling the mainboard could easily damage the components.",
+    "expectation": "Conduct a study on this spacing and, at the very least, provide constant reinforcement regarding the risk of damage to components.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Request maintenance order to adjust the table on system",
+        "Deines",
+        "2026-06-26",
+        "CLOSED"
+      ],
+      [
+        "2",
+        "Improvement application on test line",
+        "Deines",
+        "2026-08-30",
+        "RUN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2754",
+    "item": "OVEN: Preventive Maintenance Interval is long",
+    "dept": "SMT Eng.",
+    "person": "Aldeci",
+    "status": "open",
+    "occur": "30/06/2026",
+    "deadline": "30/07/2026",
+    "target": "Non-target",
+    "investment": "Sem investimento",
+    "description": "MULTI’s oven maintenance plan is scheduled every two months. We recommend referring to our plan, which is divided into weekly and monthly items.",
+    "expectation": "Analyze this recommendation and implement it if accepted.",
+    "abrangency": "Hisense/Toshiba Models",
+    "steps": [
+      [
+        "1",
+        "Standardize the Multi plan with Hisense plan",
+        "SMT Team",
+        "2026-07-30",
+        "OPEN"
+      ]
+    ],
+    "factory": "This complaint will be analyzed, and action and improvement will be taken.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  },
+  {
+    "no": "2755",
+    "item": "SCRAP MATERIAL PTH - Yellow magazine is missing.",
+    "dept": "Quality",
+    "person": "Israel",
+    "status": "closed",
+    "occur": "01/07/2026",
+    "deadline": "01/07/2026",
+    "target": "Target",
+    "investment": "Sem investimento",
+    "description": "A yellow magazine was introduced to separate parts that will be analyzed and sent back to the Materials team. Only the Red Marfinite (Scrap) is highlighted.",
+    "expectation": "It's important to have this option and avoid mixing and wasting components that are still good.",
+    "abrangency": "SMT/PTH\nProduction",
+    "steps": [
+      [
+        "1",
+        "Define yellow or red pot should be used.",
+        "PTH",
+        "2026-07-01",
+        "CLOSED"
+      ]
+    ],
+    "factory": "This information will be verified and, if confirmed, improvements will be considered.",
+    "hisense": "",
+    "auditor": "Mr. Carson"
+  }
+]
