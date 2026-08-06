@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Topbar from "./Topbar";
 import { useLanguage } from "../lib/i18n";
 
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/1NwRVmtB-jJWOEshYthvP2sUjIy2TtXVv/edit";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
 
 export default function DatabaseTable({ acoes: initialAcoes, error }) {
   const { t } = useLanguage();
