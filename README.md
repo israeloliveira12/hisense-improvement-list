@@ -30,6 +30,17 @@ Na Vercel (Project Settings → Environment Variables), configure:
 
 Depois de adicionar/mudar variáveis de ambiente na Vercel, é preciso fazer um **novo deploy** pra elas passarem a valer (a Vercel geralmente oferece um botão "Redeploy" nas configurações, ou basta dar outro `git push`).
 
+### Erro comum: `error:1E08010C:DECODER routines::unsupported`
+
+Significa que `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` não está num formato que o Node reconhece como chave válida — quase sempre é ter colado o valor **com as aspas do JSON incluídas**. Pra copiar certo:
+
+1. Abra o `.json` da service account num editor de texto simples (Bloco de Notas serve).
+2. Ache a linha `"private_key": "-----BEGIN PRIVATE KEY-----\n...==\n-----END PRIVATE KEY-----\n"`.
+3. Copie **só o que está DENTRO das aspas** — comece a seleção logo depois do `"` que vem depois de `private_key":` e termine antes do `"` final da linha (antes da vírgula). Ou seja, copie começando em `-----BEGIN PRIVATE KEY-----` e terminando em `-----END PRIVATE KEY-----\n` — sem nenhuma aspa dupla `"` no início nem no fim.
+4. Cole esse valor exato no campo da Vercel — os `\n` literais (barra + n) podem ficar como estão, o código já converte pra quebra de linha de verdade.
+
+O código já foi ajustado pra tolerar aspas coladas por engano, mas se o erro persistir depois de conferir isso, o valor colado provavelmente está incompleto (faltando o `-----BEGIN` ou `-----END`).
+
 ⚠️ Nunca cole essas credenciais no chat comigo nem commite elas no GitHub — o `.gitignore` já bloqueia `.env*`, mas a chave privada em si (o `.json` baixado do Google Cloud) também não deve entrar na pasta do projeto.
 
 ## Rodar localmente
