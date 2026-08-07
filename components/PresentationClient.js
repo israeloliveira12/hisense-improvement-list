@@ -73,6 +73,11 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     window.open(`/api/ppt/${encodeURIComponent(acaoAtual.no)}`, "_blank");
   }
 
+  function baixarTudo() {
+    if (!window.confirm(t("pres.confirmarBaixarTudo", { n: acoes.length }))) return;
+    window.open("/api/ppt/master", "_blank");
+  }
+
   function aplicarMudancaLocal(no, campo, valor) {
     setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
@@ -145,6 +150,13 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           {t("pres.baixarPpt")}
+        </button>
+        <button className="btn btn-ghost" onClick={baixarTudo}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+            <path d="M8 20h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+          {t("pres.baixarTudo")}
         </button>
         <button className="btn btn-primary" onClick={apresentar} disabled={!acaoAtual}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

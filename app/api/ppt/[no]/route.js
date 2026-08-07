@@ -1,6 +1,8 @@
 import { getAcoes } from "../../../../lib/googleSheets";
 import { buildActionPptx } from "../../../../lib/pptBuilder";
 
+export const maxDuration = 30;
+
 export async function GET(request, { params }) {
   const { no } = params;
 
