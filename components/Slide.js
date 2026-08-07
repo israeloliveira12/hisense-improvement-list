@@ -1,31 +1,87 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-function DropZone({ fotoId, uploading, onFile, onDelete, label }) {
+function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, label }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
+  const [ajustando, setAjustando] = useState(false);
+  const [preview, setPreview] = useState(null); // valor temporario enquanto arrasta os sliders
 
   if (fotoId) {
+    const base = ajuste || { zoom: 100, x: 50, y: 50 };
+    const a = ajustando && preview ? preview : base;
+
     return (
       <div className="drop drop-photo">
-        <img
-          src={`/api/drive/file/${fotoId}?v=${fotoId}`}
-          alt={label}
-          onClick={() => inputRef.current?.click()}
-        />
-        <button
-          type="button"
-          className="drop-photo-remove"
-          title={t("pres.excluirFoto")}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+        <div
+          className="drop-photo-img"
+          style={{
+            backgroundImage: `url(/api/drive/file/${fotoId}?v=${fotoId})`,
+            backgroundSize: `${a.zoom}%`,
+            backgroundPosition: `${a.x}% ${a.y}%`,
           }}
-        >
-          ✕
-        </button>
+          onClick={() => !ajustando && inputRef.current?.click()}
+        />
+        {!ajustando && (
+          <>
+            <button
+              type="button"
+              className="drop-photo-remove"
+              title={t("pres.excluirFoto")}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+              }}
+            >
+              ✕
+            </button>
+            <button
+              type="button"
+              className="drop-photo-adjust"
+              title={t("pres.ajustarFoto")}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreview(base);
+                setAjustando(true);
+              }}
+            >
+              ⤢
+            </button>
+          </>
+        )}
+        {ajustando && (
+          <div className="adjust-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="adjust-row">
+              <label>{t("pres.zoom")}</label>
+              <input type="range" min="100" max="250" value={a.zoom} onChange={(e) => setPreview({ ...a, zoom: Number(e.target.value) })} />
+            </div>
+            <div className="adjust-row">
+              <label>{t("pres.horizontal")}</label>
+              <input type="range" min="0" max="100" value={a.x} onChange={(e) => setPreview({ ...a, x: Number(e.target.value) })} />
+            </div>
+            <div className="adjust-row">
+              <label>{t("pres.vertical")}</label>
+              <input type="range" min="0" max="100" value={a.y} onChange={(e) => setPreview({ ...a, y: Number(e.target.value) })} />
+            </div>
+            <div className="adjust-actions">
+              <button type="button" className="adjust-btn ghost" onClick={() => { setAjustando(false); setPreview(null); }}>
+                {t("pres.cancelar")}
+              </button>
+              <button
+                type="button"
+                className="adjust-btn primary"
+                onClick={() => {
+                  setAjustando(false);
+                  onAdjustSave && onAdjustSave(a);
+                }}
+              >
+                {t("pres.salvarAjuste")}
+              </button>
+            </div>
+          </div>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -70,7 +126,7 @@ function DropZone({ fotoId, uploading, onFile, onDelete, label }) {
   );
 }
 
-export default function Slide({ acao, onUploadFoto, onDeleteFoto, uploadingSlot }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, uploadingSlot }) {
   if (!acao) return null;
 
   return (
@@ -156,9 +212,11 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, uploadingSlot 
           <div className="ba-col">
             <DropZone
               fotoId={acao.fotoBeforeId}
+              ajuste={acao.fotoBeforeAjuste}
               uploading={uploadingSlot === "before"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "before", acao.fotoBeforeId)}
+              onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "before", val)}
               label="Before"
             />
             <div className="ba-caption">
@@ -169,9 +227,11 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, uploadingSlot 
           <div className="ba-col">
             <DropZone
               fotoId={acao.fotoImprovementId}
+              ajuste={acao.fotoImprovementAjuste}
               uploading={uploadingSlot === "improvement"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
+              onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "improvement", val)}
               label="After"
             />
             <div className="ba-caption">
