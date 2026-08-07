@@ -7,6 +7,28 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["pptxgenjs", "image-size"],
   },
+  // pptxgenjs agora tambem roda no NAVEGADOR (baixar apresentacao completa,
+  // ver components/baixarDeck.js). O build do lado do cliente quebrava com
+  // "UnhandledSchemeError: Reading from node:fs" porque o pacote tem um
+  // `import('node:fs')` interno (so executado em runtime Node de verdade,
+  // atras de um `if (isNode)` -- nunca roda no navegador, mas o webpack
+  // precisa conseguir RESOLVER o import mesmo assim pra montar o bundle).
+  // O campo "browser" do package.json do pptxgenjs ja mapeia "fs"/"https"
+  // pra false, mas so bate com o nome exato "fs" -- nao com "node:fs" (o
+  // prefixo de esquema muda como o webpack resolve o import). Solucao
+  // padrao: tira o prefixo "node:" antes de resolver, e ai o fallback
+  // (equivalente a um modulo vazio) entra em acao normalmente.
+  webpack: (config, { isServer, webpack }) => {
+    if (!isServer) {
+      config.resolve.fallback = { ...config.resolve.fallback, fs: false, https: false };
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, "");
+        })
+      );
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
