@@ -11,11 +11,17 @@ O que já funciona de verdade (não é mais mock):
 - Modo "Apresentar" agora usa a Fullscreen API de verdade do navegador (antes era só uma camada por cima da página).
 - "Abrir no Google Sheets" já linka pra planilha real.
 - Layout responsivo pra celular/tablet.
+- **Upload E exclusão de foto pro Drive** — funcionando (corrigido bug de cache que fazia foto apagada no Drive continuar aparecendo no site).
+- **Editor completo de ação** — clique no nº da ação (Banco de Dados) ou no botão flutuante "Editar ação" (Apresentação) abre um painel com TODOS os campos editáveis: Geral (item, depto, responsável, auditor, processo, datas, status incl. fechar ação, motivo de atraso), Descrição do documento (Description/Expectation/Abrangency/comentários), Investimento (edita item, quantidade, custo, fornecedor, aprovação, etapa de cada item já lançado — adicionar item novo ainda não).
+- **Target calculado** — deixou de ser um campo manual; agora é `sem investimento OU investimento aprovado OU já fechada`, calculado ao vivo e mostrado no Dashboard (não mais um texto solto no slide).
+- **Dashboard com abas** — Principal / Investimentos (aprovado vs. recusado vs. pendente, quem precisa de investimento) / Forecast (previsão de fechamento por semana, calculado ao vivo a partir do prazo).
 
-O que ainda **não** está pronto:
-- **Upload de foto pro Drive** — o código está pronto, mas precisa da autorização OAuth de uma vez só (ver seção "Configurar o OAuth do Drive" abaixo) — a service account não tem cota de armazenamento pra criar arquivo novo numa conta pessoal do Google, só descobrimos isso testando em produção.
-- **Botão "Baixar PPT"** — ainda mostra um aviso em vez de gerar o arquivo. Motivo: o modelo de slide (`template_seed.pptx`, usado pelo gerador Python) ainda está no layout ANTIGO (14 tabelas), não no design novo aprovado que a tela "Apresentação" já usa. Gerar o PPT agora produziria um arquivo com aparência diferente da tela — combinamos deixar isso pra próxima etapa, depois de reconstruir o modelo no layout novo.
-- "+ Nova ação" (criar uma ação nova direto pelo site).
+O que ainda **não** está pronto (mockups em [proposta_fase3](https://claude.ai/code/artifact/73ff86e7-3ecc-4506-ae91-c9ed06c3d263)):
+- **Botão "Baixar PPT"** — ainda mostra um aviso em vez de gerar o arquivo (modelo do slide ainda no layout antigo).
+- **Baixar apresentação completa** (capa + divisores + encerramento, como o master deck original).
+- **Mover/redimensionar foto** dentro do slide (hoje sempre preenche a caixa toda, cortando o excesso).
+- **Selo "NEW"** em ações recém-criadas.
+- "+ Nova ação" (criar uma ação nova direto pelo site) — Investimento (adicionar item novo, hoje só edita os existentes).
 
 ## Configurar as credenciais (Fase 2)
 
