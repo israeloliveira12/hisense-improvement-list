@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "../../lib/i18n";
+import DashboardInvestimentoKanban from "./DashboardInvestimentoKanban";
 
 function formatBRL(v) {
   return "R$ " + (v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -36,6 +37,8 @@ export default function DashboardInvestimentos({ stats }) {
           <div className="kpi-value" style={{ fontSize: 22, color: "var(--amber)" }}>{formatBRL(pendente)}</div>
         </div>
       </div>
+
+      <DashboardInvestimentoKanban stats={stats} />
 
       <div className="chart-card">
         <h3>{t("dash.investimento")}</h3>

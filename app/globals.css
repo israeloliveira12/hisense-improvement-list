@@ -341,6 +341,7 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 
 .chart-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 14px; margin-bottom: 14px; }
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.chart-card + .chart-card { margin-top: 14px; }
 .chart-card h3 { margin: 0 0 3px; font-size: 13.5px; }
 .chart-card .chart-sub { font-size: 11.5px; color: var(--text-muted); margin-bottom: 14px; }
 .legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
@@ -360,6 +361,31 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .money-row .m-fill { height: 100%; display: flex; align-items: center; padding: 0 9px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
 
 .footer-note { font-size: 11px; color: var(--text-faint); text-align: center; margin-top: 18px; }
+
+/* ================= KANBAN DE INVESTIMENTO ================= */
+.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px; }
+.kanban-col { background: var(--bg); border-radius: 10px; padding: 12px; min-width: 0; }
+.kanban-col-head { display: flex; align-items: center; justify-content: space-between; border-top: 3px solid; padding-top: 8px; }
+.kanban-col-title { font-size: 12px; font-weight: 700; }
+.kanban-col-count { font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface); border-radius: 20px; padding: 1px 8px; }
+.kanban-col-total { font-size: 11px; color: var(--text-muted); margin: 3px 0 10px; font-variant-numeric: tabular-nums; }
+.kanban-cards { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; }
+.kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; box-shadow: var(--shadow); }
+.kanban-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.kanban-acao-no { font-size: 10px; font-weight: 700; color: var(--purple); font-variant-numeric: tabular-nums; }
+.kanban-card-item { font-size: 12px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+.kanban-card-row { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--text-muted); margin-bottom: 2px; }
+.kanban-card-row b { color: var(--text); font-weight: 700; }
+.kanban-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+.kanban-person { font-size: 10.5px; color: var(--text-muted); }
+.kanban-approval { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+.kanban-approval.approved { background: var(--green-tint); color: var(--green); }
+.kanban-approval.declined { background: var(--red-tint, #fbeaea); color: var(--red); }
+.kanban-approval.pending { background: var(--amber-tint); color: var(--amber); }
+
+@media (max-width: 900px) {
+  .kanban-board { grid-template-columns: 1fr; }
+}
 
 .forecast-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; padding-top: 20px; overflow-x: auto; }
 .forecast-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 34px; }
