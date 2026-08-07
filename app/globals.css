@@ -241,36 +241,26 @@ a { color: inherit; }
 .drop svg { opacity: 0.55; }
 .drop span { font-size: 9px; font-weight: 600; }
 .drop.drop-photo { padding: 0; border-style: solid; overflow: hidden; position: relative; cursor: default; }
-.drop-photo-img { width: 100%; height: 100%; background-repeat: no-repeat; cursor: pointer; }
-.drop-photo-remove, .drop-photo-adjust, .drop-photo-expand {
+.drop-photo-img {
+  width: 100%; height: 100%; background-repeat: no-repeat; cursor: pointer;
+  /* "contain" + centralizado -- a foto inteira sempre cabe na caixa, nunca
+     corta (era "cover"-like antes, via zoom em %, e isso cortava). */
+  background-size: contain; background-position: center center;
+}
+.drop-photo-remove, .drop-photo-expand {
   position: absolute; top: 4px; width: 18px; height: 18px; border-radius: 50%;
   border: none; background: rgba(23,21,31,.65); color: #fff; font-size: 10px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;
   opacity: 0; transition: opacity .12s ease;
 }
-.drop-photo:hover .drop-photo-remove, .drop-photo:hover .drop-photo-adjust, .drop-photo:hover .drop-photo-expand,
-.drop-photo:focus-within .drop-photo-remove, .drop-photo:focus-within .drop-photo-adjust, .drop-photo:focus-within .drop-photo-expand {
+.drop-photo:hover .drop-photo-remove, .drop-photo:hover .drop-photo-expand,
+.drop-photo:focus-within .drop-photo-remove, .drop-photo:focus-within .drop-photo-expand {
   opacity: 1;
 }
 .drop-photo-remove { right: 4px; }
 .drop-photo-remove:hover { background: var(--red); }
-.drop-photo-adjust { right: 26px; }
-.drop-photo-adjust:hover { background: var(--purple); }
-.drop-photo-expand { right: 48px; font-size: 11px; }
+.drop-photo-expand { right: 26px; font-size: 11px; }
 .drop-photo-expand:hover { background: var(--purple); }
-
-.adjust-panel {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 68%;
-  background: rgba(23,21,31,.86); z-index: 3;
-  display: flex; flex-direction: column; justify-content: center; gap: 5px; padding: 6px 10px; color: #fff;
-}
-.adjust-row { display: flex; align-items: center; gap: 6px; }
-.adjust-row label { font-size: 7.5px; font-weight: 700; width: 34px; flex: none; color: #DCCFF6; }
-.adjust-row input[type=range] { flex: 1; height: 10px; }
-.adjust-actions { display: flex; gap: 6px; margin-top: 4px; }
-.adjust-btn { flex: 1; border: none; border-radius: 5px; padding: 4px 0; font-size: 8px; font-weight: 700; cursor: pointer; }
-.adjust-btn.primary { background: var(--purple); color: #fff; }
-.adjust-btn.ghost { background: rgba(255,255,255,.15); color: #fff; }
 .ba-thumbs { display: flex; gap: 4px; flex: none; margin-top: 4px; overflow-x: auto; }
 .ba-thumb { position: relative; width: 30px; height: 30px; border-radius: 5px; overflow: hidden; flex: none; }
 .ba-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }

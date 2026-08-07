@@ -57,96 +57,44 @@ function PhotoLightbox({ ids, startIndex, onClose }) {
   );
 }
 
-function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, onExpand, label }) {
+function DropZone({ fotoId, uploading, onFile, onDelete, onExpand, label }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
-  const [ajustando, setAjustando] = useState(false);
-  const [preview, setPreview] = useState(null); // valor temporario enquanto arrasta os sliders
 
   if (fotoId) {
-    const base = ajuste || { zoom: 100, x: 50, y: 50 };
-    const a = ajustando && preview ? preview : base;
-
     return (
       <div className="drop drop-photo">
+        {/* "contain", sempre centralizado -- a foto inteira cabe na caixa
+            automaticamente, nunca corta pedaco nenhum. Sem zoom/posicao
+            manual: aquele controle deixava recortar a imagem por engano,
+            e o pedido foi "nunca corte, de forma automatica". */}
         <div
           className="drop-photo-img"
-          style={{
-            backgroundImage: `url(/api/drive/file/${fotoId}?v=${fotoId})`,
-            backgroundSize: `${a.zoom}%`,
-            backgroundPosition: `${a.x}% ${a.y}%`,
-          }}
-          onClick={() => !ajustando && inputRef.current?.click()}
+          style={{ backgroundImage: `url(/api/drive/file/${fotoId}?v=${fotoId})` }}
+          onClick={() => inputRef.current?.click()}
         />
-        {!ajustando && (
-          <>
-            <button
-              type="button"
-              className="drop-photo-expand"
-              title={t("pres.verGrande")}
-              onClick={(e) => {
-                e.stopPropagation();
-                onExpand && onExpand();
-              }}
-            >
-              ⛶
-            </button>
-            <button
-              type="button"
-              className="drop-photo-adjust"
-              title={t("pres.ajustarFoto")}
-              onClick={(e) => {
-                e.stopPropagation();
-                setPreview(base);
-                setAjustando(true);
-              }}
-            >
-              ⤢
-            </button>
-            <button
-              type="button"
-              className="drop-photo-remove"
-              title={t("pres.excluirFoto")}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
-              }}
-            >
-              ✕
-            </button>
-          </>
-        )}
-        {ajustando && (
-          <div className="adjust-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="adjust-row">
-              <label>{t("pres.zoom")}</label>
-              <input type="range" min="100" max="250" value={a.zoom} onChange={(e) => setPreview({ ...a, zoom: Number(e.target.value) })} />
-            </div>
-            <div className="adjust-row">
-              <label>{t("pres.horizontal")}</label>
-              <input type="range" min="0" max="100" value={a.x} onChange={(e) => setPreview({ ...a, x: Number(e.target.value) })} />
-            </div>
-            <div className="adjust-row">
-              <label>{t("pres.vertical")}</label>
-              <input type="range" min="0" max="100" value={a.y} onChange={(e) => setPreview({ ...a, y: Number(e.target.value) })} />
-            </div>
-            <div className="adjust-actions">
-              <button type="button" className="adjust-btn ghost" onClick={() => { setAjustando(false); setPreview(null); }}>
-                {t("pres.cancelar")}
-              </button>
-              <button
-                type="button"
-                className="adjust-btn primary"
-                onClick={() => {
-                  setAjustando(false);
-                  onAdjustSave && onAdjustSave(a);
-                }}
-              >
-                {t("pres.salvarAjuste")}
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          type="button"
+          className="drop-photo-expand"
+          title={t("pres.verGrande")}
+          onClick={(e) => {
+            e.stopPropagation();
+            onExpand && onExpand();
+          }}
+        >
+          ⛶
+        </button>
+        <button
+          type="button"
+          className="drop-photo-remove"
+          title={t("pres.excluirFoto")}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+          }}
+        >
+          ✕
+        </button>
         <input
           ref={inputRef}
           type="file"
@@ -218,7 +166,7 @@ function ExtraThumbs({ ids, slot, no, total, onFile, onDelete, onExpand }) {
   );
 }
 
-export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, onEditCaption, uploadingSlot }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption, uploadingSlot }) {
   const [lightbox, setLightbox] = useState(null); // { ids, index }
 
   if (!acao) return null;
@@ -311,11 +259,9 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
           <div className="ba-col">
             <DropZone
               fotoId={acao.fotoBeforeId}
-              ajuste={acao.fotoBeforeAjuste}
               uploading={uploadingSlot === "before"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "before", acao.fotoBeforeId)}
-              onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "before", val)}
               onExpand={() => beforeIds.length && setLightbox({ ids: beforeIds, index: 0 })}
               label="Before"
             />
@@ -343,11 +289,9 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
           <div className="ba-col">
             <DropZone
               fotoId={acao.fotoImprovementId}
-              ajuste={acao.fotoImprovementAjuste}
               uploading={uploadingSlot === "improvement"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
-              onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "improvement", val)}
               onExpand={() => afterIds.length && setLightbox({ ids: afterIds, index: 0 })}
               label="After"
             />

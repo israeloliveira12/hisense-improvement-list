@@ -164,22 +164,6 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     }
   }
 
-  async function ajustarFoto(no, slot, val) {
-    const campo = slot === "before" ? "fotoBeforeAjuste" : "fotoImprovementAjuste";
-    setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: val } : a)));
-    try {
-      const res = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field: campo, value: val }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-    } catch (e) {
-      alert(t("common.error") + ": " + e.message);
-    }
-  }
-
   return (
     <>
       <Topbar title={t("pres.title")} sub={t("pres.sub", { n: acoes.length })}>
@@ -259,7 +243,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             ))}
           </div>
           <div className="pres-canvas-wrap" ref={fullscreenRef}>
-            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} onAdjustFoto={ajustarFoto} onEditCaption={editarLegenda} uploadingSlot={uploadingSlot} />
+            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} onEditCaption={editarLegenda} uploadingSlot={uploadingSlot} />
             {presenting && (
               <div className="present-hint">
                 ← → · Esc · {selected + 1} / {filtradas.length}
