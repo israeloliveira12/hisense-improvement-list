@@ -1,9 +1,63 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, label }) {
+function PhotoLightbox({ ids, startIndex, onClose }) {
+  const [index, setIndex] = useState(startIndex || 0);
+  const [zoom, setZoom] = useState(1);
+  const { t } = useLanguage();
+
+  useEffect(() => setZoom(1), [index]);
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") setIndex((i) => (i + 1) % ids.length);
+      if (e.key === "ArrowLeft") setIndex((i) => (i - 1 + ids.length) % ids.length);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [ids.length, onClose]);
+
+  if (!ids || ids.length === 0) return null;
+  const id = ids[index];
+
+  return (
+    <div className="lightbox-overlay" onClick={onClose}>
+      <button type="button" className="lightbox-close" onClick={onClose} title={t("pres.fechar")}>✕</button>
+      {ids.length > 1 && <div className="lightbox-counter">{index + 1} / {ids.length}</div>}
+      {ids.length > 1 && (
+        <button
+          type="button"
+          className="lightbox-nav prev"
+          onClick={(e) => { e.stopPropagation(); setIndex((i) => (i - 1 + ids.length) % ids.length); }}
+        >
+          ‹
+        </button>
+      )}
+      <div className="lightbox-stage" onClick={(e) => e.stopPropagation()}>
+        <img src={`/api/drive/file/${id}?v=${id}`} alt="" style={{ transform: `scale(${zoom})` }} />
+      </div>
+      {ids.length > 1 && (
+        <button
+          type="button"
+          className="lightbox-nav next"
+          onClick={(e) => { e.stopPropagation(); setIndex((i) => (i + 1) % ids.length); }}
+        >
+          ›
+        </button>
+      )}
+      <div className="lightbox-zoom" onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}>−</button>
+        <span>{Math.round(zoom * 100)}%</span>
+        <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))}>+</button>
+      </div>
+    </div>
+  );
+}
+
+function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, onExpand, label }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
   const [ajustando, setAjustando] = useState(false);
@@ -28,14 +82,14 @@ function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, l
           <>
             <button
               type="button"
-              className="drop-photo-remove"
-              title={t("pres.excluirFoto")}
+              className="drop-photo-expand"
+              title={t("pres.verGrande")}
               onClick={(e) => {
                 e.stopPropagation();
-                if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+                onExpand && onExpand();
               }}
             >
-              ✕
+              ⛶
             </button>
             <button
               type="button"
@@ -48,6 +102,17 @@ function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, l
               }}
             >
               ⤢
+            </button>
+            <button
+              type="button"
+              className="drop-photo-remove"
+              title={t("pres.excluirFoto")}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+              }}
+            >
+              ✕
             </button>
           </>
         )}
@@ -126,7 +191,7 @@ function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, l
   );
 }
 
-function ExtraThumbs({ ids, slot, no, total, onFile, onDelete }) {
+function ExtraThumbs({ ids, slot, no, total, onFile, onDelete, onExpand }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
   const podeAdicionar = total < 6;
@@ -135,8 +200,8 @@ function ExtraThumbs({ ids, slot, no, total, onFile, onDelete }) {
     <div className="ba-thumbs">
       {ids.map((id) => (
         <div className="ba-thumb" key={id}>
-          <img src={`/api/drive/file/${id}?v=${id}`} alt="" />
-          <button type="button" onClick={() => onDelete(no, slot, id)}>✕</button>
+          <img src={`/api/drive/file/${id}?v=${id}`} alt="" onClick={() => onExpand && onExpand(id)} />
+          <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(no, slot, id); }}>✕</button>
         </div>
       ))}
       {podeAdicionar && (
@@ -154,9 +219,15 @@ function ExtraThumbs({ ids, slot, no, total, onFile, onDelete }) {
 }
 
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, onEditCaption, uploadingSlot }) {
+  const [lightbox, setLightbox] = useState(null); // { ids, index }
+
   if (!acao) return null;
 
+  const beforeIds = [acao.fotoBeforeId, ...(acao.fotosBeforeExtra || [])].filter(Boolean);
+  const afterIds = [acao.fotoImprovementId, ...(acao.fotosImprovementExtra || [])].filter(Boolean);
+
   return (
+    <>
     <div className="slide">
       <div className="slide-head">
         <div className="slide-badge">{acao.no}</div>
@@ -245,6 +316,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "before", acao.fotoBeforeId)}
               onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "before", val)}
+              onExpand={() => beforeIds.length && setLightbox({ ids: beforeIds, index: 0 })}
               label="Before"
             />
             <ExtraThumbs
@@ -254,6 +326,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               total={(acao.fotoBeforeId ? 1 : 0) + (acao.fotosBeforeExtra?.length || 0)}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
+              onExpand={(id) => setLightbox({ ids: beforeIds, index: Math.max(0, beforeIds.indexOf(id)) })}
             />
             <div className="ba-caption">
               <b>FACTORY COMMENT</b>
@@ -275,6 +348,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
               onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "improvement", val)}
+              onExpand={() => afterIds.length && setLightbox({ ids: afterIds, index: 0 })}
               label="After"
             />
             <ExtraThumbs
@@ -284,6 +358,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               total={(acao.fotoImprovementId ? 1 : 0) + (acao.fotosImprovementExtra?.length || 0)}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
+              onExpand={(id) => setLightbox({ ids: afterIds, index: Math.max(0, afterIds.indexOf(id)) })}
             />
             <div className="ba-caption">
               <b>HISENSE COMMENT</b>
@@ -300,5 +375,9 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
         </div>
       </div>
     </div>
+    {lightbox && (
+      <PhotoLightbox ids={lightbox.ids} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+    )}
+    </>
   );
 }

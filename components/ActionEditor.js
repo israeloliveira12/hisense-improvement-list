@@ -157,6 +157,24 @@ export default function ActionEditor({ acao, onClose, onFieldChanged }) {
           {tab === "geral" && (
             <>
               <div className="editor-field">
+                <label>ID (No.) <SaveDot status={status["acao.no"]} /></label>
+                <input
+                  defaultValue={local.no}
+                  onBlur={(e) => {
+                    const novo = e.target.value.trim();
+                    if (!novo || novo === local.no) {
+                      e.target.value = local.no;
+                      return;
+                    }
+                    if (window.confirm(`Alterar o ID de "${local.no}" para "${novo}"? Fotos, plano de ação e comentários continuam vinculados a essa ação.`)) {
+                      salvarAcao("no", novo);
+                    } else {
+                      e.target.value = local.no;
+                    }
+                  }}
+                />
+              </div>
+              <div className="editor-field">
                 <label>Item <SaveDot status={status["acao.item"]} /></label>
                 <input defaultValue={local.item} onBlur={(e) => salvarAcao("item", e.target.value)} />
               </div>

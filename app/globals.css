@@ -242,18 +242,22 @@ a { color: inherit; }
 .drop span { font-size: 9px; font-weight: 600; }
 .drop.drop-photo { padding: 0; border-style: solid; overflow: hidden; position: relative; cursor: default; }
 .drop-photo-img { width: 100%; height: 100%; background-repeat: no-repeat; cursor: pointer; }
-.drop-photo-remove {
-  position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%;
+.drop-photo-remove, .drop-photo-adjust, .drop-photo-expand {
+  position: absolute; top: 4px; width: 18px; height: 18px; border-radius: 50%;
   border: none; background: rgba(23,21,31,.65); color: #fff; font-size: 10px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;
+  opacity: 0; transition: opacity .12s ease;
 }
+.drop-photo:hover .drop-photo-remove, .drop-photo:hover .drop-photo-adjust, .drop-photo:hover .drop-photo-expand,
+.drop-photo:focus-within .drop-photo-remove, .drop-photo:focus-within .drop-photo-adjust, .drop-photo:focus-within .drop-photo-expand {
+  opacity: 1;
+}
+.drop-photo-remove { right: 4px; }
 .drop-photo-remove:hover { background: var(--red); }
-.drop-photo-adjust {
-  position: absolute; top: 4px; right: 26px; width: 18px; height: 18px; border-radius: 50%;
-  border: none; background: rgba(23,21,31,.65); color: #fff; font-size: 10px; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;
-}
+.drop-photo-adjust { right: 26px; }
 .drop-photo-adjust:hover { background: var(--purple); }
+.drop-photo-expand { right: 48px; font-size: 11px; }
+.drop-photo-expand:hover { background: var(--purple); }
 
 .adjust-panel {
   position: absolute; left: 0; right: 0; bottom: 0; height: 68%;
@@ -269,11 +273,13 @@ a { color: inherit; }
 .adjust-btn.ghost { background: rgba(255,255,255,.15); color: #fff; }
 .ba-thumbs { display: flex; gap: 4px; flex: none; margin-top: 4px; overflow-x: auto; }
 .ba-thumb { position: relative; width: 30px; height: 30px; border-radius: 5px; overflow: hidden; flex: none; }
-.ba-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ba-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
 .ba-thumb button {
   position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: 50%; border: none;
   background: rgba(23,21,31,.7); color: #fff; font-size: 7px; line-height: 1; cursor: pointer; padding: 0;
+  opacity: 0; transition: opacity .12s ease;
 }
+.ba-thumb:hover button, .ba-thumb:focus-within button { opacity: 1; }
 .ba-thumb-add {
   width: 30px; height: 30px; border-radius: 5px; border: 1.4px dashed #C9C4D8; background: #FAFAFC;
   color: var(--text-faint); font-size: 14px; cursor: pointer; flex: none;
@@ -283,6 +289,49 @@ a { color: inherit; }
 .ba-caption b { font-style: normal; color: var(--text); display: block; font-size: 7.6px; letter-spacing: 0.04em; }
 .ba-caption-editable { cursor: text; border-radius: 3px; padding: 1px 2px; margin: -1px -2px; }
 .ba-caption-editable:hover { background: var(--purple-tint); box-shadow: inset 0 0 0 1px var(--purple); }
+
+/* ================= LIGHTBOX (ver foto em tela grande) ================= */
+.lightbox-overlay {
+  position: fixed; inset: 0; background: rgba(12,10,18,.92); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: lightboxFade .14s ease-out;
+}
+@keyframes lightboxFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lightbox-overlay { animation: none; } }
+.lightbox-stage { max-width: 88vw; max-height: 82vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.lightbox-stage img { max-width: 88vw; max-height: 82vh; object-fit: contain; transition: transform .12s ease; border-radius: 4px; }
+.lightbox-close {
+  position: absolute; top: 18px; right: 20px; width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,.12); color: #fff; font-size: 15px; cursor: pointer;
+}
+.lightbox-close:hover { background: rgba(255,255,255,.22); }
+.lightbox-counter {
+  position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
+  color: #DCCFF6; font-size: 12.5px; font-weight: 700; letter-spacing: .02em;
+}
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,.12); color: #fff; font-size: 24px; line-height: 1; cursor: pointer;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,.22); }
+.lightbox-nav.prev { left: 18px; }
+.lightbox-nav.next { right: 18px; }
+.lightbox-zoom {
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.1);
+  padding: 6px 14px; border-radius: 20px;
+}
+.lightbox-zoom button {
+  width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(255,255,255,.16);
+  color: #fff; font-size: 14px; cursor: pointer; line-height: 1;
+}
+.lightbox-zoom button:hover { background: rgba(255,255,255,.28); }
+.lightbox-zoom span { color: #fff; font-size: 11.5px; font-weight: 700; min-width: 34px; text-align: center; }
+@media (max-width: 760px) {
+  .lightbox-nav { width: 38px; height: 38px; font-size: 20px; }
+  .lightbox-nav.prev { left: 8px; }
+  .lightbox-nav.next { right: 8px; }
+}
 
 /* ================= BANCO DE DADOS ================= */
 .db-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
