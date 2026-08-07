@@ -69,7 +69,8 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   }
 
   function baixarPpt() {
-    alert(t("pres.pptEmBreve"));
+    if (!acaoAtual) return;
+    window.open(`/api/ppt/${encodeURIComponent(acaoAtual.no)}`, "_blank");
   }
 
   function aplicarMudancaLocal(no, campo, valor) {
