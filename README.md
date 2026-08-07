@@ -2,26 +2,24 @@
 
 Site que substitui o par Excel + PPT por 3 telas: **Apresentação** (o slide de cada ação), **Banco de Dados** (a tabela editável) e **Dashboard** (calculado ao vivo).
 
-## Estado atual: Fase 2 — Google Sheets e Drive conectados, PPT ainda pendente
+## Estado atual: Fase 3 — todos os itens do roadmap de mockups implementados
 
 O que já funciona de verdade (não é mais mock):
-- As 3 telas, com a marca Multilaser, protegidas por senha única, com seletor de idioma (PT/EN/ZH) e tema claro/escuro/sistema no topbar.
+- As 3 telas, com a marca Multilaser, protegidas por senha única, com seletor de idioma (PT/EN/ZH) e 1 botão de tema claro/escuro no topbar.
 - **Dado ao vivo do Google Sheets** — Apresentação, Banco de Dados e Dashboard leem direto da planilha a cada carregamento, sem cache/JSON estático.
-- **Edição na tabela grava de verdade no Sheets** — mudar Item/Departamento/Responsável/Prazo na tela de Banco de Dados escreve na célula certa da planilha (com indicador visual de salvando/salvo/erro).
-- Modo "Apresentar" agora usa a Fullscreen API de verdade do navegador (antes era só uma camada por cima da página).
-- "Abrir no Google Sheets" já linka pra planilha real.
-- Layout responsivo pra celular/tablet.
-- **Upload E exclusão de foto pro Drive** — funcionando (corrigido bug de cache que fazia foto apagada no Drive continuar aparecendo no site).
-- **Editor completo de ação** — clique no nº da ação (Banco de Dados) ou no botão flutuante "Editar ação" (Apresentação) abre um painel com TODOS os campos editáveis: Geral (item, depto, responsável, auditor, processo, datas, status incl. fechar ação, motivo de atraso), Descrição do documento (Description/Expectation/Abrangency/comentários), Investimento (edita item, quantidade, custo, fornecedor, aprovação, etapa de cada item já lançado — adicionar item novo ainda não).
-- **Target calculado** — deixou de ser um campo manual; agora é `sem investimento OU investimento aprovado OU já fechada`, calculado ao vivo e mostrado no Dashboard (não mais um texto solto no slide).
-- **Dashboard com abas** — Principal / Investimentos (aprovado vs. recusado vs. pendente, quem precisa de investimento) / Forecast (previsão de fechamento por semana, calculado ao vivo a partir do prazo).
+- **Edição completa** — clique no nº da ação (Banco de Dados) ou no botão flutuante "Editar ação" (Apresentação, fora do `.slide` de propósito) abre um painel com TODOS os campos: Geral (item, depto, responsável, auditor, processo, datas, status incl. fechar ação, motivo de atraso), Descrição do documento (Description/Expectation/Abrangency/comentários), Investimento (edita os itens já lançados — adicionar item novo ainda não).
+- **"+ Nova ação"** — formulário no Banco de Dados cria uma linha nova na planilha (número temporário `NEW-<timestamp>` até a Hisense atribuir o número oficial).
+- **Selo "NEW"** no slide de ações criadas há menos de 30 dias pelo site (some sozinho depois).
+- **Upload, exclusão E reposicionamento (zoom/posição) de foto** — tudo funcionando, com preview ao vivo no ajuste de enquadramento.
+- **Baixar PPT** — de 1 ação ou da apresentação completa (capa + divisores + encerramento), gerado com `pptxgenjs` (Node puro, sem função Python) no layout novo. Fotos entram sem distorcer, mas ainda sem usar o zoom/posição configurado no site (ver pendências).
+- **Target calculado** (não mais manual): `sem investimento OU investimento aprovado OU já fechada`.
+- **Dashboard com 6 abas**: Principal, Investimentos, Forecast (previsão de fechamento por semana), Auditor, Aging (tempo em aberto), Departamentos.
+- Modo "Apresentar" com Fullscreen API real. Layout responsivo pra celular/tablet.
 
-O que ainda **não** está pronto (mockups em [proposta_fase3](https://claude.ai/code/artifact/73ff86e7-3ecc-4506-ae91-c9ed06c3d263)):
-- **Botão "Baixar PPT"** — ainda mostra um aviso em vez de gerar o arquivo (modelo do slide ainda no layout antigo).
-- **Baixar apresentação completa** (capa + divisores + encerramento, como o master deck original).
-- **Mover/redimensionar foto** dentro do slide (hoje sempre preenche a caixa toda, cortando o excesso).
-- **Selo "NEW"** em ações recém-criadas.
-- "+ Nova ação" (criar uma ação nova direto pelo site) — Investimento (adicionar item novo, hoje só edita os existentes).
+O que ainda **não** está pronto:
+- O PPT baixado não usa o zoom/posição de foto configurado no site (usa a foto inteira, centralizada).
+- Adicionar item de investimento novo pelo site (só edita os que já existem na planilha).
+- **Risco não testável daqui**: gerar a apresentação completa (50 slides + fotos) pode esbarrar no limite de tempo de execução da Vercel — só se confirma testando em produção.
 
 ## Configurar as credenciais (Fase 2)
 
