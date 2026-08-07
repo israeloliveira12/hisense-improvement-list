@@ -9,7 +9,7 @@ function formatBRL(v) {
 
 export default function DashboardInvestimentos({ stats }) {
   const { t } = useLanguage();
-  const { investimento, target, total } = stats;
+  const { investimento, total } = stats;
   const { valorTotal, aprovado, recusado, pendente, totalItens, acoesComInvestimento, acoesSemInvestimento } = investimento;
   const pctAprovado = valorTotal ? (aprovado / valorTotal) * 100 : 0;
   const pctRecusado = valorTotal ? (recusado / valorTotal) * 100 : 0;
@@ -57,42 +57,21 @@ export default function DashboardInvestimentos({ stats }) {
         </div>
       </div>
 
-      <div className="chart-grid">
-        <div className="chart-card">
-          <h3>{t("dash.precisaInvestimento")}</h3>
-          <div className="chart-sub">{t("dash.deQuantasAcoes", { n: total })}</div>
-          <svg width="100%" height="150" viewBox="0 0 200 150">
-            <g transform="translate(100,75)">
-              <circle r="60" fill="none" stroke="var(--border)" strokeWidth="22" />
-              <circle r="60" fill="none" stroke="var(--purple)" strokeWidth="22"
-                strokeDasharray={`${(pctComInvest / 100) * 2 * Math.PI * 60} ${2 * Math.PI * 60}`} transform="rotate(-90)" />
-              <text textAnchor="middle" y="-2" fontSize="26" fontWeight="700" fill="var(--text)">{acoesComInvestimento}</text>
-              <text textAnchor="middle" y="16" fontSize="10" fill="var(--text-muted)">{t("dash.precisamLabel")}</text>
-            </g>
-          </svg>
-          <div className="legend">
-            <div className="legend-item"><span className="sw" style={{ background: "var(--purple)" }} />{t("dash.precisamLabel")} — {acoesComInvestimento}</div>
-            <div className="legend-item"><span className="sw" style={{ background: "var(--border)" }} />{t("dash.naoPrecisamLabel")} — {acoesSemInvestimento}</div>
-          </div>
-        </div>
-
-        <div className="chart-card">
-          <h3>{t("dash.facilFechar")}</h3>
-          <div className="chart-sub">{t("dash.targetExplica")}</div>
-          {target && (
-            <>
-              <div className="bar-row">
-                <div className="b-label" style={{ color: "var(--green)" }}>Target</div>
-                <div className="b-track"><div className="b-fill" style={{ width: `${total ? (target.target / total) * 100 : 0}%`, background: "var(--green)" }} /></div>
-                <div className="b-val">{target.target}</div>
-              </div>
-              <div className="bar-row">
-                <div className="b-label" style={{ color: "var(--amber)" }}>Non-target</div>
-                <div className="b-track"><div className="b-fill" style={{ width: `${total ? (target.nonTarget / total) * 100 : 0}%`, background: "var(--amber)" }} /></div>
-                <div className="b-val">{target.nonTarget}</div>
-              </div>
-            </>
-          )}
+      <div className="chart-card">
+        <h3>{t("dash.precisaInvestimento")}</h3>
+        <div className="chart-sub">{t("dash.deQuantasAcoes", { n: total })}</div>
+        <svg width="100%" height="150" viewBox="0 0 200 150">
+          <g transform="translate(100,75)">
+            <circle r="60" fill="none" stroke="var(--border)" strokeWidth="22" />
+            <circle r="60" fill="none" stroke="var(--purple)" strokeWidth="22"
+              strokeDasharray={`${(pctComInvest / 100) * 2 * Math.PI * 60} ${2 * Math.PI * 60}`} transform="rotate(-90)" />
+            <text textAnchor="middle" y="-2" fontSize="26" fontWeight="700" fill="var(--text)">{acoesComInvestimento}</text>
+            <text textAnchor="middle" y="16" fontSize="10" fill="var(--text-muted)">{t("dash.precisamLabel")}</text>
+          </g>
+        </svg>
+        <div className="legend">
+          <div className="legend-item"><span className="sw" style={{ background: "var(--purple)" }} />{t("dash.precisamLabel")} — {acoesComInvestimento}</div>
+          <div className="legend-item"><span className="sw" style={{ background: "var(--border)" }} />{t("dash.naoPrecisamLabel")} — {acoesSemInvestimento}</div>
         </div>
       </div>
     </>
