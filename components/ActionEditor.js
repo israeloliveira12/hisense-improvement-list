@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-const STATUS_OPTIONS = ["Open", "Under Review", "Closed"];
+const STATUS_OPTIONS = ["Open", "Closed", "On Hold"];
 const APPROVAL_OPTIONS = ["", "Approved", "Declined"];
 const STAGE_OPTIONS = ["", "Comercial", "On Hold", "Delivered"];
 const PASSO_STATUS_OPTIONS = ["Open", "Closed"];
