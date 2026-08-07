@@ -93,12 +93,14 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Falha no upload");
+      const idField = slot === "before" ? "fotoBeforeId" : "fotoImprovementId";
+      const extraField = slot === "before" ? "fotosBeforeExtra" : "fotosImprovementExtra";
       setAcoes((prev) =>
-        prev.map((a) =>
-          a.no === no
-            ? { ...a, [slot === "before" ? "fotoBeforeId" : "fotoImprovementId"]: data.fileId }
-            : a
-        )
+        prev.map((a) => {
+          if (a.no !== no) return a;
+          if (!a[idField]) return { ...a, [idField]: data.fileId };
+          return { ...a, [extraField]: [...(a[extraField] || []), data.fileId] };
+        })
       );
     } catch (e) {
       alert(t("common.error") + ": " + e.message);
@@ -117,10 +119,17 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      const idField = slot === "before" ? "fotoBeforeId" : "fotoImprovementId";
+      const extraField = slot === "before" ? "fotosBeforeExtra" : "fotosImprovementExtra";
       setAcoes((prev) =>
-        prev.map((a) =>
-          a.no === no ? { ...a, [slot === "before" ? "fotoBeforeId" : "fotoImprovementId"]: null } : a
-        )
+        prev.map((a) => {
+          if (a.no !== no) return a;
+          if (a[idField] === fileId) {
+            const [novoPrimario, ...resto] = a[extraField] || [];
+            return { ...a, [idField]: novoPrimario || null, [extraField]: resto };
+          }
+          return { ...a, [extraField]: (a[extraField] || []).filter((id) => id !== fileId) };
+        })
       );
     } catch (e) {
       alert(t("common.error") + ": " + e.message);

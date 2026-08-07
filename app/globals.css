@@ -267,6 +267,18 @@ a { color: inherit; }
 .adjust-btn { flex: 1; border: none; border-radius: 5px; padding: 4px 0; font-size: 8px; font-weight: 700; cursor: pointer; }
 .adjust-btn.primary { background: var(--purple); color: #fff; }
 .adjust-btn.ghost { background: rgba(255,255,255,.15); color: #fff; }
+.ba-thumbs { display: flex; gap: 4px; flex: none; margin-top: 4px; overflow-x: auto; }
+.ba-thumb { position: relative; width: 30px; height: 30px; border-radius: 5px; overflow: hidden; flex: none; }
+.ba-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ba-thumb button {
+  position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: 50%; border: none;
+  background: rgba(23,21,31,.7); color: #fff; font-size: 7px; line-height: 1; cursor: pointer; padding: 0;
+}
+.ba-thumb-add {
+  width: 30px; height: 30px; border-radius: 5px; border: 1.4px dashed #C9C4D8; background: #FAFAFC;
+  color: var(--text-faint); font-size: 14px; cursor: pointer; flex: none;
+}
+.ba-thumb-add:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-tint); }
 .ba-caption { font-size: 8.6px; color: var(--text-muted); font-style: italic; margin-top: 4px; line-height: 1.25; }
 .ba-caption b { font-style: normal; color: var(--text); display: block; font-size: 7.6px; letter-spacing: 0.04em; }
 .ba-caption-editable { cursor: text; border-radius: 3px; padding: 1px 2px; margin: -1px -2px; }
@@ -431,6 +443,17 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   padding: 3px 4px; border-radius: 5px; font-family: inherit;
 }
 .editor-inv-table input:hover, .editor-inv-table select:hover { background: var(--purple-tint); }
+.editor-remove-row {
+  border: none; background: none; color: var(--text-faint); cursor: pointer; font-size: 11px;
+  width: 20px; height: 20px; border-radius: 4px;
+}
+.editor-remove-row:hover { background: var(--red-tint, #fbeaea); color: var(--red); }
+.m-add-row-real {
+  display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 700;
+  color: var(--purple); margin-top: 10px; cursor: pointer; padding: 8px; border-radius: 8px;
+  border: 1.5px dashed var(--border);
+}
+.m-add-row-real:hover { background: var(--purple-tint); border-color: var(--purple); }
 
 .edit-shortcut {
   position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; align-items: center; gap: 7px;

@@ -126,6 +126,33 @@ function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, l
   );
 }
 
+function ExtraThumbs({ ids, slot, no, total, onFile, onDelete }) {
+  const inputRef = useRef(null);
+  const { t } = useLanguage();
+  const podeAdicionar = total < 6;
+
+  return (
+    <div className="ba-thumbs">
+      {ids.map((id) => (
+        <div className="ba-thumb" key={id}>
+          <img src={`/api/drive/file/${id}?v=${id}`} alt="" />
+          <button type="button" onClick={() => onDelete(no, slot, id)}>✕</button>
+        </div>
+      ))}
+      {podeAdicionar && (
+        <button type="button" className="ba-thumb-add" title={t("pres.adicionarFoto")} onClick={() => inputRef.current?.click()}>+</button>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => e.target.files[0] && onFile(no, slot, e.target.files[0])}
+      />
+    </div>
+  );
+}
+
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, onEditCaption, uploadingSlot }) {
   if (!acao) return null;
 
@@ -220,6 +247,14 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "before", val)}
               label="Before"
             />
+            <ExtraThumbs
+              ids={acao.fotosBeforeExtra || []}
+              slot="before"
+              no={acao.no}
+              total={(acao.fotoBeforeId ? 1 : 0) + (acao.fotosBeforeExtra?.length || 0)}
+              onFile={onUploadFoto}
+              onDelete={onDeleteFoto}
+            />
             <div className="ba-caption">
               <b>FACTORY COMMENT</b>
               <span
@@ -241,6 +276,14 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
               onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
               onAdjustSave={(val) => onAdjustFoto && onAdjustFoto(acao.no, "improvement", val)}
               label="After"
+            />
+            <ExtraThumbs
+              ids={acao.fotosImprovementExtra || []}
+              slot="improvement"
+              no={acao.no}
+              total={(acao.fotoImprovementId ? 1 : 0) + (acao.fotosImprovementExtra?.length || 0)}
+              onFile={onUploadFoto}
+              onDelete={onDeleteFoto}
             />
             <div className="ba-caption">
               <b>HISENSE COMMENT</b>

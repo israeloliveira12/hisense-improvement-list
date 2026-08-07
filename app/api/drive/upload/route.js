@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { uploadFile, deleteFile } from "../../../../lib/googleDrive";
-import { appendPptDetalhesFoto, clearPptDetalhesFoto } from "../../../../lib/googleSheets";
+import { appendPptDetalhesFoto, removePptDetalhesFoto } from "../../../../lib/googleSheets";
 
 export async function POST(request) {
   const formData = await request.formData();
@@ -41,10 +41,10 @@ export async function DELETE(request) {
 
   try {
     const campo = slot === "before" ? "Foto Before" : "Foto Improvement";
-    // limpa a referencia na planilha primeiro -- se o arquivo ja tiver sido
-    // apagado direto no Drive (fora do site), deleteFile() abaixo falharia,
-    // e nao queremos deixar uma referencia quebrada presa na planilha.
-    await clearPptDetalhesFoto(no, campo);
+    // tira SO essa foto da lista na planilha primeiro -- se o arquivo ja
+    // tiver sido apagado direto no Drive (fora do site), deleteFile()
+    // abaixo falharia, e nao queremos deixar uma referencia quebrada.
+    await removePptDetalhesFoto(no, campo, fileId);
     try {
       await deleteFile(fileId);
     } catch (e) {

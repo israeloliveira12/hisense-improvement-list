@@ -6,6 +6,8 @@ import { useLanguage } from "../lib/i18n";
 const STATUS_OPTIONS = ["Open", "Under Review", "Closed"];
 const APPROVAL_OPTIONS = ["", "Approved", "Declined"];
 const STAGE_OPTIONS = ["", "Comercial", "On Hold", "Delivered"];
+const PASSO_STATUS_OPTIONS = ["Open", "Closed"];
+const MAX_PASSOS = 10;
 
 function SaveDot({ status }) {
   if (!status) return null;
@@ -74,6 +76,48 @@ export default function ActionEditor({ acao, onClose, onFieldChanged }) {
     return salvar(`/api/investimento/${row}`, field, value, "inv." + row + "." + field);
   }
 
+  async function salvarPasso(row, field, value) {
+    setLocal((prev) => ({
+      ...prev,
+      stepsEditable: prev.stepsEditable.map((p) => (p.row === row ? { ...p, [field]: value } : p)),
+    }));
+    return salvar(`/api/passos/${row}`, field, value, "passo." + row + "." + field);
+  }
+
+  async function adicionarPasso() {
+    const ordem = (local.stepsEditable?.length || 0) + 1;
+    setStatus((s) => ({ ...s, novoPasso: "saving" }));
+    try {
+      const res = await fetch("/api/passos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ no: local.no, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setLocal((prev) => ({
+        ...prev,
+        stepsEditable: [...(prev.stepsEditable || []), { row: data.row, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }],
+      }));
+      setStatus((s) => ({ ...s, novoPasso: undefined }));
+    } catch (e) {
+      setStatus((s) => ({ ...s, novoPasso: undefined }));
+      alert(`${t("common.error")}: ${e.message}`);
+    }
+  }
+
+  async function removerPasso(row) {
+    if (!window.confirm(t("pres.excluirPasso") + "?")) return;
+    try {
+      const res = await fetch(`/api/passos/${row}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setLocal((prev) => ({ ...prev, stepsEditable: prev.stepsEditable.filter((p) => p.row !== row) }));
+    } catch (e) {
+      alert(`${t("common.error")}: ${e.message}`);
+    }
+  }
+
   return (
     <div className="editor-overlay" onClick={onClose}>
       <div className="editor-drawer" onClick={(e) => e.stopPropagation()}>
@@ -101,6 +145,9 @@ export default function ActionEditor({ acao, onClose, onFieldChanged }) {
         <div className="editor-tabs">
           <button className={tab === "geral" ? "active" : ""} onClick={() => setTab("geral")}>Geral</button>
           <button className={tab === "descricao" ? "active" : ""} onClick={() => setTab("descricao")}>Descrição</button>
+          <button className={tab === "plano" ? "active" : ""} onClick={() => setTab("plano")}>
+            Plano de Ação {local.stepsEditable?.length ? `(${local.stepsEditable.length})` : ""}
+          </button>
           <button className={tab === "investimento" ? "active" : ""} onClick={() => setTab("investimento")}>
             Investimento {local.itensInvestimento?.length ? `(${local.itensInvestimento.length})` : ""}
           </button>
@@ -182,6 +229,46 @@ export default function ActionEditor({ acao, onClose, onFieldChanged }) {
                 <label>Hisense Comment <SaveDot status={status["det.hisense"]} /></label>
                 <textarea defaultValue={local.hisense} onBlur={(e) => salvarDetalhe("hisense", e.target.value)} />
               </div>
+            </>
+          )}
+
+          {tab === "plano" && (
+            <>
+              {(!local.stepsEditable || local.stepsEditable.length === 0) && (
+                <p className="editor-empty">Nenhum passo cadastrado ainda.</p>
+              )}
+              {local.stepsEditable && local.stepsEditable.length > 0 && (
+                <table className="editor-inv-table">
+                  <thead>
+                    <tr><th style={{ width: 28 }}>#</th><th>Ação</th><th>Responsável</th><th style={{ width: 60 }}>Prazo</th><th style={{ width: 70 }}>Status</th><th></th></tr>
+                  </thead>
+                  <tbody>
+                    {local.stepsEditable.map((p) => (
+                      <tr key={p.row}>
+                        <td><input defaultValue={p.ordem} style={{ width: 24 }} onBlur={(e) => salvarPasso(p.row, "ordem", e.target.value)} /></td>
+                        <td><input defaultValue={p.acao} onBlur={(e) => salvarPasso(p.row, "acao", e.target.value)} /></td>
+                        <td><input defaultValue={p.responsavel} onBlur={(e) => salvarPasso(p.row, "responsavel", e.target.value)} /></td>
+                        <td><input defaultValue={p.prazo} onBlur={(e) => salvarPasso(p.row, "prazo", e.target.value)} /></td>
+                        <td>
+                          <select defaultValue={PASSO_STATUS_OPTIONS.includes(p.status) ? p.status : "Open"} onChange={(e) => salvarPasso(p.row, "status", e.target.value)}>
+                            {PASSO_STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        </td>
+                        <td>
+                          <button type="button" className="editor-remove-row" title={t("pres.excluirPasso")} onClick={() => removerPasso(p.row)}>✕</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {(local.stepsEditable?.length || 0) < MAX_PASSOS ? (
+                <div className="m-add-row-real" onClick={adicionarPasso}>
+                  {status.novoPasso === "saving" ? t("common.saving") : t("pres.adicionarPasso")}
+                </div>
+              ) : (
+                <p className="editor-note">Limite de {MAX_PASSOS} passos atingido.</p>
+              )}
             </>
           )}
 
