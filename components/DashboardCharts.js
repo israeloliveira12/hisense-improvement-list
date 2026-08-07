@@ -5,6 +5,9 @@ import Topbar from "./Topbar";
 import DashboardPrincipal from "./dashboard/DashboardPrincipal";
 import DashboardInvestimentos from "./dashboard/DashboardInvestimentos";
 import DashboardForecast from "./dashboard/DashboardForecast";
+import DashboardAuditor from "./dashboard/DashboardAuditor";
+import DashboardAging from "./dashboard/DashboardAging";
+import DashboardDepartamentos from "./dashboard/DashboardDepartamentos";
 import { useLanguage } from "../lib/i18n";
 
 export default function DashboardCharts({ initialStats, initialError }) {
@@ -70,11 +73,17 @@ export default function DashboardCharts({ initialStats, initialError }) {
             <button className={tab === "principal" ? "active" : ""} onClick={() => setTab("principal")}>{t("dash.tabPrincipal")}</button>
             <button className={tab === "investimentos" ? "active" : ""} onClick={() => setTab("investimentos")}>{t("dash.tabInvestimentos")}</button>
             <button className={tab === "forecast" ? "active" : ""} onClick={() => setTab("forecast")}>{t("dash.tabForecast")}</button>
+            <button className={tab === "auditor" ? "active" : ""} onClick={() => setTab("auditor")}>{t("dash.tabAuditor")}</button>
+            <button className={tab === "aging" ? "active" : ""} onClick={() => setTab("aging")}>{t("dash.tabAging")}</button>
+            <button className={tab === "departamentos" ? "active" : ""} onClick={() => setTab("departamentos")}>{t("dash.tabDepartamentos")}</button>
           </div>
 
           {tab === "principal" && <DashboardPrincipal stats={stats} />}
           {tab === "investimentos" && <DashboardInvestimentos stats={stats} />}
           {tab === "forecast" && <DashboardForecast stats={stats} />}
+          {tab === "auditor" && <DashboardAuditor stats={stats} />}
+          {tab === "aging" && <DashboardAging stats={stats} />}
+          {tab === "departamentos" && <DashboardDepartamentos stats={stats} />}
 
           <div className="footer-note">{t("dash.footerNote")}</div>
         </div>
