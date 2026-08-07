@@ -15,6 +15,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [presenting, setPresenting] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState(null);
   const [editando, setEditando] = useState(null);
+  const [gerandoDeck, setGerandoDeck] = useState(null); // { feito, total } enquanto monta o .pptx
   const fullscreenRef = useRef(null);
 
   const filtradas = useMemo(() => {
@@ -74,9 +75,21 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     window.open(`/api/ppt/${encodeURIComponent(acaoAtual.no)}`, "_blank");
   }
 
-  function baixarTudo() {
+  // O deck completo e montado no NAVEGADOR, nao no servidor -- ver
+  // components/baixarDeck.js pro motivo (limite de resposta/tempo da funcao
+  // serverless nao cabe um arquivo de 25 MB com ~100 fotos).
+  async function baixarTudo() {
+    if (gerandoDeck) return;
     if (!window.confirm(t("pres.confirmarBaixarTudo", { n: acoes.length }))) return;
-    window.open("/api/ppt/master", "_blank");
+    setGerandoDeck({ feito: 0, total: acoes.length });
+    try {
+      const { baixarApresentacaoCompleta } = await import("./baixarDeck");
+      await baixarApresentacaoCompleta(acoes, (feito, total) => setGerandoDeck({ feito, total }));
+    } catch (e) {
+      alert(`${t("common.error")}: ${e.message}`);
+    } finally {
+      setGerandoDeck(null);
+    }
   }
 
   function aplicarMudancaLocal(no, campo, valor) {
@@ -177,12 +190,14 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           </svg>
           {t("pres.baixarPpt")}
         </button>
-        <button className="btn btn-ghost" onClick={baixarTudo}>
+        <button className="btn btn-ghost" onClick={baixarTudo} disabled={Boolean(gerandoDeck)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
             <path d="M8 20h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          {t("pres.baixarTudo")}
+          {gerandoDeck
+            ? t("pres.gerandoDeck", { feito: gerandoDeck.feito, total: gerandoDeck.total })
+            : t("pres.baixarTudo")}
         </button>
         <button className="btn btn-primary" onClick={apresentar} disabled={!acaoAtual}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -197,6 +212,20 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           <b>{t("config.title")}</b>
           {t("config.desc")}
           <code className="config-raw">{error}</code>
+        </div>
+      )}
+
+      {gerandoDeck && (
+        <div className="deck-progress">
+          <div className="deck-progress-txt">
+            {t("pres.gerandoDeck", { feito: gerandoDeck.feito, total: gerandoDeck.total })}
+          </div>
+          <div className="deck-progress-track">
+            <div
+              className="deck-progress-fill"
+              style={{ width: `${gerandoDeck.total ? (gerandoDeck.feito / gerandoDeck.total) * 100 : 0}%` }}
+            />
+          </div>
         </div>
       )}
 

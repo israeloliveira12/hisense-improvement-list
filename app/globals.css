@@ -290,6 +290,19 @@ a { color: inherit; }
 .ba-caption-editable { cursor: text; border-radius: 3px; padding: 1px 2px; margin: -1px -2px; }
 .ba-caption-editable:hover { background: var(--purple-tint); box-shadow: inset 0 0 0 1px var(--purple); }
 
+/* ============ PROGRESSO DA GERACAO DO DECK (baixar tudo) ============ */
+.deck-progress {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.deck-progress-txt { font-size: 12px; font-weight: 700; color: var(--purple); flex: none; }
+.deck-progress-track {
+  flex: 1; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden;
+}
+.deck-progress-fill {
+  height: 100%; background: var(--purple); border-radius: 3px; transition: width .2s ease;
+}
+
 /* ================= LIGHTBOX (ver foto em tela grande) ================= */
 .lightbox-overlay {
   position: fixed; inset: 0; background: rgba(12,10,18,.92); z-index: 200;

@@ -6,13 +6,21 @@ const CIRC = 2 * Math.PI * 60;
 
 export default function DashboardPrincipal({ stats }) {
   const { t } = useLanguage();
-  const { total, closed, open, delayed, porDepartamento, target } = stats;
+  const { total, closed, open, delayed, porDepartamento, potencialFechamento } = stats;
   const pctClosed = total ? (closed / total) * 100 : 0;
   const pctOpen = total ? (open / total) * 100 : 0;
   const closedLen = (pctClosed / 100) * CIRC;
   const openLen = (pctOpen / 100) * CIRC;
   const maxDept = Math.max(...porDepartamento.map((d) => d.count), 1);
-  const pctTarget = target && total ? (target.target / total) * 100 : 0;
+  // Faixa "potencial" no anel: o pedaco que ainda da pra fechar sem nova
+  // aprovacao. Comeca exatamente onde as fechadas terminam e vai ate onde a
+  // conclusao chegaria -- por isso o offset e -closedLen (nao 0) e o
+  // comprimento e so a diferenca. Desenhada com cor solida (nao opacidade)
+  // pra nao borrar em cima da faixa laranja que esta embaixo.
+  const fechaveis = potencialFechamento ? potencialFechamento.fechaveis : 0;
+  const potencialLen = fechaveis
+    ? ((potencialFechamento.pctPotencial - potencialFechamento.pctAtual) / 100) * CIRC
+    : 0;
 
   return (
     <>
@@ -46,16 +54,34 @@ export default function DashboardPrincipal({ stats }) {
           <svg width="100%" height="150" viewBox="0 0 200 150">
             <g transform="translate(100,75)">
               <circle r="60" fill="none" stroke="var(--border)" strokeWidth="22" />
-              <circle r="60" fill="none" stroke="var(--green)" strokeWidth="22" strokeDasharray={`${closedLen} ${CIRC}`} strokeDashoffset="0" transform="rotate(-90)" />
               <circle r="60" fill="none" stroke="var(--amber)" strokeWidth="22" strokeDasharray={`${openLen} ${CIRC}`} strokeDashoffset={-closedLen} transform="rotate(-90)" />
+              {fechaveis > 0 && (
+                <circle
+                  r="60" fill="none" stroke="#8FC7A2" strokeWidth="22"
+                  strokeDasharray={`${potencialLen} ${CIRC}`} strokeDashoffset={-closedLen} transform="rotate(-90)"
+                />
+              )}
+              <circle r="60" fill="none" stroke="var(--green)" strokeWidth="22" strokeDasharray={`${closedLen} ${CIRC}`} strokeDashoffset="0" transform="rotate(-90)" />
               <text textAnchor="middle" y="-2" fontSize="26" fontWeight="700" fill="var(--text)">{total}</text>
               <text textAnchor="middle" y="16" fontSize="10" fill="var(--text-muted)">ações</text>
             </g>
           </svg>
           <div className="legend">
             <div className="legend-item"><span className="sw" style={{ background: "var(--green)" }} />{t("db.closed")} — {closed} ({Math.round(pctClosed)}%)</div>
+            {fechaveis > 0 && (
+              <div className="legend-item"><span className="sw" style={{ background: "#8FC7A2" }} />{t("dash.podeFechar")} — {fechaveis}</div>
+            )}
             <div className="legend-item"><span className="sw" style={{ background: "var(--amber)" }} />{t("db.open")} — {open} ({Math.round(pctOpen)}%)</div>
           </div>
+          {potencialFechamento && (
+            <div className="footer-note">
+              {t("dash.potencialNota", {
+                n: potencialFechamento.fechaveis,
+                pctAtual: potencialFechamento.pctAtual,
+                pctPotencial: potencialFechamento.pctPotencial,
+              })}
+            </div>
+          )}
         </div>
 
         <div className="chart-card">
@@ -71,23 +97,6 @@ export default function DashboardPrincipal({ stats }) {
         </div>
       </div>
 
-      {target && (
-        <div className="chart-card">
-          <h3>{t("dash.facilFechar")}</h3>
-          <div className="chart-sub">{t("dash.facilFecharSub")}</div>
-          <div className="bar-row">
-            <div className="b-label" style={{ color: "var(--green)" }}>Target</div>
-            <div className="b-track"><div className="b-fill" style={{ width: `${pctTarget}%`, background: "var(--green)" }} /></div>
-            <div className="b-val">{target.target}</div>
-          </div>
-          <div className="bar-row">
-            <div className="b-label" style={{ color: "var(--amber)" }}>Non-target</div>
-            <div className="b-track"><div className="b-fill" style={{ width: `${100 - pctTarget}%`, background: "var(--amber)" }} /></div>
-            <div className="b-val">{target.nonTarget}</div>
-          </div>
-          <div className="footer-note">{t("dash.targetExplica")}</div>
-        </div>
-      )}
     </>
   );
 }
