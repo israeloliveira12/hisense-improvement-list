@@ -143,6 +143,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
         <div className={"slide-status-pill " + acao.status}>
           {acao.status === "closed" ? "CLOSED" : "OPEN"}
         </div>
+        {acao.isNew && <div className="new-badge">NEW</div>}
       </div>
 
       <div className="slide-meta">

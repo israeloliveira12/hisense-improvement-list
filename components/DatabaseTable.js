@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
+import NewActionModal from "./NewActionModal";
 import { useLanguage } from "../lib/i18n";
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
@@ -14,6 +15,19 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
   const [linhas, setLinhas] = useState(initialAcoes);
   const [status, setStatus] = useState({}); // { [no]: "saving" | "saved" | "error" }
   const [editando, setEditando] = useState(null);
+  const [criandoNova, setCriandoNova] = useState(false);
+  const [recarregando, setRecarregando] = useState(false);
+
+  async function recarregarAcoes() {
+    setRecarregando(true);
+    try {
+      const res = await fetch("/api/acoes");
+      const data = await res.json();
+      if (res.ok) setLinhas(data.acoes);
+    } finally {
+      setRecarregando(false);
+    }
+  }
 
   function aplicarMudancaLocal(no, campo, valor) {
     setLinhas((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
@@ -75,7 +89,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
           </svg>
           {t("db.abrirSheets")}
         </a>
-        <button className="btn btn-primary" disabled title={t("db.novaAcaoEmBreve")}>
+        <button className="btn btn-primary" onClick={() => setCriandoNova(true)}>
           {t("db.novaAcao")}
         </button>
       </Topbar>
@@ -204,6 +218,13 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
           acao={editando}
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
+        />
+      )}
+
+      {criandoNova && (
+        <NewActionModal
+          onClose={() => setCriandoNova(false)}
+          onCreated={() => recarregarAcoes()}
         />
       )}
     </>
