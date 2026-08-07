@@ -238,15 +238,15 @@ export default function ActionEditor({ acao, onClose, onFieldChanged }) {
                 <p className="editor-empty">Nenhum passo cadastrado ainda.</p>
               )}
               {local.stepsEditable && local.stepsEditable.length > 0 && (
-                <table className="editor-inv-table">
+                <table className="editor-inv-table editor-plano-table">
                   <thead>
-                    <tr><th style={{ width: 28 }}>#</th><th>Ação</th><th>Responsável</th><th style={{ width: 60 }}>Prazo</th><th style={{ width: 70 }}>Status</th><th></th></tr>
+                    <tr><th style={{ width: 28 }}>#</th><th>Ação</th><th style={{ width: 130 }}>Responsável</th><th style={{ width: 80 }}>Prazo</th><th style={{ width: 90 }}>Status</th><th></th></tr>
                   </thead>
                   <tbody>
                     {local.stepsEditable.map((p) => (
                       <tr key={p.row}>
                         <td><input defaultValue={p.ordem} style={{ width: 24 }} onBlur={(e) => salvarPasso(p.row, "ordem", e.target.value)} /></td>
-                        <td><input defaultValue={p.acao} onBlur={(e) => salvarPasso(p.row, "acao", e.target.value)} /></td>
+                        <td><textarea rows={2} defaultValue={p.acao} onBlur={(e) => salvarPasso(p.row, "acao", e.target.value)} /></td>
                         <td><input defaultValue={p.responsavel} onBlur={(e) => salvarPasso(p.row, "responsavel", e.target.value)} /></td>
                         <td><input defaultValue={p.prazo} onBlur={(e) => salvarPasso(p.row, "prazo", e.target.value)} /></td>
                         <td>

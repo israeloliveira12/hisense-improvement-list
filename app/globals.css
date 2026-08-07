@@ -424,14 +424,22 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   padding: 5px 12px; border-radius: 20px;
 }
 
-/* ================= EDITOR DE AÇÃO (drawer) ================= */
+/* ================= EDITOR DE AÇÃO (modal) ================= */
 .editor-overlay {
-  position: fixed; inset: 0; background: rgba(23,21,31,.35); z-index: 60;
-  display: flex; justify-content: flex-end;
+  position: fixed; inset: 0; background: rgba(23,21,31,.45); z-index: 60;
+  display: flex; justify-content: center; align-items: center; padding: 28px;
 }
 .editor-drawer {
-  width: 420px; max-width: 100%; background: var(--surface); height: 100%; overflow-y: auto;
-  box-shadow: -8px 0 30px rgba(0,0,0,.15); display: flex; flex-direction: column;
+  width: min(920px, 100%); max-height: min(88vh, 800px); background: var(--surface);
+  overflow-y: auto; border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
+  display: flex; flex-direction: column; animation: editorPop .16s ease-out;
+}
+@keyframes editorPop {
+  from { opacity: 0; transform: scale(.97) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor-drawer { animation: none; }
 }
 .editor-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .editor-no { font-size: 10.5px; font-weight: 700; color: var(--text-faint); letter-spacing: .03em; }
@@ -453,7 +461,7 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit;
 }
-.editor-field textarea { min-height: 64px; resize: vertical; }
+.editor-field textarea { min-height: 110px; resize: vertical; }
 .editor-row2 { display: flex; gap: 10px; }
 .editor-row2 .editor-field { flex: 1; }
 .editor-readonly { padding: 8px 10px; border-radius: 8px; background: var(--bg); font-size: 12.5px; color: var(--text-muted); }
@@ -469,6 +477,13 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   padding: 3px 4px; border-radius: 5px; font-family: inherit;
 }
 .editor-inv-table input:hover, .editor-inv-table select:hover { background: var(--purple-tint); }
+
+.editor-plano-table td:nth-child(2) { min-width: 260px; }
+.editor-plano-table textarea {
+  width: 100%; border: 1px solid transparent; background: none; color: inherit; font-size: 12.5px;
+  padding: 5px 6px; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 44px; line-height: 1.45;
+}
+.editor-plano-table textarea:hover, .editor-plano-table textarea:focus { background: var(--purple-tint); border-color: var(--border); outline: none; }
 .editor-remove-row {
   border: none; background: none; color: var(--text-faint); cursor: pointer; font-size: 11px;
   width: 20px; height: 20px; border-radius: 4px;
@@ -489,7 +504,8 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .edit-shortcut:hover { background: var(--purple-dark); }
 
 @media (max-width: 760px) {
-  .editor-drawer { width: 100%; }
+  .editor-overlay { padding: 0; align-items: stretch; }
+  .editor-drawer { width: 100%; max-height: 100%; height: 100%; border-radius: 0; }
 }
 
 /* ================= RESPONSIVO (celular/tablet) ================= */
