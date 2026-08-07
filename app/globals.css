@@ -181,14 +181,16 @@ a { color: inherit; }
 .status-dot.closed { background: var(--green); }
 .status-dot.open { background: var(--amber); }
 
-.pres-canvas-wrap { flex: 1; min-width: 0; overflow: auto; padding: 24px; display: flex; justify-content: center; position: relative; }
+.pres-canvas-wrap { flex: 1; min-width: 0; overflow: auto; padding: 24px; display: flex; justify-content: center; align-items: flex-start; position: relative; }
 .pres-canvas-wrap:fullscreen { background: #17151f; align-items: center; padding: 40px; }
 .pres-canvas-wrap:fullscreen .slide { width: min(1400px, 92vw); box-shadow: none; }
 .slide {
   width: 960px; max-width: 100%; aspect-ratio: 16 / 9; background: #fff; color: #17151f;
   border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; position: relative;
   display: flex; flex-direction: column; flex: none;
+  zoom: var(--slide-zoom, 1); /* controla tamanho geral incl. fonte -- ver SlideZoomControl.js */
 }
+.pres-canvas-wrap:fullscreen .slide { zoom: 1; } /* em tela cheia o tamanho ja e controlado pela largura, ignora o zoom manual */
 .slide-head { background: var(--purple); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
 .slide-badge {
   width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--purple);
@@ -221,9 +223,9 @@ a { color: inherit; }
 .plan-label { font-size: 8px; font-weight: 700; color: var(--purple); letter-spacing: 0.04em; margin-bottom: 3px; }
 .plan-table { width: 100%; border-collapse: collapse; font-size: 9px; }
 .plan-table th { background: var(--purple); color: #fff; font-size: 8.6px; padding: 4px 6px; text-align: left; }
-.plan-table th:not(:first-child) { text-align: center; }
+.plan-table th:nth-child(1), .plan-table th:nth-child(3), .plan-table th:nth-child(4), .plan-table th:nth-child(5) { text-align: center; }
 .plan-table td { padding: 3.5px 6px; background: #f4f3f8; border-bottom: 2px solid #fff; }
-.plan-table td:not(:first-child) { text-align: center; white-space: nowrap; }
+.plan-table td:nth-child(1), .plan-table td:nth-child(3), .plan-table td:nth-child(4), .plan-table td:nth-child(5) { text-align: center; white-space: nowrap; }
 .plan-table td.chip { font-weight: 700; color: var(--green); }
 
 .ba-band { background: var(--blue); color: #fff; display: flex; margin: 10px -20px 0; padding: 5px 20px; font-size: 11px; font-weight: 700; }
@@ -267,6 +269,8 @@ a { color: inherit; }
 .adjust-btn.ghost { background: rgba(255,255,255,.15); color: #fff; }
 .ba-caption { font-size: 8.6px; color: var(--text-muted); font-style: italic; margin-top: 4px; line-height: 1.25; }
 .ba-caption b { font-style: normal; color: var(--text); display: block; font-size: 7.6px; letter-spacing: 0.04em; }
+.ba-caption-editable { cursor: text; border-radius: 3px; padding: 1px 2px; margin: -1px -2px; }
+.ba-caption-editable:hover { background: var(--purple-tint); box-shadow: inset 0 0 0 1px var(--purple); }
 
 /* ================= BANCO DE DADOS ================= */
 .db-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }

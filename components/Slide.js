@@ -126,7 +126,7 @@ function DropZone({ fotoId, ajuste, uploading, onFile, onDelete, onAdjustSave, l
   );
 }
 
-export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, uploadingSlot }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, onEditCaption, uploadingSlot }) {
   if (!acao) return null;
 
   return (
@@ -222,7 +222,14 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
             />
             <div className="ba-caption">
               <b>FACTORY COMMENT</b>
-              {acao.factory || "—"}
+              <span
+                className="ba-caption-editable"
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => onEditCaption && onEditCaption(acao.no, "factory", e.currentTarget.textContent)}
+              >
+                {acao.factory || "—"}
+              </span>
             </div>
           </div>
           <div className="ba-col">
@@ -237,7 +244,14 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onAdjustFoto, 
             />
             <div className="ba-caption">
               <b>HISENSE COMMENT</b>
-              {acao.hisense || "—"}
+              <span
+                className="ba-caption-editable"
+                contentEditable
+                suppressContentEditableWarning
+                onBlur={(e) => onEditCaption && onEditCaption(acao.no, "hisense", e.currentTarget.textContent)}
+              >
+                {acao.hisense || "—"}
+              </span>
             </div>
           </div>
         </div>

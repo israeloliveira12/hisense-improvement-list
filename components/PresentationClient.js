@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import Slide from "./Slide";
 import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
+import SlideZoomControl from "./SlideZoomControl";
 import { useLanguage } from "../lib/i18n";
 
 export default function PresentationClient({ acoes: initialAcoes, error }) {
@@ -126,6 +127,21 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     }
   }
 
+  async function editarLegenda(no, campo, valor) {
+    setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
+    try {
+      const res = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: campo, value: valor }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    } catch (e) {
+      alert(t("common.error") + ": " + e.message);
+    }
+  }
+
   async function ajustarFoto(no, slot, val) {
     const campo = slot === "before" ? "fotoBeforeAjuste" : "fotoImprovementAjuste";
     setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: val } : a)));
@@ -145,6 +161,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   return (
     <>
       <Topbar title={t("pres.title")} sub={t("pres.sub", { n: acoes.length })}>
+        <SlideZoomControl />
         <button className="btn btn-ghost" onClick={baixarPpt}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -204,7 +221,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             ))}
           </div>
           <div className="pres-canvas-wrap" ref={fullscreenRef}>
-            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} onAdjustFoto={ajustarFoto} uploadingSlot={uploadingSlot} />
+            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} onAdjustFoto={ajustarFoto} onEditCaption={editarLegenda} uploadingSlot={uploadingSlot} />
             {presenting && (
               <div className="present-hint">
                 ← → · Esc · {selected + 1} / {filtradas.length}
