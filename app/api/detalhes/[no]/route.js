@@ -1,21 +1,25 @@
 import { NextResponse } from "next/server";
-import { updateAcaoField } from "../../../../lib/googleSheets";
+import { setPptDetalhesField } from "../../../../lib/googleSheets";
 
-const CAMPOS_PERMITIDOS = new Set([
-  "item", "dept", "person", "deadline",
-  "audit", "process", "occur", "deadlineOriginal", "status", "delayReason",
-]);
+const CAMPO_PARA_COLUNA = {
+  description: "Description",
+  expectation: "Expectation",
+  abrangency: "Abrangency",
+  factory: "Factory Comment",
+  hisense: "Hisense Comment",
+};
 
 export async function PATCH(request, { params }) {
   const { no } = params;
   const { field, value } = await request.json();
+  const coluna = CAMPO_PARA_COLUNA[field];
 
-  if (!CAMPOS_PERMITIDOS.has(field)) {
+  if (!coluna) {
     return NextResponse.json({ error: `Campo não editável: ${field}` }, { status: 400 });
   }
 
   try {
-    await updateAcaoField(no, field, value);
+    await setPptDetalhesField(no, coluna, value);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });

@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import Slide from "./Slide";
 import Topbar from "./Topbar";
+import ActionEditor from "./ActionEditor";
 import { useLanguage } from "../lib/i18n";
 
 export default function PresentationClient({ acoes: initialAcoes, error }) {
@@ -12,6 +13,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [selected, setSelected] = useState(0);
   const [presenting, setPresenting] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState(null);
+  const [editando, setEditando] = useState(null);
   const fullscreenRef = useRef(null);
 
   const filtradas = useMemo(() => {
@@ -62,13 +64,16 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       await fullscreenRef.current?.requestFullscreen();
       setPresenting(true);
     } catch (e) {
-      // navegador recusou (ex.: sem gesto do usuário) -- pelo menos mostra a camada
       setPresenting(true);
     }
   }
 
   function baixarPpt() {
     alert(t("pres.pptEmBreve"));
+  }
+
+  function aplicarMudancaLocal(no, campo, valor) {
+    setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
 
   async function uploadFoto(no, slot, file) {
@@ -92,6 +97,26 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       alert(t("common.error") + ": " + e.message);
     } finally {
       setUploadingSlot(null);
+    }
+  }
+
+  async function deletarFoto(no, slot, fileId) {
+    if (!fileId) return;
+    try {
+      const res = await fetch("/api/drive/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ no, slot, fileId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setAcoes((prev) =>
+        prev.map((a) =>
+          a.no === no ? { ...a, [slot === "before" ? "fotoBeforeId" : "fotoImprovementId"]: null } : a
+        )
+      );
+    } catch (e) {
+      alert(t("common.error") + ": " + e.message);
     }
   }
 
@@ -150,7 +175,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             ))}
           </div>
           <div className="pres-canvas-wrap" ref={fullscreenRef}>
-            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} uploadingSlot={uploadingSlot} />
+            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} uploadingSlot={uploadingSlot} />
             {presenting && (
               <div className="present-hint">
                 ← → · Esc · {selected + 1} / {filtradas.length}
@@ -159,6 +184,24 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           </div>
         </div>
       </div>
+
+      {!presenting && acaoAtual && (
+        <button type="button" className="edit-shortcut" onClick={() => setEditando(acaoAtual)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 20h9" strokeLinecap="round" />
+            <path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {t("pres.editarAcao")}
+        </button>
+      )}
+
+      {editando && (
+        <ActionEditor
+          acao={editando}
+          onClose={() => setEditando(null)}
+          onFieldChanged={aplicarMudancaLocal}
+        />
+      )}
     </>
   );
 }

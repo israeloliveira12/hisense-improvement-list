@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Topbar from "./Topbar";
+import ActionEditor from "./ActionEditor";
 import { useLanguage } from "../lib/i18n";
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
@@ -12,13 +13,18 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
   const [filtro, setFiltro] = useState("todas");
   const [linhas, setLinhas] = useState(initialAcoes);
   const [status, setStatus] = useState({}); // { [no]: "saving" | "saved" | "error" }
+  const [editando, setEditando] = useState(null);
+
+  function aplicarMudancaLocal(no, campo, valor) {
+    setLinhas((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
+  }
 
   const contagens = useMemo(
     () => ({
       todas: linhas.length,
       open: linhas.filter((a) => a.status === "open").length,
       closed: linhas.filter((a) => a.status === "closed").length,
-      investimento: linhas.filter((a) => a.investment && a.investment.startsWith("R$")).length,
+      investimento: linhas.filter((a) => a.investmentFlag === "yes").length,
     }),
     [linhas]
   );
@@ -27,7 +33,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
     let base = linhas;
     if (filtro === "open") base = base.filter((a) => a.status === "open");
     if (filtro === "closed") base = base.filter((a) => a.status === "closed");
-    if (filtro === "investimento") base = base.filter((a) => a.investment && a.investment.startsWith("R$"));
+    if (filtro === "investimento") base = base.filter((a) => a.investmentFlag === "yes");
 
     const q = query.trim().toLowerCase();
     if (!q) return base;
@@ -135,7 +141,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                 <tbody>
                   {filtradas.map((a) => (
                     <tr key={a.no}>
-                      <td className="cell-no">
+                      <td className="cell-no cell-no-clickable" onClick={() => setEditando(a)} title={t("pres.editarAcao")}>
                         {a.no}
                         {status[a.no] === "saving" && <span className="save-dot saving" title={t("common.saving")} />}
                         {status[a.no] === "saved" && <span className="save-dot saved" title={t("common.saved")} />}
@@ -180,8 +186,8 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                         {a.deadline || "—"}
                       </td>
                       <td>
-                        <span className={"tag-inv " + (a.investment && a.investment.startsWith("R$") ? "yes" : "no")}>
-                          {a.investment && a.investment.startsWith("R$") ? "Yes" : "No"}
+                        <span className={"tag-inv " + a.investmentFlag}>
+                          {a.investmentFlag === "yes" ? "Yes" : "No"}
                         </span>
                       </td>
                     </tr>
@@ -192,6 +198,14 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
           </div>
         </div>
       </div>
+
+      {editando && (
+        <ActionEditor
+          acao={editando}
+          onClose={() => setEditando(null)}
+          onFieldChanged={aplicarMudancaLocal}
+        />
+      )}
     </>
   );
 }

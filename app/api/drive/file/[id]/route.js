@@ -14,7 +14,10 @@ export async function GET(request, { params }) {
     return new Response(webStream, {
       headers: {
         "Content-Type": meta.mimeType || "application/octet-stream",
-        "Cache-Control": "private, max-age=3600",
+        // "no-store" de proposito -- ja tivemos foto apagada no Drive continuando
+        // a aparecer no site por causa de cache do navegador. Ferramenta interna,
+        // baixo trafego -- corretude vale mais que economizar uma chamada de API.
+        "Cache-Control": "no-store",
       },
     });
   } catch (e) {

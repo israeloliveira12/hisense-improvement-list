@@ -59,7 +59,7 @@ export default function Sidebar() {
       <div className="sidebar-foot">
         <div className="doc-pill">
           <span className="dot" />
-          {t("common.demo")}
+          {t("common.live")}
         </div>
         <LogoutButton />
       </div>

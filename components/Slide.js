@@ -3,14 +3,29 @@
 import { useRef } from "react";
 import { useLanguage } from "../lib/i18n";
 
-function DropZone({ fotoId, uploading, onFile, label }) {
+function DropZone({ fotoId, uploading, onFile, onDelete, label }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
 
   if (fotoId) {
     return (
-      <div className="drop drop-photo" onClick={() => inputRef.current?.click()}>
-        <img src={`/api/drive/file/${fotoId}`} alt={label} />
+      <div className="drop drop-photo">
+        <img
+          src={`/api/drive/file/${fotoId}?v=${fotoId}`}
+          alt={label}
+          onClick={() => inputRef.current?.click()}
+        />
+        <button
+          type="button"
+          className="drop-photo-remove"
+          title={t("pres.excluirFoto")}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
+          }}
+        >
+          ✕
+        </button>
         <input
           ref={inputRef}
           type="file"
@@ -55,7 +70,7 @@ function DropZone({ fotoId, uploading, onFile, label }) {
   );
 }
 
-export default function Slide({ acao, onUploadFoto, uploadingSlot }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, uploadingSlot }) {
   if (!acao) return null;
 
   return (
@@ -88,10 +103,6 @@ export default function Slide({ acao, onUploadFoto, uploadingSlot }) {
         <div className="m">
           <label>DEADLINE</label>
           <div>{acao.deadline || "—"}</div>
-        </div>
-        <div className="m">
-          <label>TARGET</label>
-          <div>{acao.target || "—"}</div>
         </div>
         <div className="m">
           <label>INVESTMENT</label>
@@ -147,6 +158,7 @@ export default function Slide({ acao, onUploadFoto, uploadingSlot }) {
               fotoId={acao.fotoBeforeId}
               uploading={uploadingSlot === "before"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
+              onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "before", acao.fotoBeforeId)}
               label="Before"
             />
             <div className="ba-caption">
@@ -159,6 +171,7 @@ export default function Slide({ acao, onUploadFoto, uploadingSlot }) {
               fotoId={acao.fotoImprovementId}
               uploading={uploadingSlot === "improvement"}
               onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
+              onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
               label="After"
             />
             <div className="ba-caption">
