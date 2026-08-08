@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
 // Status geral da acao: so Open/Closed (sem On Hold -- pedido explicito,
@@ -51,6 +51,14 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   const [local, setLocal] = useState(acao);
   const [excluindo, setExcluindo] = useState(false);
   const [novoInv, setNovoInv] = useState(null); // null = form fechado; objeto = form aberto com os valores digitados
+  // Campos de texto/select/data NAO salvam mais sozinhos ao perder o foco --
+  // só ficam pendentes aqui (ref, nao state, pra "agendar" durante um
+  // onBlur ler o valor mais recente sem esperar re-render) ate o usuario
+  // fechar o editor (X, clicar fora, ou "Salvar e fechar"), que dispara
+  // salvarPendentes() e manda tudo de uma vez. Pedido explicito do usuario:
+  // antes, cada campo ja alterava o Google Sheets no exato momento em que
+  // perdia o foco, antes de qualquer confirmacao de "salvar".
+  const pendentesRef = useRef({});
 
   if (!local) return null;
 
@@ -68,99 +76,112 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
     }
   }
 
-  // Cada campo ja salva sozinho ao perder o foco (onBlur) -- esse botao
-  // existe pra dar uma confirmacao clara e visivel de "salvei", e garante
-  // que o campo que ainda estava sendo digitado no momento do clique
-  // tambem dispara o salvamento dele (blur manual) antes de fechar.
-  function salvarEFechar() {
+  // So agenda o PATCH (guarda no ref) -- nao manda pro servidor ainda.
+  // "pending" e um status novo do SaveDot (bolinha cinza: "mudou, ainda nao
+  // salvou"), diferente de "saving"/"saved" que so aparecem durante o
+  // flush de verdade (ver salvarPendentes).
+  function agendar(url, statusKey, body) {
+    pendentesRef.current[statusKey] = { url, body };
+    setStatus((s) => ({ ...s, [statusKey]: "pending" }));
+  }
+
+  // Manda TODOS os campos pendentes de uma vez (em paralelo) -- chamado só
+  // ao fechar o editor (X, clicar fora, ou "Salvar e fechar"), nunca por
+  // um onBlur individual. Devolve false se algum PATCH falhou, pra quem
+  // chamou decidir NAO fechar (evita perder a edicao silenciosamente).
+  async function salvarPendentes() {
+    const entradas = Object.entries(pendentesRef.current);
+    pendentesRef.current = {};
+    if (!entradas.length) return true;
+
+    setStatus((s) => {
+      const next = { ...s };
+      entradas.forEach(([k]) => (next[k] = "saving"));
+      return next;
+    });
+
+    const resultados = await Promise.all(
+      entradas.map(async ([statusKey, { url, body }]) => {
+        try {
+          const res = await fetch(url, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+          return { statusKey, ok: true };
+        } catch (e) {
+          return { statusKey, ok: false, error: e.message };
+        }
+      })
+    );
+
+    setStatus((s) => {
+      const next = { ...s };
+      resultados.forEach(({ statusKey, ok }) => { next[statusKey] = ok ? "saved" : "error"; });
+      return next;
+    });
+
+    const erros = resultados.filter((r) => !r.ok);
+    if (erros.length) {
+      alert(`${t("common.error")}: ${erros.map((e) => e.error).join("; ")}`);
+      return false;
+    }
+
+    setTimeout(() => {
+      setStatus((s) => {
+        const next = { ...s };
+        resultados.forEach(({ statusKey }) => { if (next[statusKey] === "saved") next[statusKey] = undefined; });
+        return next;
+      });
+    }, 1500);
+    return true;
+  }
+
+  // Fecha o editor SEMPRE passando por aqui (X, clicar fora, "Salvar e
+  // fechar") -- garante que nenhum caminho de fechar descarta uma edicao
+  // pendente. Da blur no campo focado primeiro (garante que o ultimo valor
+  // digitado, ainda nao "commitado" via onBlur, entra na fila) e so fecha
+  // de verdade se o flush inteiro deu certo.
+  async function salvarEFechar() {
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
-    onClose();
-  }
-
-  async function salvar(url, field, value, statusKey) {
-    setLocal((prev) => ({ ...prev, [field]: value }));
-    onFieldChanged && onFieldChanged(local.no, field, value);
-    setStatus((s) => ({ ...s, [statusKey]: "saving" }));
-    try {
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field, value }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      setStatus((s) => ({ ...s, [statusKey]: "saved" }));
-      setTimeout(() => setStatus((s) => ({ ...s, [statusKey]: undefined })), 2000);
-    } catch (e) {
-      setStatus((s) => ({ ...s, [statusKey]: "error" }));
-      alert(`${t("common.error")}: ${e.message}`);
-    }
+    const ok = await salvarPendentes();
+    if (ok) onClose();
   }
 
   function salvarAcao(field, value) {
-    return salvar(`/api/acoes/${encodeURIComponent(local.no)}`, field, value, "acao." + field);
+    setLocal((prev) => ({ ...prev, [field]: value }));
+    onFieldChanged && onFieldChanged(local.no, field, value);
+    agendar(`/api/acoes/${encodeURIComponent(local.no)}`, "acao." + field, { field, value });
   }
 
-  async function salvarStatus(value) {
+  function salvarStatus(value) {
     setLocal((prev) => ({ ...prev, statusRaw: value, status: value === "Closed" ? "closed" : "open" }));
     onFieldChanged && onFieldChanged(local.no, "status", value === "Closed" ? "closed" : "open");
-    setStatus((s) => ({ ...s, "acao.status": "saving" }));
-    try {
-      const res = await fetch(`/api/acoes/${encodeURIComponent(local.no)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ field: "status", value }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      setStatus((s) => ({ ...s, "acao.status": "saved" }));
-      setTimeout(() => setStatus((s) => ({ ...s, "acao.status": undefined })), 2000);
-    } catch (e) {
-      setStatus((s) => ({ ...s, "acao.status": "error" }));
-      alert(`${t("common.error")}: ${e.message}`);
-    }
-  }
-  function salvarDetalhe(field, value) {
-    return salvar(`/api/detalhes/${encodeURIComponent(local.no)}`, field, value, "det." + field);
+    agendar(`/api/acoes/${encodeURIComponent(local.no)}`, "acao.status", { field: "status", value });
   }
 
-  // PATCH "cru" pra sub-itens (passo/investimento) -- ao contrario de
-  // salvar(), NAO mexe em campos de topo do `local` (esses tem nome
-  // proprio, tipo "acao"/"status", que colidiriam com campos de VERDADE da
-  // acao) nem chama onFieldChanged sozinho -- quem chama decide o que
-  // propagar pro pai (ver salvarPasso/salvarInvestimento).
-  async function salvarSubcampo(url, statusKey, body) {
-    setStatus((s) => ({ ...s, [statusKey]: "saving" }));
-    try {
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      setStatus((s) => ({ ...s, [statusKey]: "saved" }));
-      setTimeout(() => setStatus((s) => ({ ...s, [statusKey]: undefined })), 2000);
-    } catch (e) {
-      setStatus((s) => ({ ...s, [statusKey]: "error" }));
-      alert(`${t("common.error")}: ${e.message}`);
-    }
+  function salvarDetalhe(field, value) {
+    setLocal((prev) => ({ ...prev, [field]: value }));
+    onFieldChanged && onFieldChanged(local.no, field, value);
+    agendar(`/api/detalhes/${encodeURIComponent(local.no)}`, "det." + field, { field, value });
   }
 
   function salvarInvestimento(row, field, value) {
     const novosItens = local.itensInvestimento.map((it) => (it.row === row ? { ...it, [field]: value } : it));
     setLocal((prev) => ({ ...prev, itensInvestimento: novosItens }));
     onFieldChanged && onFieldChanged(local.no, "investment", investimentoDisplayClient(novosItens) || "Sem investimento");
-    return salvarSubcampo(`/api/investimento/${row}`, "inv." + row + "." + field, { field, value });
+    agendar(`/api/investimento/${row}`, "inv." + row + "." + field, { field, value });
   }
 
   function salvarPasso(row, field, value) {
     const novosSteps = local.stepsEditable.map((p) => (p.row === row ? { ...p, [field]: value } : p));
     setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
     onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
-    return salvarSubcampo(`/api/passos/${row}`, "passo." + row + "." + field, { field, value });
+    agendar(`/api/passos/${row}`, "passo." + row + "." + field, { field, value });
   }
 
   async function adicionarPasso() {
@@ -239,14 +260,14 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   }
 
   return (
-    <div className="editor-overlay" onClick={onClose}>
+    <div className="editor-overlay" onClick={salvarEFechar}>
       <div className="editor-drawer" onClick={(e) => e.stopPropagation()}>
         <div className="editor-head">
           <div>
             <div className="editor-no">{t("edit.acaoNo")} {local.no}</div>
             <h4>{local.item}</h4>
           </div>
-          <button type="button" className="editor-close" onClick={onClose}>✕</button>
+          <button type="button" className="editor-close" onClick={salvarEFechar}>✕</button>
         </div>
 
         <div className="editor-status-row">
@@ -386,7 +407,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                         <td><input defaultValue={p.ordem} style={{ width: 24 }} onBlur={(e) => salvarPasso(p.row, "ordem", e.target.value)} /></td>
                         <td><textarea rows={2} defaultValue={p.acao} onBlur={(e) => salvarPasso(p.row, "acao", e.target.value)} /></td>
                         <td><input defaultValue={p.responsavel} onBlur={(e) => salvarPasso(p.row, "responsavel", e.target.value)} /></td>
-                        <td><input defaultValue={p.prazo} onBlur={(e) => salvarPasso(p.row, "prazo", e.target.value)} /></td>
+                        <td><input type="date" lang={dateInputLang} defaultValue={p.prazo} onChange={(e) => salvarPasso(p.row, "prazo", e.target.value)} /></td>
                         <td>
                           <select
                             defaultValue={PASSO_STATUS_OPTIONS.includes(p.status) ? p.status : "Open"}

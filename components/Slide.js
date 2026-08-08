@@ -317,7 +317,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
                 <td>{st[0]}</td>
                 <td>{st[1]}</td>
                 <td>{st[2]}</td>
-                <td>{st[3]}</td>
+                <td>{formatDate(st[3]) || st[3]}</td>
                 <td className={"plan-status " + stClass}>{st[4]}</td>
               </tr>
               );
