@@ -624,7 +624,9 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 
 /* excluir a acao mora longe do X de proposito (rodape, nao no cabecalho) --
    ficava facil de clicar sem querer perto do fechar. */
-.editor-danger-zone { padding: 12px 20px; border-top: 1px solid var(--border); flex: none; }
+.editor-footer { padding: 14px 20px; border-top: 1px solid var(--border); flex: none; }
+.editor-save-btn { width: 100%; justify-content: center; }
+.editor-danger-zone { padding: 0 20px 14px; flex: none; }
 .editor-delete-full {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
   padding: 9px 0; border-radius: 8px; border: 1px solid var(--border); background: none;

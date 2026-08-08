@@ -37,6 +37,17 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
     }
   }
 
+  // Cada campo ja salva sozinho ao perder o foco (onBlur) -- esse botao
+  // existe pra dar uma confirmacao clara e visivel de "salvei", e garante
+  // que o campo que ainda estava sendo digitado no momento do clique
+  // tambem dispara o salvamento dele (blur manual) antes de fechar.
+  function salvarEFechar() {
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+    onClose();
+  }
+
   async function salvar(url, field, value, statusKey) {
     setLocal((prev) => ({ ...prev, [field]: value }));
     onFieldChanged && onFieldChanged(local.no, field, value);
@@ -138,14 +149,14 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
       <div className="editor-drawer" onClick={(e) => e.stopPropagation()}>
         <div className="editor-head">
           <div>
-            <div className="editor-no">AÇÃO Nº {local.no}</div>
+            <div className="editor-no">{t("edit.acaoNo")} {local.no}</div>
             <h4>{local.item}</h4>
           </div>
           <button type="button" className="editor-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="editor-status-row">
-          <span className={"slide-status-pill " + local.status}>{local.status === "closed" ? "CLOSED" : "OPEN"}</span>
+          <span className={"slide-status-pill " + local.status}>{local.status === "closed" ? t("db.closed") : t("db.open")}</span>
           <select
             value={STATUS_OPTIONS.includes(local.statusRaw) ? local.statusRaw : "Open"}
             onChange={(e) => salvarStatus(e.target.value)}
@@ -158,13 +169,13 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
         </div>
 
         <div className="editor-tabs">
-          <button className={tab === "geral" ? "active" : ""} onClick={() => setTab("geral")}>Geral</button>
-          <button className={tab === "descricao" ? "active" : ""} onClick={() => setTab("descricao")}>Descrição</button>
+          <button className={tab === "geral" ? "active" : ""} onClick={() => setTab("geral")}>{t("edit.tabGeral")}</button>
+          <button className={tab === "descricao" ? "active" : ""} onClick={() => setTab("descricao")}>{t("edit.tabDescricao")}</button>
           <button className={tab === "plano" ? "active" : ""} onClick={() => setTab("plano")}>
-            Plano de Ação {local.stepsEditable?.length ? `(${local.stepsEditable.length})` : ""}
+            {t("edit.tabPlano")} {local.stepsEditable?.length ? `(${local.stepsEditable.length})` : ""}
           </button>
           <button className={tab === "investimento" ? "active" : ""} onClick={() => setTab("investimento")}>
-            Investimento {local.itensInvestimento?.length ? `(${local.itensInvestimento.length})` : ""}
+            {t("edit.tabInvestimento")} {local.itensInvestimento?.length ? `(${local.itensInvestimento.length})` : ""}
           </button>
         </div>
 
@@ -172,7 +183,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
           {tab === "geral" && (
             <>
               <div className="editor-field">
-                <label>ID (No.) <SaveDot status={status["acao.no"]} /></label>
+                <label>{t("edit.fieldId")} <SaveDot status={status["acao.no"]} /></label>
                 <input
                   defaultValue={local.no}
                   onBlur={(e) => {
@@ -181,7 +192,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                       e.target.value = local.no;
                       return;
                     }
-                    if (window.confirm(`Alterar o ID de "${local.no}" para "${novo}"? Fotos, plano de ação e comentários continuam vinculados a essa ação.`)) {
+                    if (window.confirm(t("edit.confirmChangeId", { atual: local.no, novo }))) {
                       salvarAcao("no", novo);
                     } else {
                       e.target.value = local.no;
@@ -190,51 +201,51 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                 />
               </div>
               <div className="editor-field">
-                <label>Item <SaveDot status={status["acao.item"]} /></label>
+                <label>{t("edit.fieldItem")} <SaveDot status={status["acao.item"]} /></label>
                 <input defaultValue={local.item} onBlur={(e) => salvarAcao("item", e.target.value)} />
               </div>
               <div className="editor-row2">
                 <div className="editor-field">
-                  <label>Dept. in charge <SaveDot status={status["acao.dept"]} /></label>
+                  <label>{t("edit.fieldDept")} <SaveDot status={status["acao.dept"]} /></label>
                   <input defaultValue={local.dept} onBlur={(e) => salvarAcao("dept", e.target.value)} />
                 </div>
                 <div className="editor-field">
-                  <label>Person in charge <SaveDot status={status["acao.person"]} /></label>
+                  <label>{t("edit.fieldPerson")} <SaveDot status={status["acao.person"]} /></label>
                   <input defaultValue={local.person} onBlur={(e) => salvarAcao("person", e.target.value)} />
                 </div>
               </div>
               <div className="editor-row2">
                 <div className="editor-field">
-                  <label>Audit <SaveDot status={status["acao.audit"]} /></label>
+                  <label>{t("edit.fieldAudit")} <SaveDot status={status["acao.audit"]} /></label>
                   <input defaultValue={local.audit} onBlur={(e) => salvarAcao("audit", e.target.value)} />
                 </div>
                 <div className="editor-field">
-                  <label>Process <SaveDot status={status["acao.process"]} /></label>
+                  <label>{t("edit.fieldProcess")} <SaveDot status={status["acao.process"]} /></label>
                   <input defaultValue={local.process} onBlur={(e) => salvarAcao("process", e.target.value)} />
                 </div>
               </div>
               <div className="editor-row2">
                 <div className="editor-field">
-                  <label>Occur. date <SaveDot status={status["acao.occur"]} /></label>
+                  <label>{t("edit.fieldOccur")} <SaveDot status={status["acao.occur"]} /></label>
                   <input defaultValue={local.occur} onBlur={(e) => salvarAcao("occur", e.target.value)} />
                 </div>
                 <div className="editor-field">
-                  <label>Target</label>
-                  <div className="editor-readonly">{local.target ? "Target" : "Non-target"} <span className="hint">(calculado — ver Dashboard)</span></div>
+                  <label>{t("edit.fieldTarget")}</label>
+                  <div className="editor-readonly">{local.target ? t("edit.valueTarget") : t("edit.valueNonTarget")} <span className="hint">{t("edit.targetHint")}</span></div>
                 </div>
               </div>
               <div className="editor-row2">
                 <div className="editor-field">
-                  <label>Deadline original <SaveDot status={status["acao.deadlineOriginal"]} /></label>
+                  <label>{t("edit.fieldDeadlineOriginal")} <SaveDot status={status["acao.deadlineOriginal"]} /></label>
                   <input defaultValue={local.deadlineOriginal} onBlur={(e) => salvarAcao("deadlineOriginal", e.target.value)} />
                 </div>
                 <div className="editor-field">
-                  <label>New deadline <SaveDot status={status["acao.deadline"]} /></label>
+                  <label>{t("edit.fieldNewDeadline")} <SaveDot status={status["acao.deadline"]} /></label>
                   <input defaultValue={local.deadline} onBlur={(e) => salvarAcao("deadline", e.target.value)} />
                 </div>
               </div>
               <div className="editor-field">
-                <label>Delay reason <SaveDot status={status["acao.delayReason"]} /></label>
+                <label>{t("edit.fieldDelayReason")} <SaveDot status={status["acao.delayReason"]} /></label>
                 <input defaultValue={local.delayReason} onBlur={(e) => salvarAcao("delayReason", e.target.value)} />
               </div>
             </>
@@ -243,23 +254,23 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
           {tab === "descricao" && (
             <>
               <div className="editor-field">
-                <label>Description <SaveDot status={status["det.description"]} /></label>
+                <label>{t("edit.fieldDescription")} <SaveDot status={status["det.description"]} /></label>
                 <textarea defaultValue={local.description} onBlur={(e) => salvarDetalhe("description", e.target.value)} />
               </div>
               <div className="editor-field">
-                <label>Expectation <SaveDot status={status["det.expectation"]} /></label>
+                <label>{t("edit.fieldExpectation")} <SaveDot status={status["det.expectation"]} /></label>
                 <textarea defaultValue={local.expectation} onBlur={(e) => salvarDetalhe("expectation", e.target.value)} />
               </div>
               <div className="editor-field">
-                <label>Abrangency <SaveDot status={status["det.abrangency"]} /></label>
+                <label>{t("edit.fieldAbrangency")} <SaveDot status={status["det.abrangency"]} /></label>
                 <textarea defaultValue={local.abrangency} onBlur={(e) => salvarDetalhe("abrangency", e.target.value)} />
               </div>
               <div className="editor-field">
-                <label>Factory Comment <SaveDot status={status["det.factory"]} /></label>
+                <label>{t("edit.fieldFactoryComment")} <SaveDot status={status["det.factory"]} /></label>
                 <textarea defaultValue={local.factory} onBlur={(e) => salvarDetalhe("factory", e.target.value)} />
               </div>
               <div className="editor-field">
-                <label>Hisense Comment <SaveDot status={status["det.hisense"]} /></label>
+                <label>{t("edit.fieldHisenseComment")} <SaveDot status={status["det.hisense"]} /></label>
                 <textarea defaultValue={local.hisense} onBlur={(e) => salvarDetalhe("hisense", e.target.value)} />
               </div>
             </>
@@ -268,12 +279,12 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
           {tab === "plano" && (
             <>
               {(!local.stepsEditable || local.stepsEditable.length === 0) && (
-                <p className="editor-empty">Nenhum passo cadastrado ainda.</p>
+                <p className="editor-empty">{t("edit.semPassos")}</p>
               )}
               {local.stepsEditable && local.stepsEditable.length > 0 && (
                 <table className="editor-inv-table editor-plano-table">
                   <thead>
-                    <tr><th style={{ width: 28 }}>#</th><th>Ação</th><th style={{ width: 130 }}>Responsável</th><th style={{ width: 80 }}>Prazo</th><th style={{ width: 90 }}>Status</th><th></th></tr>
+                    <tr><th style={{ width: 28 }}>#</th><th>{t("edit.colAcao")}</th><th style={{ width: 130 }}>{t("edit.colResponsavel")}</th><th style={{ width: 80 }}>{t("edit.colPrazo")}</th><th style={{ width: 90 }}>{t("edit.colStatus")}</th><th></th></tr>
                   </thead>
                   <tbody>
                     {local.stepsEditable.map((p) => (
@@ -300,7 +311,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                   {status.novoPasso === "saving" ? t("common.saving") : t("pres.adicionarPasso")}
                 </div>
               ) : (
-                <p className="editor-note">Limite de {MAX_PASSOS} passos atingido.</p>
+                <p className="editor-note">{t("edit.limitePassos", { n: MAX_PASSOS })}</p>
               )}
             </>
           )}
@@ -308,12 +319,12 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
           {tab === "investimento" && (
             <>
               {(!local.itensInvestimento || local.itensInvestimento.length === 0) && (
-                <p className="editor-empty">Nenhum item de investimento lançado pra essa ação ainda.</p>
+                <p className="editor-empty">{t("edit.semInvestimento")}</p>
               )}
               {local.itensInvestimento && local.itensInvestimento.length > 0 && (
                 <table className="editor-inv-table">
                   <thead>
-                    <tr><th>Item</th><th>Qtd</th><th>Custo un. (R$)</th><th>Fornecedor</th><th>Aprovação</th><th>Etapa</th></tr>
+                    <tr><th>{t("edit.colItem")}</th><th>{t("edit.colQtd")}</th><th>{t("edit.colCustoUn")}</th><th>{t("edit.colFornecedor")}</th><th>{t("edit.colAprovacao")}</th><th>{t("edit.colEtapa")}</th></tr>
                   </thead>
                   <tbody>
                     {local.itensInvestimento.map((it) => (
@@ -337,9 +348,18 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                   </tbody>
                 </table>
               )}
-              <p className="editor-note">Adicionar um item de investimento novo ainda não é possível pelo site — edite direto na planilha por enquanto.</p>
+              <p className="editor-note">{t("edit.notaInvestimento")}</p>
             </>
           )}
+        </div>
+
+        <div className="editor-footer">
+          <button type="button" className="btn btn-primary editor-save-btn" onClick={salvarEFechar}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
+            </svg>
+            {t("pres.salvarEFechar")}
+          </button>
         </div>
 
         <div className="editor-danger-zone">

@@ -43,7 +43,7 @@ export default function Sidebar({ onCollapse }) {
           grupo<b>Multilaser</b>
         </div>
         {onCollapse && (
-          <button type="button" className="sidebar-collapse-btn" onClick={onCollapse} title="Ocultar menu">
+          <button type="button" className="sidebar-collapse-btn" onClick={onCollapse} title={t("nav.ocultarMenu")}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 6l-6 6 6 6" />
             </svg>

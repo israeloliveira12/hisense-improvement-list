@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
+import { useLanguage } from "../lib/i18n";
 
 // Colapsar a sidebar persiste entre visitas (diferente do tema, que reseta
 // sempre -- aqui nao houve pedido de resetar, e "esconder o menu" e o tipo
 // de preferencia que faz sentido lembrar).
 export default function AppShell({ children }) {
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [pronto, setPronto] = useState(false);
 
@@ -31,7 +33,7 @@ export default function AppShell({ children }) {
     <div className="app">
       {mostrarSidebar && <Sidebar onCollapse={toggle} />}
       {pronto && collapsed && (
-        <button type="button" className="sidebar-reopen" onClick={toggle} title="Mostrar menu">
+        <button type="button" className="sidebar-reopen" onClick={toggle} title={t("nav.mostrarMenu")}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
           </svg>

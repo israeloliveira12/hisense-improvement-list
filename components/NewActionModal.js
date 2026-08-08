@@ -52,34 +52,34 @@ export default function NewActionModal({ onClose, onCreated }) {
 
         <div className="editor-body">
           <div className="editor-field">
-            <label>Item *</label>
+            <label>{t("edit.fieldItemRequired")}</label>
             <input {...campo("item")} placeholder={t("db.novaAcaoItemPlaceholder")} autoFocus />
           </div>
           <div className="editor-row2">
             <div className="editor-field">
-              <label>Dept. in charge</label>
+              <label>{t("edit.fieldDept")}</label>
               <input {...campo("dept")} />
             </div>
             <div className="editor-field">
-              <label>Person in charge</label>
+              <label>{t("edit.fieldPerson")}</label>
               <input {...campo("person")} />
             </div>
           </div>
           <div className="editor-row2">
             <div className="editor-field">
-              <label>Occur. date</label>
+              <label>{t("edit.fieldOccur")}</label>
               <input {...campo("occur")} placeholder="DD/MM/AAAA" />
             </div>
             <div className="editor-field">
-              <label>Deadline</label>
+              <label>{t("edit.fieldDeadline")}</label>
               <input {...campo("deadline")} placeholder="DD/MM/AAAA" />
             </div>
           </div>
           <div className="editor-field">
-            <label>Investment</label>
+            <label>{t("pres.slideInvestment")}</label>
             <select value={form.investmentFlag} onChange={(e) => setForm((f) => ({ ...f, investmentFlag: e.target.value }))}>
-              <option value="no">No</option>
-              <option value="yes">Yes</option>
+              <option value="no">{t("edit.investNo")}</option>
+              <option value="yes">{t("edit.investYes")}</option>
             </select>
           </div>
 
