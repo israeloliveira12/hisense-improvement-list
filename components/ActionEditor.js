@@ -16,7 +16,7 @@ function SaveDot({ status }) {
 }
 
 export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted }) {
-  const { t } = useLanguage();
+  const { t, dateInputLang } = useLanguage();
   const [tab, setTab] = useState("geral");
   const [status, setStatus] = useState({}); // { [key]: "saving"|"saved"|"error" }
   const [local, setLocal] = useState(acao);
@@ -228,7 +228,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
               <div className="editor-row2">
                 <div className="editor-field">
                   <label>{t("edit.fieldOccur")} <SaveDot status={status["acao.occur"]} /></label>
-                  <input defaultValue={local.occur} onBlur={(e) => salvarAcao("occur", e.target.value)} />
+                  <input type="date" lang={dateInputLang} defaultValue={local.occur} onChange={(e) => salvarAcao("occur", e.target.value)} />
                 </div>
                 <div className="editor-field">
                   <label>{t("edit.fieldTarget")}</label>
@@ -238,11 +238,11 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
               <div className="editor-row2">
                 <div className="editor-field">
                   <label>{t("edit.fieldDeadlineOriginal")} <SaveDot status={status["acao.deadlineOriginal"]} /></label>
-                  <input defaultValue={local.deadlineOriginal} onBlur={(e) => salvarAcao("deadlineOriginal", e.target.value)} />
+                  <input type="date" lang={dateInputLang} defaultValue={local.deadlineOriginal} onChange={(e) => salvarAcao("deadlineOriginal", e.target.value)} />
                 </div>
                 <div className="editor-field">
                   <label>{t("edit.fieldNewDeadline")} <SaveDot status={status["acao.deadline"]} /></label>
-                  <input defaultValue={local.deadline} onBlur={(e) => salvarAcao("deadline", e.target.value)} />
+                  <input type="date" lang={dateInputLang} defaultValue={local.deadline} onChange={(e) => salvarAcao("deadline", e.target.value)} />
                 </div>
               </div>
               <div className="editor-field">

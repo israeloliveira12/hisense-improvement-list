@@ -220,7 +220,7 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
 }
 
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const [lightbox, setLightbox] = useState(null); // { ids, index }
 
   useEffect(() => {
@@ -256,11 +256,11 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
         </div>
         <div className="m">
           <label>{t("pres.slideOccurDate")}</label>
-          <div>{acao.occur || "—"}</div>
+          <div>{formatDate(acao.occur) || "—"}</div>
         </div>
         <div className="m">
           <label>{t("pres.slideDeadline")}</label>
-          <div>{acao.deadline || "—"}</div>
+          <div>{formatDate(acao.deadline) || "—"}</div>
         </div>
         <div className="m">
           <label>{t("pres.slideInvestment")}</label>

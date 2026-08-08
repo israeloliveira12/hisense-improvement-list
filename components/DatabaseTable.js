@@ -9,7 +9,7 @@ import { useLanguage } from "../lib/i18n";
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
 
 export default function DatabaseTable({ acoes: initialAcoes, error }) {
-  const { t } = useLanguage();
+  const { t, dateInputLang } = useLanguage();
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState("todas");
   const [linhas, setLinhas] = useState(initialAcoes);
@@ -196,13 +196,14 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                           {a.status === "closed" ? t("db.closed") : t("db.open")}
                         </span>
                       </td>
-                      <td
-                        className="cell-editable"
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => editarCampo(a.no, "deadline", e.currentTarget.textContent)}
-                      >
-                        {a.deadline || "—"}
+                      <td>
+                        <input
+                          type="date"
+                          className="cell-date-input"
+                          lang={dateInputLang}
+                          defaultValue={a.deadline || ""}
+                          onChange={(e) => editarCampo(a.no, "deadline", e.target.value)}
+                        />
                       </td>
                       <td>
                         <span className={"tag-inv " + a.investmentFlag}>

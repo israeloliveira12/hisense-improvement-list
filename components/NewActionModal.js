@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
 export default function NewActionModal({ onClose, onCreated }) {
-  const { t } = useLanguage();
+  const { t, dateInputLang } = useLanguage();
   const [form, setForm] = useState({
     item: "", dept: "", person: "", occur: "", deadline: "", investmentFlag: "no",
   });
@@ -68,11 +68,11 @@ export default function NewActionModal({ onClose, onCreated }) {
           <div className="editor-row2">
             <div className="editor-field">
               <label>{t("edit.fieldOccur")}</label>
-              <input {...campo("occur")} placeholder="DD/MM/AAAA" />
+              <input type="date" lang={dateInputLang} {...campo("occur")} />
             </div>
             <div className="editor-field">
               <label>{t("edit.fieldDeadline")}</label>
-              <input {...campo("deadline")} placeholder="DD/MM/AAAA" />
+              <input type="date" lang={dateInputLang} {...campo("deadline")} />
             </div>
           </div>
           <div className="editor-field">

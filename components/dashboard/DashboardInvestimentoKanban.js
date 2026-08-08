@@ -22,7 +22,7 @@ function formatBRL(v) {
 }
 
 export default function DashboardInvestimentoKanban({ stats }) {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const itens = stats.itensDetalhados || [];
 
   const aprovados = itens.filter((it) => it.requestApproval === "Approved");
@@ -84,7 +84,7 @@ export default function DashboardInvestimentoKanban({ stats }) {
                     {it.deadline && (
                       <div className="kanban-card-row">
                         <span>{t("dash.quando")}</span>
-                        <b>{it.deadline}</b>
+                        <b>{formatDate(it.deadline)}</b>
                       </div>
                     )}
                     {it.supplier && (
