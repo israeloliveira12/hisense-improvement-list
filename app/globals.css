@@ -260,7 +260,7 @@ a { color: inherit; }
   display: flex; flex-direction: column; flex: none;
   zoom: var(--slide-zoom, 1); /* controla tamanho geral incl. fonte -- ver SlideZoomControl.js */
 }
-.pres-canvas-wrap:fullscreen .slide { zoom: 1; } /* em tela cheia o tamanho ja e controlado pela largura, ignora o zoom manual */
+.pres-canvas-wrap:fullscreen .slide { zoom: var(--fs-slide-zoom, 1); } /* em tela cheia, Ctrl+scroll controla isso -- ver PresentationClient.js */
 .slide-head { background: var(--purple); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
 .slide-badge {
   width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--purple);

@@ -17,6 +17,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [deptoFiltro, setDeptoFiltro] = useState("");
   const [selected, setSelected] = useState(0);
   const [presenting, setPresenting] = useState(false);
+  const [fsZoom, setFsZoom] = useState(1);
   const [uploadingSlot, setUploadingSlot] = useState(null);
   const [editando, setEditando] = useState(null);
   const [gerandoDeck, setGerandoDeck] = useState(null); // { feito, total } enquanto monta o .pptx
@@ -89,6 +90,27 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     document.addEventListener("fullscreenchange", onFsChange);
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
+
+  // Ctrl+scroll (e pinch de trackpad, que o navegador reporta como wheel com
+  // ctrlKey) so e capturado ENQUANTO apresentando -- preventDefault impede o
+  // navegador de aplicar o zoom nativo na pagina inteira (o bug reportado: sair
+  // da apresentacao e a pagina toda ficar gigante). Fora da apresentacao nenhum
+  // listener fica registrado, entao o zoom nativo do site continua normal.
+  useEffect(() => {
+    if (!presenting) {
+      setFsZoom(1);
+      return undefined;
+    }
+    const el = fullscreenRef.current;
+    if (!el) return undefined;
+    function onWheel(e) {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setFsZoom((z) => Math.min(2.2, Math.max(0.6, z - e.deltaY * 0.0015)));
+    }
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [presenting]);
 
   async function apresentar() {
     try {
@@ -292,7 +314,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
               </button>
             ))}
           </div>
-          <div className="pres-canvas-wrap" ref={fullscreenRef}>
+          <div className="pres-canvas-wrap" ref={fullscreenRef} style={presenting ? { "--fs-slide-zoom": fsZoom } : undefined}>
             <Slide
               acao={acaoAtual}
               onUploadFoto={uploadFoto}
@@ -305,6 +327,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             {presenting && (
               <div className="present-hint">
                 ← → · Esc · {selected + 1} / {filtradas.length}
+                {Math.round(fsZoom * 100) !== 100 ? ` · ${Math.round(fsZoom * 100)}%` : ""}
               </div>
             )}
           </div>
