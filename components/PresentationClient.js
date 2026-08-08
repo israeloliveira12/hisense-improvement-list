@@ -106,19 +106,28 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
 
   // O deck completo e montado no NAVEGADOR, nao no servidor -- ver
   // components/baixarDeck.js pro motivo (limite de resposta/tempo da funcao
-  // serverless nao cabe um arquivo de 25 MB com ~100 fotos).
-  async function baixarTudo() {
-    if (gerandoDeck) return;
-    if (!window.confirm(t("pres.confirmarBaixarTudo", { n: acoes.length }))) return;
-    setGerandoDeck({ feito: 0, total: acoes.length });
+  // serverless nao cabe um arquivo de 25 MB com ~100 fotos). `lista` e
+  // `acoes` inteiro ("Baixar tudo") ou `filtradas` ("Baixar com filtro").
+  async function gerarDeck(lista, confirmKey) {
+    if (gerandoDeck || !lista.length) return;
+    if (!window.confirm(t(confirmKey, { n: lista.length }))) return;
+    setGerandoDeck({ feito: 0, total: lista.length });
     try {
       const { baixarApresentacaoCompleta } = await import("./baixarDeck");
-      await baixarApresentacaoCompleta(acoes, (feito, total) => setGerandoDeck({ feito, total }));
+      await baixarApresentacaoCompleta(lista, (feito, total) => setGerandoDeck({ feito, total }));
     } catch (e) {
       alert(`${t("common.error")}: ${e.message}`);
     } finally {
       setGerandoDeck(null);
     }
+  }
+
+  function baixarTudo() {
+    return gerarDeck(acoes, "pres.confirmarBaixarTudo");
+  }
+
+  function baixarFiltrados() {
+    return gerarDeck(filtradas, "pres.confirmarBaixarFiltrados");
   }
 
   function aplicarMudancaLocal(no, campo, valor) {
@@ -219,7 +228,10 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
         <DownloadMenu
           onBaixarUm={baixarPpt}
           onBaixarTudo={baixarTudo}
+          onBaixarFiltrados={baixarFiltrados}
           podeBaixarUm={Boolean(acaoAtual)}
+          filtroAtivo={apenasOpen || Boolean(deptoFiltro) || Boolean(query.trim())}
+          totalFiltrado={filtradas.length}
           gerando={Boolean(gerandoDeck)}
         />
         <button type="button" className="icon-btn primary" title={t("pres.apresentar")} onClick={apresentar} disabled={!acaoAtual}>

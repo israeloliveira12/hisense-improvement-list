@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-// Um so botao ("Baixar") que abre as duas opcoes -- antes eram 2 botoes
-// separados grudados no topbar ("Baixar PPT" e "Baixar tudo").
-export default function DownloadMenu({ onBaixarUm, onBaixarTudo, podeBaixarUm, gerando }) {
+// Um so botao ("Baixar") que abre as opcoes -- antes eram 2 botoes
+// separados grudados no topbar ("Baixar PPT" e "Baixar tudo"). "Baixar com
+// filtro" baixa exatamente as acoes que estao passando pelo filtro/busca
+// ativos no momento (ver FilterMenu).
+export default function DownloadMenu({ onBaixarUm, onBaixarTudo, onBaixarFiltrados, podeBaixarUm, filtroAtivo, totalFiltrado, gerando }) {
   const { t } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
@@ -39,6 +41,11 @@ export default function DownloadMenu({ onBaixarUm, onBaixarTudo, podeBaixarUm, g
           <button type="button" onClick={() => { setAberto(false); onBaixarTudo(); }}>
             {t("pres.baixarTudo")}
           </button>
+          {onBaixarFiltrados && (
+            <button type="button" disabled={!filtroAtivo || !totalFiltrado} onClick={() => { setAberto(false); onBaixarFiltrados(); }}>
+              {t("pres.baixarFiltro", { n: totalFiltrado ?? 0 })}
+            </button>
+          )}
         </div>
       )}
     </div>
