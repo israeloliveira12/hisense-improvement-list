@@ -16,6 +16,10 @@ const CAMPO_PARA_COLUNA = {
   // (os 2 primeiros IDs viram as fotos "principais", o resto miniatura).
   fotoBeforeOrdem: "Foto Before",
   fotoImprovementOrdem: "Foto Improvement",
+  // rotacao por foto -- string "id:deg,id:deg" ja montada pelo cliente
+  // (mesmo padrao do fotoBeforeOrdem: o cliente manda o valor final pronto).
+  fotoBeforeRotacao: "Foto Before Rotacao",
+  fotoImprovementRotacao: "Foto Improvement Rotacao",
 };
 
 export async function PATCH(request, { params }) {

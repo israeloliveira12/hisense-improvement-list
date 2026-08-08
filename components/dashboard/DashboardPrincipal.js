@@ -16,7 +16,8 @@ export default function DashboardPrincipal({ stats }) {
   const closedLen = (pctClosed / 100) * CIRC;
   const openLen = (pctOpen / 100) * CIRC;
   const deptos = departamentosDetalhe || [];
-  const maxDept = Math.max(...deptos.map((d) => d.total), 1);
+  const deptosPorOpen = [...deptos].sort((a, b) => b.open - a.open);
+  const maxDeptOpen = Math.max(...deptos.map((d) => d.open), 1);
 
   return (
     <>
@@ -73,20 +74,12 @@ export default function DashboardPrincipal({ stats }) {
 
         <div className="chart-card">
           <h3>{t("dash.porDepto")}</h3>
-          <div className="chart-sub">{t("dash.deptSub")}</div>
-          <div className="legend" style={{ marginTop: 0, marginBottom: 12 }}>
-            <div className="legend-item"><span className="sw" style={{ background: "var(--green)" }} />{t("db.closed")}</div>
-            <div className="legend-item"><span className="sw" style={{ background: "var(--amber)" }} />{t("db.open")}</div>
-          </div>
           <div className="chart-scroll-list">
-            {deptos.map((d) => (
+            {deptosPorOpen.map((d) => (
               <div className="bar-row" key={d.label}>
                 <div className="b-label">{d.label}</div>
-                <div className="b-track b-track-stacked">
-                  <div className="b-fill-closed" style={{ width: `${(d.closed / maxDept) * 100}%` }} />
-                  <div className="b-fill-open" style={{ width: `${(d.open / maxDept) * 100}%` }} />
-                </div>
-                <div className="b-val">{d.total}</div>
+                <div className="b-track"><div className="b-fill" style={{ width: `${(d.open / maxDeptOpen) * 100}%` }} /></div>
+                <div className="b-val">{d.open}</div>
               </div>
             ))}
           </div>

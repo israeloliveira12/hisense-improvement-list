@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-const STATUS_OPTIONS = ["Open", "Closed", "On Hold"];
+// Status geral da acao: so Open/Closed (sem On Hold -- pedido explicito,
+// "on hold" so faz sentido no nivel de passo do plano de acao).
+const STATUS_OPTIONS = ["Open", "Closed"];
 const APPROVAL_OPTIONS = ["", "Approved", "Declined"];
 const STAGE_OPTIONS = ["", "Preparing", "In Transit", "Delivered"];
 const STAGE_LABEL_KEYS = { Preparing: "dash.etapaPreparing", "In Transit": "dash.etapaInTransit", Delivered: "dash.etapaDelivered" };
-const PASSO_STATUS_OPTIONS = ["Open", "Closed"];
+const PASSO_STATUS_OPTIONS = ["Open", "Closed", "On Hold"];
 const MAX_PASSOS = 10;
 
 function SaveDot({ status }) {
@@ -295,7 +297,11 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                         <td><input defaultValue={p.responsavel} onBlur={(e) => salvarPasso(p.row, "responsavel", e.target.value)} /></td>
                         <td><input defaultValue={p.prazo} onBlur={(e) => salvarPasso(p.row, "prazo", e.target.value)} /></td>
                         <td>
-                          <select defaultValue={PASSO_STATUS_OPTIONS.includes(p.status) ? p.status : "Open"} onChange={(e) => salvarPasso(p.row, "status", e.target.value)}>
+                          <select
+                            defaultValue={PASSO_STATUS_OPTIONS.includes(p.status) ? p.status : "Open"}
+                            onChange={(e) => salvarPasso(p.row, "status", e.target.value)}
+                            style={{ color: p.status === "Closed" ? "var(--green)" : p.status === "On Hold" ? "var(--red)" : "var(--amber)", fontWeight: 700 }}
+                          >
                             {PASSO_STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
                           </select>
                         </td>

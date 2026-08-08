@@ -151,6 +151,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                     <th>{t("db.col.no")}</th>
                     <th>{t("db.col.item")}</th>
                     <th>{t("db.col.dept")}</th>
+                    <th>{t("db.col.process")}</th>
                     <th>{t("db.col.person")}</th>
                     <th>{t("db.col.status")}</th>
                     <th>{t("db.col.deadline")}</th>
@@ -181,6 +182,14 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                         onBlur={(e) => editarCampo(a.no, "dept", e.currentTarget.textContent)}
                       >
                         {a.dept}
+                      </td>
+                      <td
+                        className="cell-editable"
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => editarCampo(a.no, "process", e.currentTarget.textContent)}
+                      >
+                        {a.process}
                       </td>
                       <td
                         className="cell-editable"

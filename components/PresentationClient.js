@@ -221,6 +221,33 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     }
   }
 
+  // Gira uma foto 90° por clique (0->90->180->270->0). Guardado a parte da
+  // ordem, so pras fotos que tem rotacao != 0 (formato esparso "id:deg").
+  async function rotacionarFoto(no, slot, fileId) {
+    const campo = slot === "before" ? "fotosBeforeRotacao" : "fotosImprovementRotacao";
+    const acaoAlvo = acoes.find((a) => a.no === no);
+    const atual = (acaoAlvo && acaoAlvo[campo]) || {};
+    const novoDeg = ((atual[fileId] || 0) + 90) % 360;
+    const novoMapa = { ...atual };
+    if (novoDeg === 0) delete novoMapa[fileId];
+    else novoMapa[fileId] = novoDeg;
+
+    setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: novoMapa } : a)));
+    try {
+      const fieldApi = slot === "before" ? "fotoBeforeRotacao" : "fotoImprovementRotacao";
+      const value = Object.entries(novoMapa).map(([id, deg]) => `${id}:${deg}`).join(",");
+      const res = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: fieldApi, value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    } catch (e) {
+      alert(t("common.error") + ": " + e.message);
+    }
+  }
+
   async function editarLegenda(no, campo, valor) {
     setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
     try {
@@ -320,6 +347,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
               onUploadFoto={uploadFoto}
               onDeleteFoto={deletarFoto}
               onReorderFoto={reordenarFotos}
+              onRotateFoto={rotacionarFoto}
               onEditCaption={editarLegenda}
               uploadingSlot={uploadingSlot}
               onLightboxOpenChange={(aberto) => { lightboxAbertoRef.current = aberto; }}

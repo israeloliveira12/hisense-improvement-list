@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-function PhotoLightbox({ ids, startIndex, onClose }) {
+function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
   const [index, setIndex] = useState(startIndex || 0);
   const [zoom, setZoom] = useState(1);
   const { t } = useLanguage();
@@ -37,7 +37,11 @@ function PhotoLightbox({ ids, startIndex, onClose }) {
         </button>
       )}
       <div className="lightbox-stage" onClick={(e) => e.stopPropagation()}>
-        <img src={`/api/drive/file/${id}?v=${id}`} alt="" style={{ transform: `scale(${zoom})` }} />
+        <img
+          src={`/api/drive/file/${id}?v=${id}`}
+          alt=""
+          style={{ transform: `rotate(${rotacoes?.[id] || 0}deg) scale(${zoom})` }}
+        />
       </div>
       {ids.length > 1 && (
         <button
@@ -106,19 +110,24 @@ function UploadTile({ className, uploading, label, onFile, dropavel }) {
 // (troca de posicao com a vizinha -- promove miniatura a principal quando
 // move o suficiente pra esquerda, e vice-versa), excluir e ver em tela
 // grande. `podeMoverEsq`/`podeMoverDir` desabilitam nas pontas da lista.
-function FotoItem({ id, grande, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand }) {
+function FotoItem({ id, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand, onRotate }) {
   const { t } = useLanguage();
   return (
     <div className={grande ? "drop drop-photo" : "ba-thumb"}>
       <div
         className={grande ? "drop-photo-img" : "ba-thumb-img"}
-        style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})` }}
+        style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})`, transform: rotacao ? `rotate(${rotacao}deg)` : undefined }}
         onClick={onExpand}
       />
       <div className="foto-controls">
         {podeMoverEsq && (
           <button type="button" title={t("pres.moverEsquerda")} onClick={(e) => { e.stopPropagation(); onMover(-1); }}>
             ‹
+          </button>
+        )}
+        {grande && (
+          <button type="button" title={t("pres.rotacionarFoto")} onClick={(e) => { e.stopPropagation(); onRotate(); }}>
+            ⟳
           </button>
         )}
         <button
@@ -151,7 +160,7 @@ function FotoItem({ id, grande, podeMoverEsq, podeMoverDir, onMover, onDelete, o
 // lado a lado (grandes, sem cortar -- os 2 primeiros IDs da lista), e o
 // resto em miniatura embaixo. Mover uma foto reescreve a lista inteira na
 // ordem nova -- e isso, sozinho, decide quem e principal e quem e miniatura.
-function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onReorder }) {
+function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onExpand, onReorder, onRotate }) {
   const { t } = useLanguage();
   const lista = ids || [];
   const principais = lista.slice(0, 2);
@@ -186,11 +195,13 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
             key={id}
             id={id}
             grande
+            rotacao={rotacoes?.[id]}
             podeMoverEsq={i > 0}
             podeMoverDir={i < lista.length - 1}
             onMover={(delta) => mover(i, delta)}
             onDelete={() => onDelete(no, slot, id)}
             onExpand={() => onExpand(id)}
+            onRotate={() => onRotate(no, slot, id)}
           />
         ))}
       </div>
@@ -202,11 +213,13 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
               <FotoItem
                 key={id}
                 id={id}
+                rotacao={rotacoes?.[id]}
                 podeMoverEsq
                 podeMoverDir={i < lista.length - 1}
                 onMover={(delta) => mover(i, delta)}
                 onDelete={() => onDelete(no, slot, id)}
                 onExpand={() => onExpand(id)}
+                onRotate={() => onRotate(no, slot, id)}
               />
             );
           })}
@@ -219,9 +232,9 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
   );
 }
 
-export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onRotateFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
   const { t, formatDate } = useLanguage();
-  const [lightbox, setLightbox] = useState(null); // { ids, index }
+  const [lightbox, setLightbox] = useState(null); // { ids, rotacoes, index }
 
   useEffect(() => {
     onLightboxOpenChange && onLightboxOpenChange(Boolean(lightbox));
@@ -294,15 +307,19 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
               <th style={{ width: 56 }}>{t("pres.slideColDate")}</th>
               <th style={{ width: 60 }}>{t("pres.slideColStatus")}</th>
             </tr>
-            {(acao.steps || []).map((st, i) => (
+            {(acao.steps || []).map((st, i) => {
+              const stStatus = String(st[4] || "").toUpperCase();
+              const stClass = stStatus === "CLOSED" ? "is-closed" : stStatus === "ON HOLD" ? "is-on-hold" : "is-open";
+              return (
               <tr key={i}>
                 <td>{st[0]}</td>
                 <td>{st[1]}</td>
                 <td>{st[2]}</td>
                 <td>{st[3]}</td>
-                <td className={"plan-status " + (String(st[4]).toUpperCase() === "CLOSED" ? "is-closed" : "is-open")}>{st[4]}</td>
+                <td className={"plan-status " + stClass}>{st[4]}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
 
@@ -314,13 +331,15 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
           <div className="ba-col">
             <PhotoGroup
               ids={beforeIds}
+              rotacoes={acao.fotosBeforeRotacao}
               slot="before"
               no={acao.no}
               uploading={uploadingSlot === "before"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
-              onExpand={(id) => setLightbox({ ids: beforeIds, index: Math.max(0, beforeIds.indexOf(id)) })}
+              onExpand={(id) => setLightbox({ ids: beforeIds, rotacoes: acao.fotosBeforeRotacao, index: Math.max(0, beforeIds.indexOf(id)) })}
               onReorder={onReorderFoto}
+              onRotate={onRotateFoto}
             />
             <div className="ba-caption">
               <b>{t("pres.slideFactoryComment")}</b>
@@ -337,13 +356,15 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
           <div className="ba-col">
             <PhotoGroup
               ids={afterIds}
+              rotacoes={acao.fotosImprovementRotacao}
               slot="improvement"
               no={acao.no}
               uploading={uploadingSlot === "improvement"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
-              onExpand={(id) => setLightbox({ ids: afterIds, index: Math.max(0, afterIds.indexOf(id)) })}
+              onExpand={(id) => setLightbox({ ids: afterIds, rotacoes: acao.fotosImprovementRotacao, index: Math.max(0, afterIds.indexOf(id)) })}
               onReorder={onReorderFoto}
+              onRotate={onRotateFoto}
             />
             <div className="ba-caption">
               <b>{t("pres.slideHisenseComment")}</b>
@@ -361,7 +382,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
       </div>
     </div>
     {lightbox && (
-      <PhotoLightbox ids={lightbox.ids} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+      <PhotoLightbox ids={lightbox.ids} rotacoes={lightbox.rotacoes} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
     )}
     </>
   );
