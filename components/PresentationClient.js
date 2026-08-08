@@ -6,12 +6,15 @@ import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
 import SlideZoomControl from "./SlideZoomControl";
 import DownloadMenu from "./DownloadMenu";
+import FilterMenu from "./FilterMenu";
 import { useLanguage } from "../lib/i18n";
 
 export default function PresentationClient({ acoes: initialAcoes, error }) {
   const { t } = useLanguage();
   const [acoes, setAcoes] = useState(initialAcoes);
   const [query, setQuery] = useState("");
+  const [apenasOpen, setApenasOpen] = useState(false);
+  const [deptoFiltro, setDeptoFiltro] = useState("");
   const [selected, setSelected] = useState(0);
   const [presenting, setPresenting] = useState(false);
   const [uploadingSlot, setUploadingSlot] = useState(null);
@@ -20,16 +23,33 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const fullscreenRef = useRef(null);
   const lightboxAbertoRef = useRef(false); // enquanto o carrossel de fotos esta aberto, seta do teclado e dele, nao do slide
 
+  const departamentos = useMemo(() => {
+    const set = new Set();
+    acoes.forEach((a) => a.dept && set.add(a.dept));
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [acoes]);
+
   const filtradas = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return acoes;
-    return acoes.filter(
-      (a) =>
-        a.no.toLowerCase().includes(q) ||
-        (a.item || "").toLowerCase().includes(q) ||
-        (a.dept || "").toLowerCase().includes(q)
-    );
-  }, [acoes, query]);
+    return acoes.filter((a) => {
+      if (apenasOpen && a.status !== "open") return false;
+      if (deptoFiltro && a.dept !== deptoFiltro) return false;
+      if (q && !(a.no.toLowerCase().includes(q) || (a.item || "").toLowerCase().includes(q) || (a.dept || "").toLowerCase().includes(q))) {
+        return false;
+      }
+      return true;
+    });
+  }, [acoes, query, apenasOpen, deptoFiltro]);
+
+  function alternarApenasOpen(v) {
+    setApenasOpen(v);
+    setSelected(0);
+  }
+
+  function mudarDeptoFiltro(v) {
+    setDeptoFiltro(v);
+    setSelected(0);
+  }
 
   const acaoAtual = filtradas[selected] || filtradas[0] || null;
 
@@ -188,6 +208,13 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   return (
     <>
       <Topbar title={t("pres.title")} sub={t("pres.sub", { n: acoes.length })}>
+        <FilterMenu
+          apenasOpen={apenasOpen}
+          onToggleApenasOpen={alternarApenasOpen}
+          departamentos={departamentos}
+          deptoFiltro={deptoFiltro}
+          onChangeDepto={mudarDeptoFiltro}
+        />
         <SlideZoomControl />
         <DownloadMenu
           onBaixarUm={baixarPpt}
