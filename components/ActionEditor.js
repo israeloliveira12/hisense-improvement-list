@@ -309,6 +309,38 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
   // pendente. Da blur no campo focado primeiro (garante que o ultimo valor
   // digitado, ainda nao "commitado" via onBlur, entra na fila) e so fecha
   // de verdade se o flush inteiro deu certo.
+  // Tem edicao de rascunho ainda nao enviada? (campo alterado, passo
+  // adicionado/removido, item de investimento em digitacao...)
+  function temPendencias() {
+    return (
+      Object.keys(pendentesRef.current).length > 0 ||
+      passosRemovidosRef.current.size > 0 ||
+      passosSujoRef.current ||
+      investimentoSujoRef.current ||
+      Boolean(novoInv && Object.values(novoInv).some((v) => String(v || "").trim()))
+    );
+  }
+
+  // X = CANCELAR. Descarta o rascunho e fecha sem gravar nada -- so o
+  // "Salvar e fechar" grava. Como nada sai do editor antes do flush (ver
+  // salvarPendentes), cancelar e literalmente jogar fora as pendencias:
+  // a planilha nunca chegou a ser tocada.
+  async function cancelarEFechar() {
+    if (salvando) return;
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+    // deixa o onBlur do campo focado rodar antes de medir o que ha pendente
+    await new Promise((r) => setTimeout(r, 0));
+    if (temPendencias() && !window.confirm(t("edit.confirmarDescartar"))) return;
+    pendentesRef.current = {};
+    parentUpdatesRef.current = {};
+    passosRemovidosRef.current = new Set();
+    passosSujoRef.current = false;
+    investimentoSujoRef.current = false;
+    onClose();
+  }
+
   async function salvarEFechar() {
     if (salvando) return; // ja esta salvando -- clique duplo nao dispara um 2o lote
     if (document.activeElement && typeof document.activeElement.blur === "function") {
@@ -427,7 +459,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
             <div className="editor-no">{t("edit.acaoNo")} {local.no}</div>
             <h4>{local.item}</h4>
           </div>
-          <button type="button" className="editor-close" onClick={salvarEFechar} disabled={Boolean(salvando)}>✕</button>
+          <button type="button" className="editor-close" title={t("pres.cancelar")} onClick={cancelarEFechar} disabled={Boolean(salvando)}>✕</button>
         </div>
 
         <div className="editor-status-row">
