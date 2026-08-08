@@ -51,14 +51,19 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   const [local, setLocal] = useState(acao);
   const [excluindo, setExcluindo] = useState(false);
   const [novoInv, setNovoInv] = useState(null); // null = form fechado; objeto = form aberto com os valores digitados
-  // Campos de texto/select/data NAO salvam mais sozinhos ao perder o foco --
-  // só ficam pendentes aqui (ref, nao state, pra "agendar" durante um
-  // onBlur ler o valor mais recente sem esperar re-render) ate o usuario
-  // fechar o editor (X, clicar fora, ou "Salvar e fechar"), que dispara
-  // salvarPendentes() e manda tudo de uma vez. Pedido explicito do usuario:
-  // antes, cada campo ja alterava o Google Sheets no exato momento em que
-  // perdia o foco, antes de qualquer confirmacao de "salvar".
-  const pendentesRef = useRef({});
+  // NADA sai do editor (nem PATCH pro servidor, nem propagacao pro
+  // componente pai/apresentacao) antes de "Salvar e fechar" -- pedido
+  // explicito do usuario, em duas rodadas: primeiro so os campos de texto,
+  // depois tambem adicionar/remover passo e item de investimento (que antes
+  // ficavam IMEDIATOS, e por isso um passo novo ja aparecia na apresentacao
+  // por tras do editor antes de salvar).
+  const idOriginalRef = useRef(acao.no); // congela o ID de quando o editor abriu -- PATCHes usam sempre este, nunca local.no (que pode ter sido editado nessa mesma sessao, mas so vira de verdade no servidor na hora do flush)
+  const pendentesRef = useRef({}); // { statusKey: {url, body} } -- edicoes de campo simples (acao/detalhe/passo existente/investimento existente)
+  const parentUpdatesRef = useRef({}); // { field: value } -- o que propagar pro componente pai no flush
+  const passosRemovidosRef = useRef(new Set()); // rows (reais, >0) de passos marcados pra excluir no flush
+  const passosSujoRef = useRef(false); // true = precisa recalcular "steps" (formato de exibicao) no flush
+  const investimentoSujoRef = useRef(false); // true = precisa recalcular "investment" (resumo) no flush
+  const tempIdRef = useRef(0); // gera IDs temporarios negativos pra passo/item ainda nao criado no servidor
 
   if (!local) return null;
 
@@ -66,10 +71,13 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
     if (!window.confirm(t("pres.confirmarExcluirAcao", { no: local.no, item: local.item || "" }))) return;
     setExcluindo(true);
     try {
-      const res = await fetch(`/api/acoes/${encodeURIComponent(local.no)}`, { method: "DELETE" });
+      // usa o ID original (do servidor), nao local.no -- se o usuario tiver
+      // editado o ID nessa mesma sessao sem salvar ainda, a linha no Sheets
+      // ainda esta sob o ID antigo.
+      const res = await fetch(`/api/acoes/${encodeURIComponent(idOriginalRef.current)}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      onDeleted && onDeleted(local.no);
+      onDeleted && onDeleted(idOriginalRef.current);
     } catch (e) {
       alert(`${t("common.error")}: ${e.message}`);
       setExcluindo(false);
@@ -85,57 +93,178 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
     setStatus((s) => ({ ...s, [statusKey]: "pending" }));
   }
 
-  // Manda TODOS os campos pendentes de uma vez (em paralelo) -- chamado só
-  // ao fechar o editor (X, clicar fora, ou "Salvar e fechar"), nunca por
-  // um onBlur individual. Devolve false se algum PATCH falhou, pra quem
-  // chamou decidir NAO fechar (evita perder a edicao silenciosamente).
+  // So marca o que precisa propagar pro componente pai quando flushar --
+  // NUNCA chama onFieldChanged na hora (isso e exatamente o que fazia um
+  // passo novo, ou qualquer campo editado, ja aparecer na apresentacao por
+  // tras do editor antes de "Salvar e fechar").
+  function marcarParaPai(field, value) {
+    parentUpdatesRef.current[field] = value;
+  }
+
+  // Manda tudo que ficou pendente pro servidor, na ordem certa, e só DEPOIS
+  // propaga pro componente pai -- chamado só ao fechar o editor (X, clicar
+  // fora, ou "Salvar e fechar"), nunca por um onBlur/clique individual.
+  // Devolve false se algo falhou, pra quem chamou decidir NAO fechar (evita
+  // perder a edicao silenciosamente).
   async function salvarPendentes() {
-    const entradas = Object.entries(pendentesRef.current);
-    pendentesRef.current = {};
-    if (!entradas.length) return true;
+    const no = idOriginalRef.current;
 
-    setStatus((s) => {
-      const next = { ...s };
-      entradas.forEach(([k]) => (next[k] = "saving"));
-      return next;
-    });
+    // FASE 1 -- passos marcados pra excluir (ja existiam no servidor).
+    for (const row of passosRemovidosRef.current) {
+      try {
+        const res = await fetch(`/api/passos/${row}`, { method: "DELETE" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      } catch (e) {
+        alert(`${t("common.error")}: ${e.message}`);
+        return false;
+      }
+    }
+    passosRemovidosRef.current = new Set();
 
-    const resultados = await Promise.all(
-      entradas.map(async ([statusKey, { url, body }]) => {
+    // FASE 2 -- passos novos (row temporario < 0): cria no servidor e troca
+    // o row temporario pelo real. Atualiza o local JA AQUI (mesmo que uma
+    // criacao seguinte falhe) pra uma nova tentativa de salvar nao recriar
+    // o que ja foi criado com sucesso.
+    let stepsAtual = local.stepsEditable || [];
+    const novosPassos = stepsAtual.filter((p) => p.row < 0);
+    if (novosPassos.length) {
+      const mapa = {};
+      let erro = null;
+      for (const p of novosPassos) {
         try {
-          const res = await fetch(url, {
-            method: "PATCH",
+          const res = await fetch("/api/passos", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ no, ordem: p.ordem, acao: p.acao, responsavel: p.responsavel, prazo: p.prazo, status: p.status || "Open" }),
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-          return { statusKey, ok: true };
+          mapa[p.row] = data.row;
         } catch (e) {
-          return { statusKey, ok: false, error: e.message };
+          erro = e.message;
+          break;
         }
-      })
-    );
-
-    setStatus((s) => {
-      const next = { ...s };
-      resultados.forEach(({ statusKey, ok }) => { next[statusKey] = ok ? "saved" : "error"; });
-      return next;
-    });
-
-    const erros = resultados.filter((r) => !r.ok);
-    if (erros.length) {
-      alert(`${t("common.error")}: ${erros.map((e) => e.error).join("; ")}`);
-      return false;
+      }
+      stepsAtual = stepsAtual.map((p) => (mapa[p.row] ? { ...p, row: mapa[p.row] } : p));
+      if (Object.keys(mapa).length) setLocal((prev) => ({ ...prev, stepsEditable: stepsAtual }));
+      if (erro) {
+        alert(`${t("common.error")}: ${erro}`);
+        return false;
+      }
     }
 
-    setTimeout(() => {
+    // FASE 3 -- item de investimento novo (no maximo 1, mesmo limite de
+    // addInvestimentoItem no servidor).
+    let itensAtual = local.itensInvestimento || [];
+    let investimentoCriado = false;
+    const novosItens = itensAtual.filter((it) => it.row < 0);
+    if (novosItens.length) {
+      for (const it of novosItens) {
+        try {
+          const res = await fetch("/api/investimento", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ no, item: it.item, quantity: it.quantity, unitCost: it.unitCost, supplier: it.supplier }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+          itensAtual = itensAtual.map((x) => (x.row === it.row ? { ...x, row: data.row } : x));
+          investimentoCriado = true;
+        } catch (e) {
+          setLocal((prev) => ({ ...prev, itensInvestimento: itensAtual }));
+          alert(`${t("common.error")}: ${e.message}`);
+          return false;
+        }
+      }
+      setLocal((prev) => ({ ...prev, itensInvestimento: itensAtual }));
+    }
+
+    // FASE 4 -- edicoes de campo simples (acao/detalhe/passo/investimento JA
+    // existentes), tudo em paralelo -- exceto troca de ID, tratada por
+    // ultimo (as outras URLs usam sempre o ID original, que so deixa de
+    // valer depois que a troca acontecer de verdade no servidor).
+    const renomeio = pendentesRef.current["acao.no"];
+    const entradas = Object.entries(pendentesRef.current).filter(([k]) => k !== "acao.no");
+    pendentesRef.current = {};
+
+    if (entradas.length) {
       setStatus((s) => {
         const next = { ...s };
-        resultados.forEach(({ statusKey }) => { if (next[statusKey] === "saved") next[statusKey] = undefined; });
+        entradas.forEach(([k]) => (next[k] = "saving"));
         return next;
       });
-    }, 1500);
+      const resultados = await Promise.all(
+        entradas.map(async ([statusKey, { url, body }]) => {
+          try {
+            const res = await fetch(url, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+            return { statusKey, ok: true };
+          } catch (e) {
+            return { statusKey, ok: false, error: e.message };
+          }
+        })
+      );
+      setStatus((s) => {
+        const next = { ...s };
+        resultados.forEach(({ statusKey, ok }) => { next[statusKey] = ok ? "saved" : "error"; });
+        return next;
+      });
+      const erros = resultados.filter((r) => !r.ok);
+      if (erros.length) {
+        alert(`${t("common.error")}: ${erros.map((e) => e.error).join("; ")}`);
+        return false;
+      }
+      setTimeout(() => {
+        setStatus((s) => {
+          const next = { ...s };
+          resultados.forEach(({ statusKey }) => { if (next[statusKey] === "saved") next[statusKey] = undefined; });
+          return next;
+        });
+      }, 1500);
+    }
+
+    // FASE 5 -- troca de ID (se pendente), por ultimo.
+    let idFinal = no;
+    if (renomeio) {
+      try {
+        const res = await fetch(renomeio.url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(renomeio.body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        idFinal = renomeio.body.value;
+      } catch (e) {
+        alert(`${t("common.error")}: ${e.message}`);
+        return false;
+      }
+    }
+
+    // FASE 6 -- SO AGORA propaga pro componente pai (Apresentacao/Banco de
+    // Dados). Nada disso aparecia la antes de chegar aqui.
+    if (renomeio) onFieldChanged && onFieldChanged(no, "no", idFinal);
+    Object.entries(parentUpdatesRef.current).forEach(([field, value]) => {
+      onFieldChanged && onFieldChanged(idFinal, field, value);
+    });
+    parentUpdatesRef.current = {};
+    if (passosSujoRef.current) {
+      onFieldChanged && onFieldChanged(idFinal, "steps", stepsParaArray(stepsAtual));
+      passosSujoRef.current = false;
+    }
+    if (investimentoSujoRef.current || investimentoCriado) {
+      onFieldChanged && onFieldChanged(idFinal, "investment", investimentoDisplayClient(itensAtual) || "Sem investimento");
+      investimentoSujoRef.current = false;
+    }
+    if (investimentoCriado) onFieldChanged && onFieldChanged(idFinal, "investmentFlag", "yes");
+
+    idOriginalRef.current = idFinal;
     return true;
   }
 
@@ -154,109 +283,86 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
 
   function salvarAcao(field, value) {
     setLocal((prev) => ({ ...prev, [field]: value }));
-    onFieldChanged && onFieldChanged(local.no, field, value);
-    agendar(`/api/acoes/${encodeURIComponent(local.no)}`, "acao." + field, { field, value });
+    marcarParaPai(field, value);
+    agendar(`/api/acoes/${encodeURIComponent(idOriginalRef.current)}`, "acao." + field, { field, value });
   }
 
   function salvarStatus(value) {
-    setLocal((prev) => ({ ...prev, statusRaw: value, status: value === "Closed" ? "closed" : "open" }));
-    onFieldChanged && onFieldChanged(local.no, "status", value === "Closed" ? "closed" : "open");
-    agendar(`/api/acoes/${encodeURIComponent(local.no)}`, "acao.status", { field: "status", value });
+    const novoStatus = value === "Closed" ? "closed" : "open";
+    setLocal((prev) => ({ ...prev, statusRaw: value, status: novoStatus }));
+    marcarParaPai("status", novoStatus);
+    agendar(`/api/acoes/${encodeURIComponent(idOriginalRef.current)}`, "acao.status", { field: "status", value });
   }
 
   function salvarDetalhe(field, value) {
     setLocal((prev) => ({ ...prev, [field]: value }));
-    onFieldChanged && onFieldChanged(local.no, field, value);
-    agendar(`/api/detalhes/${encodeURIComponent(local.no)}`, "det." + field, { field, value });
+    marcarParaPai(field, value);
+    agendar(`/api/detalhes/${encodeURIComponent(idOriginalRef.current)}`, "det." + field, { field, value });
   }
 
   function salvarInvestimento(row, field, value) {
     const novosItens = local.itensInvestimento.map((it) => (it.row === row ? { ...it, [field]: value } : it));
     setLocal((prev) => ({ ...prev, itensInvestimento: novosItens }));
-    onFieldChanged && onFieldChanged(local.no, "investment", investimentoDisplayClient(novosItens) || "Sem investimento");
-    agendar(`/api/investimento/${row}`, "inv." + row + "." + field, { field, value });
+    investimentoSujoRef.current = true;
+    if (row > 0) agendar(`/api/investimento/${row}`, "inv." + row + "." + field, { field, value });
   }
 
   function salvarPasso(row, field, value) {
     const novosSteps = local.stepsEditable.map((p) => (p.row === row ? { ...p, [field]: value } : p));
     setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
-    onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
-    agendar(`/api/passos/${row}`, "passo." + row + "." + field, { field, value });
+    passosSujoRef.current = true;
+    if (row > 0) agendar(`/api/passos/${row}`, "passo." + row + "." + field, { field, value });
   }
 
-  async function adicionarPasso() {
+  // Adiciona so localmente -- nada e criado no servidor ate o flush.
+  function adicionarPasso() {
+    if ((local.stepsEditable?.length || 0) >= MAX_PASSOS) return;
     const ordem = (local.stepsEditable?.length || 0) + 1;
-    setStatus((s) => ({ ...s, novoPasso: "saving" }));
-    try {
-      const res = await fetch("/api/passos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ no: local.no, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      const novosSteps = [...(local.stepsEditable || []), { row: data.row, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }];
-      setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
-      onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
-      setStatus((s) => ({ ...s, novoPasso: undefined }));
-    } catch (e) {
-      setStatus((s) => ({ ...s, novoPasso: undefined }));
-      alert(`${t("common.error")}: ${e.message}`);
-    }
+    const tempRow = --tempIdRef.current;
+    const novosSteps = [...(local.stepsEditable || []), { row: tempRow, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }];
+    setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
+    passosSujoRef.current = true;
   }
 
-  async function removerPasso(row) {
+  function removerPasso(row) {
     if (!window.confirm(t("pres.excluirPasso") + "?")) return;
-    try {
-      const res = await fetch(`/api/passos/${row}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      const novosSteps = local.stepsEditable.filter((p) => p.row !== row);
-      setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
-      onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
-    } catch (e) {
-      alert(`${t("common.error")}: ${e.message}`);
+    const novosSteps = local.stepsEditable.filter((p) => p.row !== row);
+    setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
+    passosSujoRef.current = true;
+    if (row > 0) {
+      // ja existe no servidor -- so exclui de verdade no flush.
+      passosRemovidosRef.current.add(row);
     }
+    // descarta qualquer edicao de campo ja agendada pra esse passo (seja
+    // ele novo ou existente) -- nao faz sentido salvar campo de um passo
+    // que nao vai mais existir.
+    Object.keys(pendentesRef.current).forEach((k) => {
+      if (k.startsWith("passo." + row + ".")) delete pendentesRef.current[k];
+    });
   }
 
-  // So funciona pro PRIMEIRO item de investimento da acao (escreve na
-  // propria linha-ancora, que fica livre nesse caso) -- ver o aviso em
-  // addInvestimentoItem (lib/googleSheets.js) sobre o limite de 1.
-  async function adicionarInvestimento() {
+  // Adiciona so localmente -- funciona pro PRIMEIRO item de investimento da
+  // acao (escreve na propria linha-ancora, que fica livre nesse caso, no
+  // flush) -- ver o aviso em addInvestimentoItem (lib/googleSheets.js)
+  // sobre o limite de 1.
+  function adicionarInvestimento() {
     if (!novoInv?.item?.trim()) return;
-    setStatus((s) => ({ ...s, novoInvestimento: "saving" }));
-    try {
-      const res = await fetch("/api/investimento", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ no: local.no, ...novoInv }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      const novoItem = {
-        row: data.row,
-        item: novoInv.item,
-        quantity: novoInv.quantity || "",
-        unitCost: novoInv.unitCost || "",
-        supplier: novoInv.supplier || "",
-        requestApproval: "",
-        stage: "",
-        status: "",
-        remark: "",
-      };
-      const novosItens = [...(local.itensInvestimento || []), novoItem];
-      setLocal((prev) => ({ ...prev, itensInvestimento: novosItens, investmentFlag: "yes" }));
-      onFieldChanged && onFieldChanged(local.no, "investment", investimentoDisplayClient(novosItens) || "Sem investimento");
-      // addInvestimentoItem (servidor) forca a flag "Investment" pra Yes
-      // junto do primeiro item -- propaga aqui tambem, senao a tag
-      // Yes/No do Banco de Dados fica desatualizada ate recarregar.
-      onFieldChanged && onFieldChanged(local.no, "investmentFlag", "yes");
-      setNovoInv(null);
-      setStatus((s) => ({ ...s, novoInvestimento: undefined }));
-    } catch (e) {
-      setStatus((s) => ({ ...s, novoInvestimento: undefined }));
-      alert(`${t("common.error")}: ${e.message}`);
-    }
+    const tempRow = --tempIdRef.current;
+    const novoItem = {
+      row: tempRow,
+      item: novoInv.item,
+      quantity: novoInv.quantity || "",
+      unitCost: novoInv.unitCost || "",
+      supplier: novoInv.supplier || "",
+      requestApproval: "",
+      stage: "",
+      status: "",
+      remark: "",
+    };
+    const novosItens = [...(local.itensInvestimento || []), novoItem];
+    setLocal((prev) => ({ ...prev, itensInvestimento: novosItens }));
+    investimentoSujoRef.current = true;
+    setNovoInv(null);
   }
 
   return (
@@ -427,7 +533,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
               )}
               {(local.stepsEditable?.length || 0) < MAX_PASSOS ? (
                 <div className="m-add-row-real" onClick={adicionarPasso}>
-                  {status.novoPasso === "saving" ? t("common.saving") : t("pres.adicionarPasso")}
+                  {t("pres.adicionarPasso")}
                 </div>
               ) : (
                 <p className="editor-note">{t("edit.limitePassos", { n: MAX_PASSOS })}</p>
@@ -507,9 +613,9 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                       className="btn btn-primary"
                       style={{ justifyContent: "center" }}
                       onClick={adicionarInvestimento}
-                      disabled={status.novoInvestimento === "saving" || !novoInv.item?.trim()}
+                      disabled={!novoInv.item?.trim()}
                     >
-                      {status.novoInvestimento === "saving" ? t("common.saving") : t("edit.invSalvar")}
+                      {t("edit.invSalvar")}
                     </button>
                     <button type="button" className="btn btn-ghost" style={{ justifyContent: "center" }} onClick={() => setNovoInv(null)}>
                       {t("pres.cancelar")}
