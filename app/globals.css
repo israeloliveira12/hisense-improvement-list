@@ -30,20 +30,11 @@
   --text-faint: #736e82;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 18px rgba(0, 0, 0, 0.35);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --purple-tint: #241548;
-    --green-tint: #10301c;
-    --amber-tint: #3a2708;
-    --bg: #131019;
-    --surface: #1c1826;
-    --border: #322c40;
-    --text: #f1eff7;
-    --text-muted: #ada8bc;
-    --text-faint: #736e82;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 18px rgba(0, 0, 0, 0.35);
-  }
-}
+/* De proposito SEM "@media (prefers-color-scheme: dark)" aqui -- o pedido
+   explicito do usuario e abrir sempre no claro, mesmo com o SO no escuro.
+   O escuro so entra via [data-theme="dark"], que so o ThemeToggle escreve
+   (acao manual do usuario). Assim o claro fica garantido pelo CSS sozinho,
+   sem depender do script do <head> rodar a tempo/sem erro. */
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }

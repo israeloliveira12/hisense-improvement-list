@@ -193,9 +193,6 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
             onExpand={() => onExpand(id)}
           />
         ))}
-        {principais.length < 2 && podeAdicionar && (
-          <UploadTile className="drop drop-photo-add" uploading={uploading} onFile={(file) => onFile(no, slot, file)} />
-        )}
       </div>
       {(extras.length > 0 || podeAdicionar) && (
         <div className="ba-thumbs">
