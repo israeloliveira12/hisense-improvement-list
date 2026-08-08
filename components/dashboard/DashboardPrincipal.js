@@ -16,8 +16,10 @@ export default function DashboardPrincipal({ stats }) {
   const closedLen = (pctClosed / 100) * CIRC;
   const openLen = (pctOpen / 100) * CIRC;
   const deptos = departamentosDetalhe || [];
-  const deptosPorOpen = [...deptos].sort((a, b) => b.open - a.open);
-  const maxDeptOpen = Math.max(...deptos.map((d) => d.open), 1);
+  // so departamento COM acao aberta -- os zerados so rendiam linha de rotulo
+  // com barra vazia, ocupando espaco sem informar nada.
+  const deptosPorOpen = deptos.filter((d) => d.open > 0).sort((a, b) => b.open - a.open);
+  const maxDeptOpen = Math.max(...deptosPorOpen.map((d) => d.open), 1);
 
   return (
     <>
@@ -75,6 +77,7 @@ export default function DashboardPrincipal({ stats }) {
         <div className="chart-card">
           <h3>{t("dash.porDepto")}</h3>
           <div className="chart-scroll-list">
+            {deptosPorOpen.length === 0 && <p className="editor-empty">{t("dash.semAbertasPorDepto")}</p>}
             {deptosPorOpen.map((d) => (
               <div className="bar-row" key={d.label}>
                 <div className="b-label">{tv(d.label)}</div>
