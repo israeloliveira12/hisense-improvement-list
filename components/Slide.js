@@ -238,7 +238,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
         <div className="slide-badge">{acao.no}</div>
         <div className="slide-head-txt">
           <h2>{acao.item}</h2>
-          <p>{acao.dept}</p>
+          <p>{acao.process}</p>
         </div>
         <div className={"slide-status-pill " + acao.status}>
           {acao.status === "closed" ? "CLOSED" : "OPEN"}
