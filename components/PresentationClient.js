@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import Slide from "./Slide";
 import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
+import NewActionModal from "./NewActionModal";
 import SlideZoomControl from "./SlideZoomControl";
 import DownloadMenu from "./DownloadMenu";
 import FilterMenu from "./FilterMenu";
@@ -20,6 +21,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [fsZoom, setFsZoom] = useState(1);
   const [uploadingSlot, setUploadingSlot] = useState(null);
   const [editando, setEditando] = useState(null);
+  const [criandoNova, setCriandoNova] = useState(false);
   const [gerandoDeck, setGerandoDeck] = useState(null); // { feito, total } enquanto monta o .pptx
   const fullscreenRef = useRef(null);
   const lightboxAbertoRef = useRef(false); // enquanto o carrossel de fotos esta aberto, seta do teclado e dele, nao do slide
@@ -161,6 +163,25 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     setEditando(null);
   }
 
+  // Depois de criar, recarrega a lista inteira (mais simples que montar o
+  // objeto novo na mao) e pula direto pra ação recem-criada -- limpa os
+  // filtros ativos pra garantir que ela nao fique escondida por engano.
+  async function acaoCriada(no) {
+    try {
+      const res = await fetch("/api/acoes");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setAcoes(data.acoes);
+      setQuery("");
+      setApenasOpen(false);
+      setDeptoFiltro("");
+      const idx = data.acoes.findIndex((a) => a.no === no);
+      setSelected(idx >= 0 ? idx : 0);
+    } catch (e) {
+      alert(t("common.error") + ": " + e.message);
+    }
+  }
+
   async function uploadFoto(no, slot, file) {
     setUploadingSlot(slot);
     const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
@@ -283,6 +304,11 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           totalFiltrado={filtradas.length}
           gerando={Boolean(gerandoDeck)}
         />
+        <button type="button" className="icon-btn" title={t("db.novaAcao")} onClick={() => setCriandoNova(true)}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
         <button type="button" className="icon-btn primary" title={t("pres.apresentar")} onClick={apresentar} disabled={!acaoAtual}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M5 3l16 9-16 9V3z" fill="currentColor" />
@@ -372,6 +398,13 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
           onDeleted={acaoDeletada}
+        />
+      )}
+
+      {criandoNova && (
+        <NewActionModal
+          onClose={() => setCriandoNova(false)}
+          onCreated={acaoCriada}
         />
       )}
     </>
