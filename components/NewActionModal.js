@@ -6,7 +6,7 @@ import { useLanguage } from "../lib/i18n";
 export default function NewActionModal({ onClose, onCreated }) {
   const { t, dateInputLang } = useLanguage();
   const [form, setForm] = useState({
-    item: "", dept: "", person: "", occur: "", deadline: "", investmentFlag: "no",
+    item: "", dept: "", person: "", occur: "", deadline: "",
   });
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
@@ -75,14 +75,6 @@ export default function NewActionModal({ onClose, onCreated }) {
               <input type="date" lang={dateInputLang} {...campo("deadline")} />
             </div>
           </div>
-          <div className="editor-field">
-            <label>{t("pres.slideInvestment")}</label>
-            <select value={form.investmentFlag} onChange={(e) => setForm((f) => ({ ...f, investmentFlag: e.target.value }))}>
-              <option value="no">{t("edit.investNo")}</option>
-              <option value="yes">{t("edit.investYes")}</option>
-            </select>
-          </div>
-
           {erro && <p style={{ color: "var(--red)", fontSize: 12.5 }}>{erro}</p>}
 
           <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 8 }} onClick={salvar} disabled={salvando}>

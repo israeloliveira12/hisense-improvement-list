@@ -249,7 +249,9 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
     <>
     <div className="slide">
       <div className="slide-head">
-        <div className="slide-badge">{acao.no}</div>
+        <div className="slide-badge" style={{ fontSize: String(acao.no).length > 9 ? 8 : String(acao.no).length > 6 ? 10 : 12.5 }}>
+          {acao.no}
+        </div>
         <div className="slide-head-txt">
           <h2>{acao.item}</h2>
           <p>{acao.process}</p>

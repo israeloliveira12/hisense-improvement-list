@@ -265,6 +265,7 @@ a { color: inherit; }
 .slide-badge {
   width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--purple);
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12.5px; flex: none;
+  overflow: hidden; text-align: center; line-height: 1.05; padding: 2px; word-break: break-word;
 }
 .slide-head-txt { flex: 1; min-width: 0; }
 .slide-head-txt h2 { margin: 0; font-size: 17px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
@@ -273,9 +274,9 @@ a { color: inherit; }
 .slide-status-pill.closed { background: #1e8e3e; color: #fff; }
 .slide-status-pill.open { background: #b4680a; color: #fff; }
 .new-badge {
-  position: absolute; top: -7px; right: 14px; background: #D4537E; color: #fff;
-  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; padding: 3px 10px; border-radius: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 2;
+  flex: none; background: #D4537E; color: #fff;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; padding: 5px 10px; border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
 }
 
 .slide-meta { display: flex; padding: 9px 20px; border-bottom: 1px solid #eceaf4; gap: 6px; }
@@ -703,6 +704,17 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
   border: 1.5px dashed var(--border);
 }
 .m-add-row-real:hover { background: var(--purple-tint); border-color: var(--purple); }
+
+.editor-add-inv-form {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding: 10px;
+  border: 1.5px dashed var(--border); border-radius: 8px;
+}
+.editor-add-inv-form input {
+  border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; font-size: 12.5px;
+  color: inherit; background: var(--bg); font-family: inherit;
+}
+.editor-add-inv-form .editor-row2 { display: flex; gap: 8px; }
+.editor-add-inv-form .editor-row2 input, .editor-add-inv-form .editor-row2 button { flex: 1; }
 
 .edit-shortcut {
   position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; align-items: center; gap: 7px;

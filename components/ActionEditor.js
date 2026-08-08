@@ -17,12 +17,40 @@ function SaveDot({ status }) {
   return <span className={"save-dot " + status} />;
 }
 
+// `steps` (formato de exibicao, array de arrays -- o que Slide.js/PPT
+// consomem) precisa ser recalculado toda vez que `stepsEditable` (formato
+// de edicao, usado so aqui no editor) muda, e mandado pro componente pai
+// via onFieldChanged -- senao o slide por tras do editor e o PPT baixado
+// ficam com os passos desatualizados (bug: editar/adicionar passo "nao
+// salva" -- salvava no servidor, so o preview local que nao via a mudanca).
+function stepsParaArray(stepsEditable) {
+  return (stepsEditable || []).map((p) => [
+    String(p.ordem ?? ""),
+    p.acao || "",
+    p.responsavel || "",
+    p.prazo || "",
+    String(p.status || "Open").toUpperCase(),
+  ]);
+}
+
+// Mesma logica de investimentoDisplay() do servidor (lib/googleSheets.js),
+// reaproveitada aqui pro resumo (acao.investment) tambem ficar em dia
+// depois de editar um item pelo editor, sem precisar recarregar a pagina.
+function investimentoDisplayClient(itens) {
+  if (!itens || !itens.length) return null;
+  const total = itens.reduce((acc, it) => acc + (Number(it.quantity) || 0) * (Number(it.unitCost) || 0), 0);
+  const situacao = { Approved: "Approved", Declined: "Declined" }[itens[0].requestApproval] || "Pending";
+  const totalBRL = "R$ " + (total || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${totalBRL} · ${situacao}`;
+}
+
 export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted }) {
   const { t, dateInputLang } = useLanguage();
   const [tab, setTab] = useState("geral");
   const [status, setStatus] = useState({}); // { [key]: "saving"|"saved"|"error" }
   const [local, setLocal] = useState(acao);
   const [excluindo, setExcluindo] = useState(false);
+  const [novoInv, setNovoInv] = useState(null); // null = form fechado; objeto = form aberto com os valores digitados
 
   if (!local) return null;
 
@@ -97,20 +125,42 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   function salvarDetalhe(field, value) {
     return salvar(`/api/detalhes/${encodeURIComponent(local.no)}`, field, value, "det." + field);
   }
-  function salvarInvestimento(row, field, value) {
-    setLocal((prev) => ({
-      ...prev,
-      itensInvestimento: prev.itensInvestimento.map((it) => (it.row === row ? { ...it, [field]: value } : it)),
-    }));
-    return salvar(`/api/investimento/${row}`, field, value, "inv." + row + "." + field);
+
+  // PATCH "cru" pra sub-itens (passo/investimento) -- ao contrario de
+  // salvar(), NAO mexe em campos de topo do `local` (esses tem nome
+  // proprio, tipo "acao"/"status", que colidiriam com campos de VERDADE da
+  // acao) nem chama onFieldChanged sozinho -- quem chama decide o que
+  // propagar pro pai (ver salvarPasso/salvarInvestimento).
+  async function salvarSubcampo(url, statusKey, body) {
+    setStatus((s) => ({ ...s, [statusKey]: "saving" }));
+    try {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setStatus((s) => ({ ...s, [statusKey]: "saved" }));
+      setTimeout(() => setStatus((s) => ({ ...s, [statusKey]: undefined })), 2000);
+    } catch (e) {
+      setStatus((s) => ({ ...s, [statusKey]: "error" }));
+      alert(`${t("common.error")}: ${e.message}`);
+    }
   }
 
-  async function salvarPasso(row, field, value) {
-    setLocal((prev) => ({
-      ...prev,
-      stepsEditable: prev.stepsEditable.map((p) => (p.row === row ? { ...p, [field]: value } : p)),
-    }));
-    return salvar(`/api/passos/${row}`, field, value, "passo." + row + "." + field);
+  function salvarInvestimento(row, field, value) {
+    const novosItens = local.itensInvestimento.map((it) => (it.row === row ? { ...it, [field]: value } : it));
+    setLocal((prev) => ({ ...prev, itensInvestimento: novosItens }));
+    onFieldChanged && onFieldChanged(local.no, "investment", investimentoDisplayClient(novosItens) || "Sem investimento");
+    return salvarSubcampo(`/api/investimento/${row}`, "inv." + row + "." + field, { field, value });
+  }
+
+  function salvarPasso(row, field, value) {
+    const novosSteps = local.stepsEditable.map((p) => (p.row === row ? { ...p, [field]: value } : p));
+    setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
+    onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
+    return salvarSubcampo(`/api/passos/${row}`, "passo." + row + "." + field, { field, value });
   }
 
   async function adicionarPasso() {
@@ -124,10 +174,9 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      setLocal((prev) => ({
-        ...prev,
-        stepsEditable: [...(prev.stepsEditable || []), { row: data.row, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }],
-      }));
+      const novosSteps = [...(local.stepsEditable || []), { row: data.row, ordem, acao: "", responsavel: "", prazo: "", status: "Open" }];
+      setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
+      onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
       setStatus((s) => ({ ...s, novoPasso: undefined }));
     } catch (e) {
       setStatus((s) => ({ ...s, novoPasso: undefined }));
@@ -141,8 +190,50 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
       const res = await fetch(`/api/passos/${row}`, { method: "DELETE" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      setLocal((prev) => ({ ...prev, stepsEditable: prev.stepsEditable.filter((p) => p.row !== row) }));
+      const novosSteps = local.stepsEditable.filter((p) => p.row !== row);
+      setLocal((prev) => ({ ...prev, stepsEditable: novosSteps }));
+      onFieldChanged && onFieldChanged(local.no, "steps", stepsParaArray(novosSteps));
     } catch (e) {
+      alert(`${t("common.error")}: ${e.message}`);
+    }
+  }
+
+  // So funciona pro PRIMEIRO item de investimento da acao (escreve na
+  // propria linha-ancora, que fica livre nesse caso) -- ver o aviso em
+  // addInvestimentoItem (lib/googleSheets.js) sobre o limite de 1.
+  async function adicionarInvestimento() {
+    if (!novoInv?.item?.trim()) return;
+    setStatus((s) => ({ ...s, novoInvestimento: "saving" }));
+    try {
+      const res = await fetch("/api/investimento", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ no: local.no, ...novoInv }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      const novoItem = {
+        row: data.row,
+        item: novoInv.item,
+        quantity: novoInv.quantity || "",
+        unitCost: novoInv.unitCost || "",
+        supplier: novoInv.supplier || "",
+        requestApproval: "",
+        stage: "",
+        status: "",
+        remark: "",
+      };
+      const novosItens = [...(local.itensInvestimento || []), novoItem];
+      setLocal((prev) => ({ ...prev, itensInvestimento: novosItens, investmentFlag: "yes" }));
+      onFieldChanged && onFieldChanged(local.no, "investment", investimentoDisplayClient(novosItens) || "Sem investimento");
+      // addInvestimentoItem (servidor) forca a flag "Investment" pra Yes
+      // junto do primeiro item -- propaga aqui tambem, senao a tag
+      // Yes/No do Banco de Dados fica desatualizada ate recarregar.
+      onFieldChanged && onFieldChanged(local.no, "investmentFlag", "yes");
+      setNovoInv(null);
+      setStatus((s) => ({ ...s, novoInvestimento: undefined }));
+    } catch (e) {
+      setStatus((s) => ({ ...s, novoInvestimento: undefined }));
       alert(`${t("common.error")}: ${e.message}`);
     }
   }
@@ -362,7 +453,53 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                   </tbody>
                 </table>
               )}
-              <p className="editor-note">{t("edit.notaInvestimento")}</p>
+              {local.itensInvestimento && local.itensInvestimento.length > 0 ? (
+                <p className="editor-note">{t("edit.notaInvestimento")}</p>
+              ) : novoInv ? (
+                <div className="editor-add-inv-form">
+                  <input
+                    placeholder={t("edit.invItemPlaceholder")}
+                    value={novoInv.item || ""}
+                    onChange={(e) => setNovoInv((f) => ({ ...f, item: e.target.value }))}
+                    autoFocus
+                  />
+                  <div className="editor-row2">
+                    <input
+                      placeholder={t("edit.colQtd")}
+                      value={novoInv.quantity || ""}
+                      onChange={(e) => setNovoInv((f) => ({ ...f, quantity: e.target.value }))}
+                    />
+                    <input
+                      placeholder={t("edit.colCustoUn")}
+                      value={novoInv.unitCost || ""}
+                      onChange={(e) => setNovoInv((f) => ({ ...f, unitCost: e.target.value }))}
+                    />
+                  </div>
+                  <input
+                    placeholder={t("edit.colFornecedor")}
+                    value={novoInv.supplier || ""}
+                    onChange={(e) => setNovoInv((f) => ({ ...f, supplier: e.target.value }))}
+                  />
+                  <div className="editor-row2">
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{ justifyContent: "center" }}
+                      onClick={adicionarInvestimento}
+                      disabled={status.novoInvestimento === "saving" || !novoInv.item?.trim()}
+                    >
+                      {status.novoInvestimento === "saving" ? t("common.saving") : t("edit.invSalvar")}
+                    </button>
+                    <button type="button" className="btn btn-ghost" style={{ justifyContent: "center" }} onClick={() => setNovoInv(null)}>
+                      {t("pres.cancelar")}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="m-add-row-real" onClick={() => setNovoInv({})}>
+                  {t("edit.addInvestimento")}
+                </div>
+              )}
             </>
           )}
         </div>
