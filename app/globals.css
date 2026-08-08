@@ -546,10 +546,21 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .kanban-card-row b { color: var(--text); font-weight: 700; }
 .kanban-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
 .kanban-person { font-size: 10.5px; color: var(--text-muted); }
-.kanban-approval { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
-.kanban-approval.approved { background: var(--green-tint); color: var(--green); }
-.kanban-approval.declined { background: var(--red-tint, #fbeaea); color: var(--red); }
-.kanban-approval.pending { background: var(--amber-tint); color: var(--amber); }
+
+.kanban-decisao-titulo { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-faint); margin: 14px 0 6px; }
+.kanban-decisao-row { display: flex; gap: 10px; }
+.kanban-decisao-card { flex: 1; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px dashed var(--border); border-radius: 10px; padding: 9px 13px; min-width: 0; }
+.kanban-decisao-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; }
+.kanban-decisao-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.kanban-decisao-label .dot.pending { background: var(--amber); }
+.kanban-decisao-label .dot.declined { background: var(--red); }
+.kanban-decisao-nums { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+.kanban-decisao-nums b { font-size: 14px; }
+.kanban-decisao-total { font-size: 10.5px; color: var(--text-muted); }
+.kanban-pipeline-titulo { margin-top: 18px; }
+@media (max-width: 640px) {
+  .kanban-decisao-row { flex-direction: column; }
+}
 
 @media (max-width: 900px) {
   .kanban-board { grid-template-columns: 1fr; }
@@ -665,6 +676,7 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   padding: 3px 4px; border-radius: 5px; font-family: inherit;
 }
 .editor-inv-table input:hover, .editor-inv-table select:hover { background: var(--purple-tint); }
+.editor-etapa-disabled { display: inline-block; padding: 3px 4px; font-size: 11.5px; color: var(--text-faint); cursor: help; }
 
 .editor-plano-table td:nth-child(2) { min-width: 260px; }
 .editor-plano-table textarea {

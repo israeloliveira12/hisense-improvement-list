@@ -5,7 +5,8 @@ import { useLanguage } from "../lib/i18n";
 
 const STATUS_OPTIONS = ["Open", "Closed", "On Hold"];
 const APPROVAL_OPTIONS = ["", "Approved", "Declined"];
-const STAGE_OPTIONS = ["", "Comercial", "On Hold", "Delivered"];
+const STAGE_OPTIONS = ["", "Preparing", "In Transit", "Delivered"];
+const STAGE_LABEL_KEYS = { Preparing: "dash.etapaPreparing", "In Transit": "dash.etapaInTransit", Delivered: "dash.etapaDelivered" };
 const PASSO_STATUS_OPTIONS = ["Open", "Closed"];
 const MAX_PASSOS = 10;
 
@@ -339,9 +340,16 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                           </select>
                         </td>
                         <td>
-                          <select defaultValue={it.stage} onChange={(e) => salvarInvestimento(it.row, "stage", e.target.value)}>
-                            {STAGE_OPTIONS.map((o) => <option key={o} value={o}>{o || "—"}</option>)}
-                          </select>
+                          {it.requestApproval === "Approved" ? (
+                            <select defaultValue={it.stage || ""} onChange={(e) => salvarInvestimento(it.row, "stage", e.target.value)}>
+                              {STAGE_OPTIONS.map((o) => <option key={o} value={o}>{o ? t(STAGE_LABEL_KEYS[o]) : "—"}</option>)}
+                              {it.stage && !STAGE_OPTIONS.includes(it.stage) && (
+                                <option value={it.stage}>{it.stage} ({t("edit.etapaAntiga")})</option>
+                              )}
+                            </select>
+                          ) : (
+                            <span className="editor-etapa-disabled" title={t("edit.etapaRequerAprovacao")}>—</span>
+                          )}
                         </td>
                       </tr>
                     ))}
