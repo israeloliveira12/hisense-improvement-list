@@ -88,15 +88,10 @@ export default function DashboardPrincipal({ stats }) {
       {investimento && (
         <div className="chart-card">
           <h3>{t("dash.resumoInvestimento")}</h3>
-          <div className="chart-sub">{t("dash.itensSolicitados", { n: investimento.totalItens, valor: formatBRL(investimento.valorTotal) })}</div>
-          <div className="kpi-row" style={{ marginTop: 10 }}>
+          <div className="kpi-row kpi-row-3" style={{ marginTop: 10 }}>
             <div className="kpi-card">
               <div className="kpi-label">{t("dash.aprovado")}</div>
               <div className="kpi-value" style={{ fontSize: 20, color: "var(--green)" }}>{formatBRL(investimento.aprovado)}</div>
-            </div>
-            <div className="kpi-card">
-              <div className="kpi-label">{t("dash.recusado")}</div>
-              <div className="kpi-value" style={{ fontSize: 20, color: "var(--red)" }}>{formatBRL(investimento.recusado)}</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">{t("dash.pendente")}</div>
