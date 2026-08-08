@@ -10,7 +10,7 @@ import { useLanguage } from "../lib/i18n";
 // visual do FilterMenu da Apresentacao (dropdown no topbar, bolinha com
 // contagem de filtros ativos).
 export default function DashboardFilterMenu({ status, onChangeStatus, investimento, onChangeInvestimento, departamentos, dept, onChangeDept }) {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
   const ativos = (status ? 1 : 0) + (investimento ? 1 : 0) + (dept ? 1 : 0);
@@ -60,7 +60,7 @@ export default function DashboardFilterMenu({ status, onChangeStatus, investimen
           <select className="filter-select" value={dept} onChange={(e) => onChangeDept(e.target.value)}>
             <option value="">{t("pres.todosDeptos")}</option>
             {departamentos.map((d) => (
-              <option key={d} value={d}>{d}</option>
+              <option key={d} value={d}>{tv(d)}</option>
             ))}
           </select>
 

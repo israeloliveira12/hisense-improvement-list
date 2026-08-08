@@ -63,6 +63,12 @@ function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
 
 const MAX_FOTOS_POR_LADO = 8;
 
+// BRL continua em pt-BR em qualquer idioma -- e a moeda do valor, nao um
+// rotulo de interface.
+function formatBRL(v) {
+  return "R$ " + (Number(v) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function UploadTile({ className, uploading, label, onFile, dropavel }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
@@ -233,7 +239,7 @@ function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onEx
 }
 
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onRotateFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
-  const { t, formatDate } = useLanguage();
+  const { t, tv, formatDate } = useLanguage();
   const [lightbox, setLightbox] = useState(null); // { ids, rotacoes, index }
 
   useEffect(() => {
@@ -279,7 +285,11 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
         </div>
         <div className="m">
           <label>{t("pres.slideInvestment")}</label>
-          <div>{acao.investment || "—"}</div>
+          <div>
+            {acao.investmentInfo
+              ? `${formatBRL(acao.investmentInfo.total)} · ${tv(acao.investmentInfo.situacao)}`
+              : t("common.semInvestimento")}
+          </div>
         </div>
       </div>
 
@@ -318,7 +328,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
                 <td>{st[1]}</td>
                 <td>{st[2]}</td>
                 <td>{formatDate(st[3]) || st[3]}</td>
-                <td className={"plan-status " + stClass}>{st[4]}</td>
+                <td className={"plan-status " + stClass}>{tv(st[4])}</td>
               </tr>
               );
             })}

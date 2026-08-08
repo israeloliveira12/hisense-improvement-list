@@ -74,7 +74,7 @@ export default function DashboardInvestimentoKanban({ stats }) {
                   <div className="kanban-card" key={i}>
                     <div className="kanban-card-top">
                       <span className="kanban-acao-no">{it.acaoNo}</span>
-                      <span className={"status-dot " + it.acaoStatus} title={it.acaoStatus} />
+                      <span className={"status-dot " + it.acaoStatus} title={it.acaoStatus === "closed" ? t("db.closed") : t("db.open")} />
                     </div>
                     <div className="kanban-card-item">{it.item || it.acaoItem}</div>
                     <div className="kanban-card-row">

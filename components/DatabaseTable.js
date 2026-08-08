@@ -9,7 +9,7 @@ import { useLanguage } from "../lib/i18n";
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
 
 export default function DatabaseTable({ acoes: initialAcoes, error }) {
-  const { t, dateInputLang } = useLanguage();
+  const { t, tv, dateInputLang } = useLanguage();
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState("todas");
   const [linhas, setLinhas] = useState(initialAcoes);
@@ -227,7 +227,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                       </td>
                       <td>
                         <span className={"tag-inv " + a.investmentFlag}>
-                          {a.investmentFlag === "yes" ? "Yes" : "No"}
+                          {a.investmentFlag === "yes" ? t("common.sim") : t("common.nao")}
                         </span>
                       </td>
                     </tr>

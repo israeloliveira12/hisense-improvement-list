@@ -45,7 +45,7 @@ function investimentoDisplayClient(itens) {
 }
 
 export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, onDeleted }) {
-  const { t, dateInputLang } = useLanguage();
+  const { t, tv, dateInputLang } = useLanguage();
   const [tab, setTab] = useState("geral");
   const [status, setStatus] = useState({}); // { [key]: "saving"|"saved"|"error" }
   const [local, setLocal] = useState(acao);
@@ -469,7 +469,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
             onChange={(e) => salvarStatus(e.target.value)}
           >
             {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>{tv(s)}</option>
             ))}
           </select>
           <SaveDot status={status["acao.status"]} />
@@ -606,7 +606,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                             onChange={(e) => salvarPasso(p.row, "status", e.target.value)}
                             style={{ color: p.status === "Closed" ? "var(--green)" : p.status === "On Hold" ? "var(--red)" : "var(--amber)", fontWeight: 700 }}
                           >
-                            {PASSO_STATUS_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                            {PASSO_STATUS_OPTIONS.map((o) => <option key={o} value={o}>{tv(o)}</option>)}
                           </select>
                         </td>
                         <td>
@@ -646,7 +646,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                         <td><input defaultValue={it.supplier} onBlur={(e) => salvarInvestimento(it.row, "supplier", e.target.value)} /></td>
                         <td>
                           <select defaultValue={it.requestApproval} onChange={(e) => salvarInvestimento(it.row, "requestApproval", e.target.value)}>
-                            {APPROVAL_OPTIONS.map((o) => <option key={o} value={o}>{o || "—"}</option>)}
+                            {APPROVAL_OPTIONS.map((o) => <option key={o} value={o}>{o ? tv(o) : "—"}</option>)}
                           </select>
                         </td>
                         <td>
@@ -654,7 +654,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                             <select defaultValue={it.stage || ""} onChange={(e) => salvarInvestimento(it.row, "stage", e.target.value)}>
                               {STAGE_OPTIONS.map((o) => <option key={o} value={o}>{o ? t(STAGE_LABEL_KEYS[o]) : "—"}</option>)}
                               {it.stage && !STAGE_OPTIONS.includes(it.stage) && (
-                                <option value={it.stage}>{it.stage} ({t("edit.etapaAntiga")})</option>
+                                <option value={it.stage}>{tv(it.stage)} ({t("edit.etapaAntiga")})</option>
                               )}
                             </select>
                           ) : (

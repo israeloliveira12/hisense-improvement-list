@@ -8,7 +8,7 @@ import { useLanguage } from "../lib/i18n";
 // por texto que ja existia. Fica num dropdown do topbar, com uma bolinha
 // mostrando quantos filtros estao ativos.
 export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInvestimento, onToggleApenasInvestimento, departamentos, deptoFiltro, onChangeDepto }) {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
   const ativos = (apenasOpen ? 1 : 0) + (apenasInvestimento ? 1 : 0) + (deptoFiltro ? 1 : 0);
@@ -58,7 +58,7 @@ export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInves
           <select className="filter-select" value={deptoFiltro} onChange={(e) => onChangeDepto(e.target.value)}>
             <option value="">{t("pres.todosDeptos")}</option>
             {departamentos.map((d) => (
-              <option key={d} value={d}>{d}</option>
+              <option key={d} value={d}>{tv(d)}</option>
             ))}
           </select>
 

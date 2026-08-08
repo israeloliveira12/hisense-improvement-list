@@ -4,7 +4,7 @@ import { Fragment, useState } from "react";
 import { useLanguage } from "../../lib/i18n";
 
 export default function DashboardDepartamentos({ stats }) {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const deptos = stats.departamentosDetalhe || [];
   const [expandido, setExpandido] = useState(() => new Set());
 
@@ -39,7 +39,7 @@ export default function DashboardDepartamentos({ stats }) {
                   <tr className="dept-row-clickable" onClick={() => toggle(d.label)}>
                     <td className="cell-item">
                       <span className={"dept-caret" + (aberto ? " open" : "")}>▸</span>
-                      {d.label}
+                      {tv(d.label)}
                     </td>
                     <td className="cell-no">{d.total}</td>
                     <td>
@@ -64,7 +64,7 @@ export default function DashboardDepartamentos({ stats }) {
                           <div className="dept-pessoas-title">{t("dash.deptResponsaveis")}</div>
                           {(d.pessoas || []).map((p) => (
                             <div className="dept-pessoa-row" key={p.nome}>
-                              <span>{p.nome}</span>
+                              <span>{tv(p.nome)}</span>
                               <b>{t("dash.deptAcoesCount", { n: p.count })}</b>
                             </div>
                           ))}

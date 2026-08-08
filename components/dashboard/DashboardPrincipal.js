@@ -9,7 +9,7 @@ function formatBRL(v) {
 }
 
 export default function DashboardPrincipal({ stats }) {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const { total, closed, open, delayed, departamentosDetalhe, potencialFechamento, investimento } = stats;
   const pctClosed = total ? (closed / total) * 100 : 0;
   const pctOpen = total ? (open / total) * 100 : 0;
@@ -77,7 +77,7 @@ export default function DashboardPrincipal({ stats }) {
           <div className="chart-scroll-list">
             {deptosPorOpen.map((d) => (
               <div className="bar-row" key={d.label}>
-                <div className="b-label">{d.label}</div>
+                <div className="b-label">{tv(d.label)}</div>
                 <div className="b-track"><div className="b-fill" style={{ width: `${(d.open / maxDeptOpen) * 100}%` }} /></div>
                 <div className="b-val">{d.open}</div>
               </div>
