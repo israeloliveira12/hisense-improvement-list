@@ -3,23 +3,23 @@ import { uploadFile, deleteFile } from "../../../../lib/googleDrive";
 import { appendPptDetalhesFoto, removePptDetalhesFoto } from "../../../../lib/googleSheets";
 
 export async function POST(request) {
-  const formData = await request.formData();
-  const file = formData.get("file");
-  const no = formData.get("no");
-  const slot = formData.get("slot"); // "before" | "improvement"
-
-  if (!file || !no || !slot) {
-    return NextResponse.json({ error: "Parâmetros faltando (file, no, slot)." }, { status: 400 });
-  }
-  if (!["before", "improvement"].includes(slot)) {
-    return NextResponse.json({ error: "slot inválido." }, { status: 400 });
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const filename = `${no}_${slot}_${Date.now()}.${ext}`;
-
   try {
+    const formData = await request.formData();
+    const file = formData.get("file");
+    const no = formData.get("no");
+    const slot = formData.get("slot"); // "before" | "improvement"
+
+    if (!file || !no || !slot) {
+      return NextResponse.json({ error: "Parâmetros faltando (file, no, slot)." }, { status: 400 });
+    }
+    if (!["before", "improvement"].includes(slot)) {
+      return NextResponse.json({ error: "slot inválido." }, { status: 400 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const filename = `${no}_${slot}_${Date.now()}.${ext}`;
+
     const fileId = await uploadFile(buffer, filename, file.type || "image/jpeg");
     const campo = slot === "before" ? "Foto Before" : "Foto Improvement";
     await appendPptDetalhesFoto(no, campo, fileId);
@@ -30,16 +30,16 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
-  const { no, slot, fileId } = await request.json();
-
-  if (!no || !slot || !fileId) {
-    return NextResponse.json({ error: "Parâmetros faltando (no, slot, fileId)." }, { status: 400 });
-  }
-  if (!["before", "improvement"].includes(slot)) {
-    return NextResponse.json({ error: "slot inválido." }, { status: 400 });
-  }
-
   try {
+    const { no, slot, fileId } = await request.json();
+
+    if (!no || !slot || !fileId) {
+      return NextResponse.json({ error: "Parâmetros faltando (no, slot, fileId)." }, { status: 400 });
+    }
+    if (!["before", "improvement"].includes(slot)) {
+      return NextResponse.json({ error: "slot inválido." }, { status: 400 });
+    }
+
     const campo = slot === "before" ? "Foto Before" : "Foto Improvement";
     // tira SO essa foto da lista na planilha primeiro -- se o arquivo ja
     // tiver sido apagado direto no Drive (fora do site), deleteFile()

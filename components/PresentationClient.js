@@ -5,6 +5,7 @@ import Slide from "./Slide";
 import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
 import SlideZoomControl from "./SlideZoomControl";
+import DownloadMenu from "./DownloadMenu";
 import { useLanguage } from "../lib/i18n";
 
 export default function PresentationClient({ acoes: initialAcoes, error }) {
@@ -17,6 +18,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [editando, setEditando] = useState(null);
   const [gerandoDeck, setGerandoDeck] = useState(null); // { feito, total } enquanto monta o .pptx
   const fullscreenRef = useRef(null);
+  const lightboxAbertoRef = useRef(false); // enquanto o carrossel de fotos esta aberto, seta do teclado e dele, nao do slide
 
   const filtradas = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -44,14 +46,21 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
 
   useEffect(() => {
     function onKey(e) {
-      if (!presenting) return;
+      // com o carrossel de fotos aberto (ver Slide.js/PhotoLightbox), a seta
+      // e dele -- nao navega o slide por baixo. Sem isso os dois escutavam
+      // a mesma tecla e o slide sempre "ganhava" (o listener dele foi
+      // registrado primeiro, entao roda primeiro).
+      if (lightboxAbertoRef.current) return;
+      // nao rouba a seta de quem esta digitando (busca, comentario editavel)
+      const el = document.activeElement;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
       if (e.key === "ArrowRight" || e.key === "PageDown") irPara(1);
       if (e.key === "ArrowLeft" || e.key === "PageUp") irPara(-1);
       if (e.key === "Escape" && document.fullscreenElement) document.exitFullscreen();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [presenting, irPara]);
+  }, [irPara]);
 
   useEffect(() => {
     function onFsChange() {
@@ -96,8 +105,14 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
 
+  function acaoDeletada(no) {
+    setAcoes((prev) => prev.filter((a) => a.no !== no));
+    setEditando(null);
+  }
+
   async function uploadFoto(no, slot, file) {
     setUploadingSlot(slot);
+    const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -106,14 +121,8 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Falha no upload");
-      const idField = slot === "before" ? "fotoBeforeId" : "fotoImprovementId";
-      const extraField = slot === "before" ? "fotosBeforeExtra" : "fotosImprovementExtra";
       setAcoes((prev) =>
-        prev.map((a) => {
-          if (a.no !== no) return a;
-          if (!a[idField]) return { ...a, [idField]: data.fileId };
-          return { ...a, [extraField]: [...(a[extraField] || []), data.fileId] };
-        })
+        prev.map((a) => (a.no === no ? { ...a, [campo]: [...(a[campo] || []), data.fileId] } : a))
       );
     } catch (e) {
       alert(t("common.error") + ": " + e.message);
@@ -124,6 +133,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
 
   async function deletarFoto(no, slot, fileId) {
     if (!fileId) return;
+    const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
     try {
       const res = await fetch("/api/drive/upload", {
         method: "DELETE",
@@ -132,18 +142,29 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-      const idField = slot === "before" ? "fotoBeforeId" : "fotoImprovementId";
-      const extraField = slot === "before" ? "fotosBeforeExtra" : "fotosImprovementExtra";
       setAcoes((prev) =>
-        prev.map((a) => {
-          if (a.no !== no) return a;
-          if (a[idField] === fileId) {
-            const [novoPrimario, ...resto] = a[extraField] || [];
-            return { ...a, [idField]: novoPrimario || null, [extraField]: resto };
-          }
-          return { ...a, [extraField]: (a[extraField] || []).filter((id) => id !== fileId) };
-        })
+        prev.map((a) => (a.no === no ? { ...a, [campo]: (a[campo] || []).filter((id) => id !== fileId) } : a))
       );
+    } catch (e) {
+      alert(t("common.error") + ": " + e.message);
+    }
+  }
+
+  // Mover uma foto de posicao (troca com a vizinha) -- os 2 primeiros IDs
+  // da lista viram as fotos "principais" automaticamente, entao mover e o
+  // unico gesto que decide tanto ordem quanto quem e principal.
+  async function reordenarFotos(no, slot, novaOrdem) {
+    const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
+    setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: novaOrdem } : a)));
+    try {
+      const fieldApi = slot === "before" ? "fotoBeforeOrdem" : "fotoImprovementOrdem";
+      const res = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ field: fieldApi, value: novaOrdem.join(",") }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     } catch (e) {
       alert(t("common.error") + ": " + e.message);
     }
@@ -168,26 +189,16 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     <>
       <Topbar title={t("pres.title")} sub={t("pres.sub", { n: acoes.length })}>
         <SlideZoomControl />
-        <button className="btn btn-ghost" onClick={baixarPpt}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {t("pres.baixarPpt")}
-        </button>
-        <button className="btn btn-ghost" onClick={baixarTudo} disabled={Boolean(gerandoDeck)}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
-            <path d="M8 20h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          {gerandoDeck
-            ? t("pres.gerandoDeck", { feito: gerandoDeck.feito, total: gerandoDeck.total })
-            : t("pres.baixarTudo")}
-        </button>
-        <button className="btn btn-primary" onClick={apresentar} disabled={!acaoAtual}>
+        <DownloadMenu
+          onBaixarUm={baixarPpt}
+          onBaixarTudo={baixarTudo}
+          podeBaixarUm={Boolean(acaoAtual)}
+          gerando={Boolean(gerandoDeck)}
+        />
+        <button type="button" className="icon-btn primary" title={t("pres.apresentar")} onClick={apresentar} disabled={!acaoAtual}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M5 3l16 9-16 9V3z" fill="currentColor" />
           </svg>
-          {t("pres.apresentar")}
         </button>
       </Topbar>
 
@@ -243,7 +254,15 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
             ))}
           </div>
           <div className="pres-canvas-wrap" ref={fullscreenRef}>
-            <Slide acao={acaoAtual} onUploadFoto={uploadFoto} onDeleteFoto={deletarFoto} onEditCaption={editarLegenda} uploadingSlot={uploadingSlot} />
+            <Slide
+              acao={acaoAtual}
+              onUploadFoto={uploadFoto}
+              onDeleteFoto={deletarFoto}
+              onReorderFoto={reordenarFotos}
+              onEditCaption={editarLegenda}
+              uploadingSlot={uploadingSlot}
+              onLightboxOpenChange={(aberto) => { lightboxAbertoRef.current = aberto; }}
+            />
             {presenting && (
               <div className="present-hint">
                 ← → · Esc · {selected + 1} / {filtradas.length}
@@ -268,6 +287,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           acao={editando}
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
+          onDeleted={acaoDeletada}
         />
       )}
     </>

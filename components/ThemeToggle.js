@@ -3,24 +3,24 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
+// Tema e por sessao de aba, nao persiste (pedido explicito: sempre abre
+// claro). O <html data-theme> ja vem setado como "light" pelo script no
+// <head> (app/layout.js) antes do primeiro paint -- aqui so lemos o que
+// ja esta no DOM pra manter o icone certo ao navegar entre paginas dentro
+// do mesmo carregamento (o atributo sobrevive a navegacao client-side).
 export default function ThemeToggle() {
   const { t } = useLanguage();
   const [theme, setTheme] = useState(null); // null ate montar no cliente (evita mismatch de SSR)
 
   useEffect(() => {
-    const saved = localStorage.getItem("hisense-theme");
-    if (saved === "light" || saved === "dark") {
-      setTheme(saved);
-    } else {
-      setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    }
+    const atual = document.documentElement.getAttribute("data-theme");
+    setTheme(atual === "dark" ? "dark" : "light");
   }, []);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
     document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("hisense-theme", next);
   }
 
   if (!theme) return <span className="theme-toggle-single" aria-hidden="true" />;

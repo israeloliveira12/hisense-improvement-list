@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateAcaoField, renameAcaoId } from "../../../../lib/googleSheets";
+import { updateAcaoField, renameAcaoId, deleteAcao } from "../../../../lib/googleSheets";
 
 const CAMPOS_PERMITIDOS = new Set([
   "item", "dept", "person", "deadline",
@@ -8,9 +8,9 @@ const CAMPOS_PERMITIDOS = new Set([
 
 export async function PATCH(request, { params }) {
   const { no } = params;
-  const { field, value } = await request.json();
 
   try {
+    const { field, value } = await request.json();
     if (field === "no") {
       const novo = await renameAcaoId(no, value);
       return NextResponse.json({ ok: true, no: novo });
@@ -19,6 +19,16 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: `Campo não editável: ${field}` }, { status: 400 });
     }
     await updateAcaoField(no, field, value);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  const { no } = params;
+  try {
+    await deleteAcao(no);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });

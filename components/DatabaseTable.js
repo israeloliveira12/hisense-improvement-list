@@ -33,6 +33,11 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
     setLinhas((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
 
+  function acaoDeletada(no) {
+    setLinhas((prev) => prev.filter((a) => a.no !== no));
+    setEditando(null);
+  }
+
   const contagens = useMemo(
     () => ({
       todas: linhas.length,
@@ -218,6 +223,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
           acao={editando}
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
+          onDeleted={acaoDeletada}
         />
       )}
 

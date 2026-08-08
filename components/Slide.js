@@ -57,64 +57,25 @@ function PhotoLightbox({ ids, startIndex, onClose }) {
   );
 }
 
-function DropZone({ fotoId, uploading, onFile, onDelete, onExpand, label }) {
+const MAX_FOTOS_POR_LADO = 8;
+
+function UploadTile({ className, uploading, label, onFile, dropavel }) {
   const inputRef = useRef(null);
   const { t } = useLanguage();
 
-  if (fotoId) {
-    return (
-      <div className="drop drop-photo">
-        {/* "contain", sempre centralizado -- a foto inteira cabe na caixa
-            automaticamente, nunca corta pedaco nenhum. Sem zoom/posicao
-            manual: aquele controle deixava recortar a imagem por engano,
-            e o pedido foi "nunca corte, de forma automatica". */}
-        <div
-          className="drop-photo-img"
-          style={{ backgroundImage: `url(/api/drive/file/${fotoId}?v=${fotoId})` }}
-          onClick={() => inputRef.current?.click()}
-        />
-        <button
-          type="button"
-          className="drop-photo-expand"
-          title={t("pres.verGrande")}
-          onClick={(e) => {
-            e.stopPropagation();
-            onExpand && onExpand();
-          }}
-        >
-          ⛶
-        </button>
-        <button
-          type="button"
-          className="drop-photo-remove"
-          title={t("pres.excluirFoto")}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (window.confirm(t("pres.confirmarExclusao"))) onDelete && onDelete();
-          }}
-        >
-          ✕
-        </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: "none" }}
-          onChange={(e) => e.target.files[0] && onFile(e.target.files[0])}
-        />
-      </div>
-    );
-  }
-
   return (
     <div
-      className="drop"
+      className={className}
       onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]);
-      }}
+      onDragOver={dropavel ? (e) => e.preventDefault() : undefined}
+      onDrop={
+        dropavel
+          ? (e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files[0]) onFile(e.dataTransfer.files[0]);
+            }
+          : undefined
+      }
     >
       <input
         ref={inputRef}
@@ -125,7 +86,7 @@ function DropZone({ fotoId, uploading, onFile, onDelete, onExpand, label }) {
       />
       {uploading ? (
         <span>{t("pres.enviando")}</span>
-      ) : (
+      ) : label ? (
         <>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
             <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -134,45 +95,144 @@ function DropZone({ fotoId, uploading, onFile, onDelete, onExpand, label }) {
           </svg>
           <span>{t("pres.enviarFoto")}</span>
         </>
+      ) : (
+        "+"
       )}
     </div>
   );
 }
 
-function ExtraThumbs({ ids, slot, no, total, onFile, onDelete, onExpand }) {
-  const inputRef = useRef(null);
+// Uma foto (principal grande ou miniatura), com os controles de mover
+// (troca de posicao com a vizinha -- promove miniatura a principal quando
+// move o suficiente pra esquerda, e vice-versa), excluir e ver em tela
+// grande. `podeMoverEsq`/`podeMoverDir` desabilitam nas pontas da lista.
+function FotoItem({ id, grande, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand }) {
   const { t } = useLanguage();
-  const podeAdicionar = total < 6;
+  return (
+    <div className={grande ? "drop drop-photo" : "ba-thumb"}>
+      <div
+        className={grande ? "drop-photo-img" : "ba-thumb-img"}
+        style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})` }}
+        onClick={onExpand}
+      />
+      <div className="foto-controls">
+        {podeMoverEsq && (
+          <button type="button" title={t("pres.moverEsquerda")} onClick={(e) => { e.stopPropagation(); onMover(-1); }}>
+            ‹
+          </button>
+        )}
+        <button
+          type="button"
+          className="foto-controls-remove"
+          title={t("pres.excluirFoto")}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(t("pres.confirmarExclusao"))) onDelete();
+          }}
+        >
+          ✕
+        </button>
+        {podeMoverDir && (
+          <button type="button" title={t("pres.moverDireita")} onClick={(e) => { e.stopPropagation(); onMover(1); }}>
+            ›
+          </button>
+        )}
+      </div>
+      {grande && (
+        <button type="button" className="drop-photo-expand" title={t("pres.verGrande")} onClick={(e) => { e.stopPropagation(); onExpand(); }}>
+          ⛶
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Grupo completo de fotos de um lado (Before OU After): ate 2 "principais"
+// lado a lado (grandes, sem cortar -- os 2 primeiros IDs da lista), e o
+// resto em miniatura embaixo. Mover uma foto reescreve a lista inteira na
+// ordem nova -- e isso, sozinho, decide quem e principal e quem e miniatura.
+function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onReorder }) {
+  const { t } = useLanguage();
+  const lista = ids || [];
+  const principais = lista.slice(0, 2);
+  const extras = lista.slice(2);
+  const podeAdicionar = lista.length < MAX_FOTOS_POR_LADO;
+
+  function mover(index, delta) {
+    const alvo = index + delta;
+    if (alvo < 0 || alvo >= lista.length) return;
+    const nova = [...lista];
+    [nova[index], nova[alvo]] = [nova[alvo], nova[index]];
+    onReorder(no, slot, nova);
+  }
+
+  if (lista.length === 0) {
+    return (
+      <UploadTile
+        className="drop"
+        uploading={uploading}
+        label
+        dropavel
+        onFile={(file) => onFile(no, slot, file)}
+      />
+    );
+  }
 
   return (
-    <div className="ba-thumbs">
-      {ids.map((id) => (
-        <div className="ba-thumb" key={id}>
-          <img src={`/api/drive/file/${id}?v=${id}`} alt="" onClick={() => onExpand && onExpand(id)} />
-          <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(no, slot, id); }}>✕</button>
+    <>
+      <div className="ba-primaries">
+        {principais.map((id, i) => (
+          <FotoItem
+            key={id}
+            id={id}
+            grande
+            podeMoverEsq={i > 0}
+            podeMoverDir={i < lista.length - 1}
+            onMover={(delta) => mover(i, delta)}
+            onDelete={() => onDelete(no, slot, id)}
+            onExpand={() => onExpand(id)}
+          />
+        ))}
+        {principais.length < 2 && podeAdicionar && (
+          <UploadTile className="drop drop-photo-add" uploading={uploading} onFile={(file) => onFile(no, slot, file)} />
+        )}
+      </div>
+      {(extras.length > 0 || podeAdicionar) && (
+        <div className="ba-thumbs">
+          {extras.map((id, j) => {
+            const i = j + principais.length;
+            return (
+              <FotoItem
+                key={id}
+                id={id}
+                podeMoverEsq
+                podeMoverDir={i < lista.length - 1}
+                onMover={(delta) => mover(i, delta)}
+                onDelete={() => onDelete(no, slot, id)}
+                onExpand={() => onExpand(id)}
+              />
+            );
+          })}
+          {podeAdicionar && (
+            <UploadTile className="ba-thumb-add" uploading={false} onFile={(file) => onFile(no, slot, file)} />
+          )}
         </div>
-      ))}
-      {podeAdicionar && (
-        <button type="button" className="ba-thumb-add" title={t("pres.adicionarFoto")} onClick={() => inputRef.current?.click()}>+</button>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={(e) => e.target.files[0] && onFile(no, slot, e.target.files[0])}
-      />
-    </div>
+    </>
   );
 }
 
-export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption, uploadingSlot }) {
+export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
   const [lightbox, setLightbox] = useState(null); // { ids, index }
+
+  useEffect(() => {
+    onLightboxOpenChange && onLightboxOpenChange(Boolean(lightbox));
+  }, [lightbox, onLightboxOpenChange]);
 
   if (!acao) return null;
 
-  const beforeIds = [acao.fotoBeforeId, ...(acao.fotosBeforeExtra || [])].filter(Boolean);
-  const afterIds = [acao.fotoImprovementId, ...(acao.fotosImprovementExtra || [])].filter(Boolean);
+  const beforeIds = (acao.fotosBefore || []).filter(Boolean);
+  const afterIds = (acao.fotosImprovement || []).filter(Boolean);
 
   return (
     <>
@@ -181,10 +241,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption,
         <div className="slide-badge">{acao.no}</div>
         <div className="slide-head-txt">
           <h2>{acao.item}</h2>
-          <p>
-            {acao.dept}
-            {acao.auditor ? ` · Auditor: ${acao.auditor}` : ""}
-          </p>
+          <p>{acao.dept}</p>
         </div>
         <div className={"slide-status-pill " + acao.status}>
           {acao.status === "closed" ? "CLOSED" : "OPEN"}
@@ -236,7 +293,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption,
               <th style={{ width: 24 }}>#</th>
               <th>Action</th>
               <th style={{ width: 80 }}>Owner</th>
-              <th style={{ width: 56 }}>Due</th>
+              <th style={{ width: 56 }}>Date</th>
               <th style={{ width: 60 }}>Status</th>
             </tr>
             {(acao.steps || []).map((st, i) => (
@@ -245,7 +302,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption,
                 <td>{st[1]}</td>
                 <td>{st[2]}</td>
                 <td>{st[3]}</td>
-                <td className="chip">{st[4]}</td>
+                <td className={"plan-status " + (String(st[4]).toUpperCase() === "CLOSED" ? "is-closed" : "is-open")}>{st[4]}</td>
               </tr>
             ))}
           </tbody>
@@ -257,22 +314,15 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption,
         </div>
         <div className="ba-photos">
           <div className="ba-col">
-            <DropZone
-              fotoId={acao.fotoBeforeId}
-              uploading={uploadingSlot === "before"}
-              onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "before", file)}
-              onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "before", acao.fotoBeforeId)}
-              onExpand={() => beforeIds.length && setLightbox({ ids: beforeIds, index: 0 })}
-              label="Before"
-            />
-            <ExtraThumbs
-              ids={acao.fotosBeforeExtra || []}
+            <PhotoGroup
+              ids={beforeIds}
               slot="before"
               no={acao.no}
-              total={(acao.fotoBeforeId ? 1 : 0) + (acao.fotosBeforeExtra?.length || 0)}
+              uploading={uploadingSlot === "before"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
               onExpand={(id) => setLightbox({ ids: beforeIds, index: Math.max(0, beforeIds.indexOf(id)) })}
+              onReorder={onReorderFoto}
             />
             <div className="ba-caption">
               <b>FACTORY COMMENT</b>
@@ -287,22 +337,15 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onEditCaption,
             </div>
           </div>
           <div className="ba-col">
-            <DropZone
-              fotoId={acao.fotoImprovementId}
-              uploading={uploadingSlot === "improvement"}
-              onFile={(file) => onUploadFoto && onUploadFoto(acao.no, "improvement", file)}
-              onDelete={() => onDeleteFoto && onDeleteFoto(acao.no, "improvement", acao.fotoImprovementId)}
-              onExpand={() => afterIds.length && setLightbox({ ids: afterIds, index: 0 })}
-              label="After"
-            />
-            <ExtraThumbs
-              ids={acao.fotosImprovementExtra || []}
+            <PhotoGroup
+              ids={afterIds}
               slot="improvement"
               no={acao.no}
-              total={(acao.fotoImprovementId ? 1 : 0) + (acao.fotosImprovementExtra?.length || 0)}
+              uploading={uploadingSlot === "improvement"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
               onExpand={(id) => setLightbox({ ids: afterIds, index: Math.max(0, afterIds.indexOf(id)) })}
+              onReorder={onReorderFoto}
             />
             <div className="ba-caption">
               <b>HISENSE COMMENT</b>

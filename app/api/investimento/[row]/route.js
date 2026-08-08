@@ -3,9 +3,9 @@ import { updateInvestmentItemField } from "../../../../lib/googleSheets";
 
 export async function PATCH(request, { params }) {
   const { row } = params;
-  const { field, value } = await request.json();
 
   try {
+    const { field, value } = await request.json();
     await updateInvestmentItemField(row, field, value);
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -68,6 +68,18 @@ a { color: inherit; }
   display: flex; flex-direction: column; padding: 20px 14px;
 }
 .brand { display: flex; align-items: center; gap: 8px; padding: 0 8px 22px; }
+.sidebar-collapse-btn {
+  margin-left: auto; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-faint); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex: none;
+}
+.sidebar-collapse-btn:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-tint); }
+.sidebar-reopen {
+  position: fixed; left: 12px; top: 16px; z-index: 30; width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow);
+}
+.sidebar-reopen:hover { color: var(--purple); border-color: var(--purple); }
 .brand-mark {
   width: 26px; height: 26px; border-radius: 7px;
   background: linear-gradient(135deg, var(--purple), var(--blue));
@@ -132,6 +144,33 @@ a { color: inherit; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .topbar-divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+
+/* topbar minimalista: botoes so com icone, e os menus (baixar, zoom) viram
+   um dropdown compacto em vez de varios botoes grudados. */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer;
+  flex: none;
+}
+.icon-btn:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-tint); }
+.icon-btn:disabled { opacity: .5; cursor: not-allowed; }
+.icon-btn.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+.icon-btn.primary:hover { background: var(--purple-dark); }
+
+.topbar-dropdown { position: relative; }
+.topbar-dropdown-pop {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; min-width: 150px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow);
+  padding: 4px; display: flex; flex-direction: column; gap: 2px;
+}
+.topbar-dropdown-pop button {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; border: none;
+  background: none; color: var(--text); font-size: 12.5px; font-weight: 600; cursor: pointer;
+  text-align: left; white-space: nowrap; width: 100%;
+}
+.topbar-dropdown-pop button:hover { background: var(--purple-tint); color: var(--purple); }
+.topbar-dropdown-pop button:disabled { opacity: .5; cursor: not-allowed; }
+.topbar-dropdown-pop button.active { color: var(--purple); font-weight: 700; }
 .lang-switch { display: flex; gap: 2px; padding: 3px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
 .lang-switch-btn {
   padding: 6px 9px; border-radius: 6px; border: none; background: none; color: var(--text-faint);
@@ -226,7 +265,11 @@ a { color: inherit; }
 .plan-table th:nth-child(1), .plan-table th:nth-child(3), .plan-table th:nth-child(4), .plan-table th:nth-child(5) { text-align: center; }
 .plan-table td { padding: 3.5px 6px; background: #f4f3f8; border-bottom: 2px solid #fff; }
 .plan-table td:nth-child(1), .plan-table td:nth-child(3), .plan-table td:nth-child(4), .plan-table td:nth-child(5) { text-align: center; white-space: nowrap; }
-.plan-table td.chip { font-weight: 700; color: var(--green); }
+/* status do passo: so texto (negrito, maiusculo, cor) -- sem pill/borda
+   arredondada, pra ficar no mesmo formato do resto da tabela. */
+.plan-table td.plan-status { font-weight: 700; text-transform: uppercase; }
+.plan-table td.plan-status.is-closed { color: var(--green); }
+.plan-table td.plan-status.is-open { color: var(--amber); }
 
 .ba-band { background: var(--blue); color: #fff; display: flex; margin: 10px -20px 0; padding: 5px 20px; font-size: 11px; font-weight: 700; }
 .ba-band span { flex: 1; text-align: center; }
@@ -243,36 +286,56 @@ a { color: inherit; }
 .drop.drop-photo { padding: 0; border-style: solid; overflow: hidden; position: relative; cursor: default; }
 .drop-photo-img {
   width: 100%; height: 100%; background-repeat: no-repeat; cursor: pointer;
-  /* "contain" + centralizado -- a foto inteira sempre cabe na caixa, nunca
-     corta (era "cover"-like antes, via zoom em %, e isso cortava). */
+  /* "contain" + centralizado -- a foto principal inteira sempre cabe na
+     caixa, nunca corta nem oculta pedaco nenhum. */
   background-size: contain; background-position: center center;
 }
-.drop-photo-remove, .drop-photo-expand {
-  position: absolute; top: 4px; width: 18px; height: 18px; border-radius: 50%;
-  border: none; background: rgba(23,21,31,.65); color: #fff; font-size: 10px; line-height: 1;
+
+/* ate 2 fotos "principais" lado a lado, grandes -- a ordem da lista decide
+   quem e principal (ver PhotoGroup em Slide.js); a 2a caixa vira um "+"
+   tracejado quando so tem 1 foto ainda. */
+.ba-primaries { display: flex; gap: 6px; flex: 1; min-height: 0; }
+.ba-primaries .drop-photo, .ba-primaries .drop-photo-add { flex: 1; min-width: 0; }
+.drop-photo-add { font-size: 24px; font-weight: 300; }
+
+.drop-photo-expand {
+  position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%;
+  border: none; background: rgba(23,21,31,.65); color: #fff; font-size: 11px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;
   opacity: 0; transition: opacity .12s ease;
 }
-.drop-photo:hover .drop-photo-remove, .drop-photo:hover .drop-photo-expand,
-.drop-photo:focus-within .drop-photo-remove, .drop-photo:focus-within .drop-photo-expand {
-  opacity: 1;
-}
-.drop-photo-remove { right: 4px; }
-.drop-photo-remove:hover { background: var(--red); }
-.drop-photo-expand { right: 26px; font-size: 11px; }
+.drop-photo:hover .drop-photo-expand, .drop-photo:focus-within .drop-photo-expand { opacity: 1; }
 .drop-photo-expand:hover { background: var(--purple); }
+
+/* controles de mover (troca com a vizinha) + excluir -- centralizados em
+   cima, aparecem so no hover. Mesma marcacao serve pra foto principal
+   (grande) e miniatura, só o tamanho dos botoes muda. */
+.foto-controls {
+  position: absolute; top: 4px; left: 0; right: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  opacity: 0; transition: opacity .12s ease; pointer-events: none;
+}
+.drop-photo:hover .foto-controls, .drop-photo:focus-within .foto-controls,
+.ba-thumb:hover .foto-controls, .ba-thumb:focus-within .foto-controls {
+  opacity: 1; pointer-events: auto;
+}
+.foto-controls button {
+  width: 18px; height: 18px; border-radius: 50%; border: none; padding: 0;
+  background: rgba(23,21,31,.65); color: #fff; font-size: 12px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.foto-controls-remove:hover { background: var(--red); }
+.foto-controls button:not(.foto-controls-remove):hover { background: var(--purple); }
+
 .ba-thumbs { display: flex; gap: 4px; flex: none; margin-top: 4px; overflow-x: auto; }
 .ba-thumb { position: relative; width: 30px; height: 30px; border-radius: 5px; overflow: hidden; flex: none; }
-.ba-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
-.ba-thumb button {
-  position: absolute; top: 1px; right: 1px; width: 12px; height: 12px; border-radius: 50%; border: none;
-  background: rgba(23,21,31,.7); color: #fff; font-size: 7px; line-height: 1; cursor: pointer; padding: 0;
-  opacity: 0; transition: opacity .12s ease;
-}
-.ba-thumb:hover button, .ba-thumb:focus-within button { opacity: 1; }
+.ba-thumb-img { width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; }
+.ba-thumb .foto-controls { top: 1px; gap: 1px; }
+.ba-thumb .foto-controls button { width: 11px; height: 11px; font-size: 7px; }
 .ba-thumb-add {
   width: 30px; height: 30px; border-radius: 5px; border: 1.4px dashed #C9C4D8; background: #FAFAFC;
   color: var(--text-faint); font-size: 14px; cursor: pointer; flex: none;
+  display: flex; align-items: center; justify-content: center;
 }
 .ba-thumb-add:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-tint); }
 .ba-caption { font-size: 8.6px; color: var(--text-muted); font-style: italic; margin-top: 4px; line-height: 1.25; }
@@ -362,6 +425,25 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .db-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12.5px; vertical-align: middle; }
 .db-table tbody tr:hover { background: var(--purple-tint); }
 .db-table tbody tr:last-child td { border-bottom: none; }
+
+/* Departamentos: linha clicavel expande os responsaveis daquele depto */
+.dept-row-clickable { cursor: pointer; }
+.dept-caret {
+  display: inline-block; margin-right: 6px; color: var(--text-faint); font-size: 10px;
+  transition: transform .12s ease;
+}
+.dept-caret.open { transform: rotate(90deg); color: var(--purple); }
+.dept-row-expand td { padding: 0; border-bottom: 1px solid var(--border); background: var(--bg); }
+.dept-pessoas { padding: 10px 14px 12px 34px; display: flex; flex-direction: column; gap: 4px; }
+.dept-pessoas-title {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  color: var(--text-faint); margin-bottom: 4px;
+}
+.dept-pessoa-row {
+  display: flex; align-items: center; justify-content: space-between; font-size: 12px;
+  padding: 3px 0; color: var(--text);
+}
+.dept-pessoa-row b { color: var(--purple); font-weight: 700; }
 .cell-no { font-variant-numeric: tabular-nums; color: var(--text-muted); font-weight: 700; position: relative; }
 .cell-no-clickable { cursor: pointer; }
 .cell-no-clickable:hover { color: var(--purple); text-decoration: underline; }
@@ -400,6 +482,9 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
 .legend-item .sw { width: 9px; height: 9px; border-radius: 3px; }
 
+/* lista de departamentos sem agrupar em "Outros" -- pode ficar longa,
+   entao rola dentro do card em vez de esticar o dashboard inteiro. */
+.chart-scroll-list { max-height: 220px; overflow-y: auto; padding-right: 4px; }
 .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .bar-row .b-label { width: 96px; flex: none; font-size: 11.5px; color: var(--text-muted); font-weight: 600; text-align: right; }
 .bar-row .b-track { flex: 1; background: var(--bg); border-radius: 5px; height: 16px; position: relative; overflow: hidden; }
@@ -496,8 +581,14 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .editor-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .editor-no { font-size: 10.5px; font-weight: 700; color: var(--text-faint); letter-spacing: .03em; }
 .editor-head h4 { margin: 3px 0 0; font-size: 15px; }
-.editor-close { border: none; background: var(--bg); color: var(--text-muted); width: 28px; height: 28px; border-radius: 8px; cursor: pointer; flex: none; }
+.editor-head-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.editor-close, .editor-delete {
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: var(--bg); color: var(--text-muted); width: 28px; height: 28px; border-radius: 8px; cursor: pointer; flex: none;
+}
 .editor-close:hover { background: var(--purple-tint); color: var(--purple); }
+.editor-delete:hover { background: var(--red-tint, #fbeaea); color: var(--red); }
+.editor-delete:disabled { opacity: .5; cursor: not-allowed; }
 
 .editor-status-row { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
 .editor-status-row select { font-size: 12px; border-radius: 7px; border: 1px solid var(--border); padding: 6px 8px; background: var(--bg); color: var(--text); }

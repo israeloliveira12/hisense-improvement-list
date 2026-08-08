@@ -4,7 +4,12 @@ import crypto from "crypto";
 const COOKIE_NAME = "hisense_session";
 
 export async function POST(request) {
-  const { password } = await request.json();
+  let password;
+  try {
+    ({ password } = await request.json());
+  } catch (e) {
+    return NextResponse.json({ error: "Corpo da requisição inválido." }, { status: 400 });
+  }
   const expected = process.env.SITE_PASSWORD;
 
   if (!expected) {
