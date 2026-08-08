@@ -220,6 +220,7 @@ function PhotoGroup({ ids, slot, no, uploading, onFile, onDelete, onExpand, onRe
 }
 
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
+  const { t } = useLanguage();
   const [lightbox, setLightbox] = useState(null); // { ids, index }
 
   useEffect(() => {
@@ -241,28 +242,28 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
           <p>{acao.process}</p>
         </div>
         <div className={"slide-status-pill " + acao.status}>
-          {acao.status === "closed" ? "CLOSED" : "OPEN"}
+          {acao.status === "closed" ? t("db.closed") : t("db.open")}
         </div>
-        {acao.isNew && <div className="new-badge">NEW</div>}
+        {acao.isNew && <div className="new-badge">{t("pres.slideNew")}</div>}
       </div>
 
       <div className="slide-meta">
         <div className="m">
-          <label>PERSON IN CHARGE</label>
+          <label>{t("pres.slidePersonInCharge")}</label>
           <div>
             {acao.person || "—"} {acao.dept ? `(${acao.dept})` : ""}
           </div>
         </div>
         <div className="m">
-          <label>OCCUR. DATE</label>
+          <label>{t("pres.slideOccurDate")}</label>
           <div>{acao.occur || "—"}</div>
         </div>
         <div className="m">
-          <label>DEADLINE</label>
+          <label>{t("pres.slideDeadline")}</label>
           <div>{acao.deadline || "—"}</div>
         </div>
         <div className="m">
-          <label>INVESTMENT</label>
+          <label>{t("pres.slideInvestment")}</label>
           <div>{acao.investment || "—"}</div>
         </div>
       </div>
@@ -270,28 +271,28 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
       <div className="slide-body">
         <div className="desc-row">
           <div className="desc-col wide">
-            <label>DESCRIPTION</label>
+            <label>{t("pres.slideDescription")}</label>
             <div className="desc-box">{acao.description || "—"}</div>
           </div>
           <div className="desc-col">
-            <label>EXPECTATION</label>
+            <label>{t("pres.slideExpectation")}</label>
             <div className="desc-box">{acao.expectation || "—"}</div>
           </div>
           <div className="desc-col">
-            <label>ABRANGENCY</label>
+            <label>{t("pres.slideAbrangency")}</label>
             <div className="desc-box">{acao.abrangency || "—"}</div>
           </div>
         </div>
 
-        <div className="plan-label">ACTION PLAN</div>
+        <div className="plan-label">{t("pres.slideActionPlan")}</div>
         <table className="plan-table">
           <tbody>
             <tr>
               <th style={{ width: 24 }}>#</th>
-              <th>Action</th>
-              <th style={{ width: 80 }}>Owner</th>
-              <th style={{ width: 56 }}>Date</th>
-              <th style={{ width: 60 }}>Status</th>
+              <th>{t("pres.slideColAction")}</th>
+              <th style={{ width: 80 }}>{t("pres.slideColOwner")}</th>
+              <th style={{ width: 56 }}>{t("pres.slideColDate")}</th>
+              <th style={{ width: 60 }}>{t("pres.slideColStatus")}</th>
             </tr>
             {(acao.steps || []).map((st, i) => (
               <tr key={i}>
@@ -306,8 +307,8 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
         </table>
 
         <div className="ba-band">
-          <span>BEFORE</span>
-          <span>AFTER</span>
+          <span>{t("pres.slideBefore")}</span>
+          <span>{t("pres.slideAfter")}</span>
         </div>
         <div className="ba-photos">
           <div className="ba-col">
@@ -322,7 +323,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
               onReorder={onReorderFoto}
             />
             <div className="ba-caption">
-              <b>FACTORY COMMENT</b>
+              <b>{t("pres.slideFactoryComment")}</b>
               <span
                 className="ba-caption-editable"
                 contentEditable
@@ -345,7 +346,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
               onReorder={onReorderFoto}
             />
             <div className="ba-caption">
-              <b>HISENSE COMMENT</b>
+              <b>{t("pres.slideHisenseComment")}</b>
               <span
                 className="ba-caption-editable"
                 contentEditable
