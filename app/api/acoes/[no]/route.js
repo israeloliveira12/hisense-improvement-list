@@ -1,5 +1,22 @@
 import { NextResponse } from "next/server";
-import { updateAcaoField, renameAcaoId, deleteAcao } from "../../../../lib/googleSheets";
+import { getAcoes, updateAcaoField, renameAcaoId, deleteAcao } from "../../../../lib/googleSheets";
+
+export const dynamic = "force-dynamic";
+
+// Le UMA acao direto da planilha. Usado pelo editor logo depois de salvar,
+// pra confirmar que o que ficou gravado e o que a tela vai mostrar (em vez
+// de assumir que deu certo e remendar o estado local campo a campo).
+export async function GET(request, { params }) {
+  const { no } = params;
+  try {
+    const acoes = await getAcoes();
+    const alvo = acoes.find((a) => String(a.no) === String(no));
+    if (!alvo) return NextResponse.json({ error: `Ação ${no} não encontrada.` }, { status: 404 });
+    return NextResponse.json({ acao: alvo });
+  } catch (e) {
+    return NextResponse.json({ error: String(e.message || e) }, { status: 500 });
+  }
+}
 
 const CAMPOS_PERMITIDOS = new Set([
   "item", "dept", "person", "deadline",

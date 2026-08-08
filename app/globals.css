@@ -626,6 +626,7 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
   width: min(920px, 100%); height: min(88vh, 800px); background: var(--surface);
   border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
   display: flex; flex-direction: column; animation: editorPop .16s ease-out;
+  position: relative; /* ancora a faixa .editor-salvando no topo DO POPUP */
 }
 @keyframes editorPop {
   from { opacity: 0; transform: scale(.97) translateY(8px); }
@@ -705,6 +706,22 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
   border: 1.5px dashed var(--border);
 }
 .m-add-row-real:hover { background: var(--purple-tint); border-color: var(--purple); }
+
+/* faixa de "estou salvando" no topo do editor -- some sozinha quando o
+   salvamento termina (e o editor fecha). Enquanto aparece, o X e o botao
+   de salvar ficam desabilitados. */
+.editor-salvando {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--purple); color: #fff; font-size: 12px; font-weight: 700;
+  padding: 7px 12px; border-radius: 18px 18px 0 0;
+}
+.editor-salvando-spinner {
+  width: 12px; height: 12px; border-radius: 50%; flex: none;
+  border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .editor-add-inv-form {
   display: flex; flex-direction: column; gap: 8px; margin-top: 10px; padding: 10px;

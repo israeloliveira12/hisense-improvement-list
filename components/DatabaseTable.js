@@ -33,6 +33,13 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
     setLinhas((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
 
+  // Editor confirmou o salvamento relendo a acao da planilha -- troca o
+  // objeto inteiro (mesma logica da Apresentacao).
+  function substituirAcao(noAntigo, nova) {
+    setLinhas((prev) => prev.map((a) => (a.no === noAntigo ? nova : a)));
+    setEditando((atual) => (atual && atual.no === noAntigo ? nova : atual));
+  }
+
   function acaoDeletada(no) {
     setLinhas((prev) => prev.filter((a) => a.no !== no));
     setEditando(null);
@@ -205,11 +212,15 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
                           {a.status === "closed" ? t("db.closed") : t("db.open")}
                         </span>
                       </td>
+                      {/* a key faz o input (nao-controlado) remontar quando o
+                          prazo muda no servidor -- sem ela ele continuaria
+                          mostrando o valor antigo depois de editar pelo popup */}
                       <td>
                         <input
                           type="date"
                           className="cell-date-input"
                           lang={dateInputLang}
+                          key={a.deadline || ""}
                           defaultValue={a.deadline || ""}
                           onChange={(e) => editarCampo(a.no, "deadline", e.target.value)}
                         />
@@ -233,6 +244,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
           acao={editando}
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
+          onSaved={substituirAcao}
           onDeleted={acaoDeletada}
         />
       )}

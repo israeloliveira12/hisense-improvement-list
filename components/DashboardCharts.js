@@ -19,6 +19,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
   const [tab, setTab] = useState("principal");
   const [status, setStatus] = useState("");
   const [dept, setDept] = useState("");
+  const [investimento, setInvestimento] = useState("");
   // Lista de departamentos pro seletor vem SEMPRE da carga inicial (sem
   // filtro) -- assim continua completa mesmo depois de filtrar por um
   // departamento so, permitindo trocar de departamento sem precisar limpar
@@ -27,12 +28,13 @@ export default function DashboardCharts({ initialStats, initialError }) {
     [...new Set((initialStats?.departamentosDetalhe || []).map((d) => d.label))].sort((a, b) => a.localeCompare(b))
   );
 
-  async function carregar(novoStatus, novoDept) {
+  async function carregar(novoStatus, novoDept, novoInvestimento) {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (novoStatus) params.set("status", novoStatus);
       if (novoDept) params.set("dept", novoDept);
+      if (novoInvestimento) params.set("investimento", novoInvestimento);
       const qs = params.toString();
       const res = await fetch("/api/dashboard" + (qs ? `?${qs}` : ""));
       const data = await res.json();
@@ -47,17 +49,22 @@ export default function DashboardCharts({ initialStats, initialError }) {
   }
 
   function atualizar() {
-    return carregar(status, dept);
+    return carregar(status, dept, investimento);
   }
 
   function mudarStatus(v) {
     setStatus(v);
-    carregar(v, dept);
+    carregar(v, dept, investimento);
   }
 
   function mudarDept(v) {
     setDept(v);
-    carregar(status, v);
+    carregar(status, v, investimento);
+  }
+
+  function mudarInvestimento(v) {
+    setInvestimento(v);
+    carregar(status, dept, v);
   }
 
   if (!stats) {
@@ -76,7 +83,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
   return (
     <>
       <Topbar title={t("dash.title")}>
-        <DashboardFilterMenu status={status} onChangeStatus={mudarStatus} departamentos={departamentos} dept={dept} onChangeDept={mudarDept} />
+        <DashboardFilterMenu status={status} onChangeStatus={mudarStatus} investimento={investimento} onChangeInvestimento={mudarInvestimento} departamentos={departamentos} dept={dept} onChangeDept={mudarDept} />
         <button className="btn btn-ghost" onClick={atualizar} disabled={loading}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path

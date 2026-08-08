@@ -18,36 +18,75 @@ import { setupPresentation, buildDeck } from "../lib/pptSlides";
 // converte o blob da foto em data URI + descobre largura/altura reais
 // (precisa das duas coisas: o data URI pro pptxgenjs, as dimensoes pra nao
 // distorcer a imagem dentro da caixa do slide)
+// ESTA LISTA E A CORRECAO DO "arquivo precisa de reparo".
+// O pptxgenjs deriva a EXTENSAO do arquivo interno de midia direto do MIME
+// do data URI ("image/png;base64,..." -> ppt/media/imageN.png). O proxy do
+// Drive devolve o mimeType que o Google reporta, entao um .webp (ou um
+// application/octet-stream, ou .avif/.heic) virava ppt/media/imageN.webp --
+// que o Chrome exibe numa boa, mas que o OOXML nao aceita: o PowerPoint
+// abre pedindo reparo e, ao "reparar", DESCARTA o slide que referenciava
+// aquela midia -- exatamente os slides que apareciam em branco.
+// Qualquer coisa fora desta lista e reconvertida via canvas antes de entrar
+// no arquivo.
+const MIMES_ACEITOS_PELO_POWERPOINT = new Set(["image/png", "image/jpeg", "image/gif"]);
+
+function lerComoDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("falha lendo a foto"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function blobParaFoto(blob) {
   // dimensoes: medidas por object URL (o navegador le direto do blob) em vez
   // de jogar o data URI inteiro no src -- com foto de 10 MB isso evita
   // segurar uma string de ~13 MB so pra descobrir largura e altura
   const objectUrl = URL.createObjectURL(blob);
-  let dimensoes;
+  let dataUrl;
+  let width;
+  let height;
   try {
-    dimensoes = await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-      img.onerror = () => reject(new Error("imagem inválida"));
-      img.src = objectUrl;
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("imagem inválida"));
+      el.src = objectUrl;
     });
+    width = img.naturalWidth;
+    height = img.naturalHeight;
+    if (!width || !height) throw new Error("imagem sem dimensão");
+
+    const tipo = String(blob.type || "").toLowerCase().split(";")[0].trim();
+    if (MIMES_ACEITOS_PELO_POWERPOINT.has(tipo)) {
+      dataUrl = await lerComoDataUrl(blob);
+    } else {
+      // reconverte pra JPEG preservando a resolucao original (so cai aqui
+      // quem ja estava quebrando o arquivo -- foto normal segue intacta)
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("canvas indisponível");
+      ctx.fillStyle = "#ffffff"; // JPEG nao tem transparencia -- fundo branco em vez de preto
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0);
+      dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+    }
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
 
-  const dataUrl = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error("falha lendo a foto"));
-    reader.readAsDataURL(blob);
-  });
+  // rede de seguranca: se mesmo assim o prefixo nao for um dos 3 aceitos,
+  // e melhor pular a foto do que entregar um .pptx que nao abre.
+  const semPrefixo = String(dataUrl).replace(/^data:/, "");
+  if (!/^image\/(png|jpeg|gif);base64,/.test(semPrefixo)) {
+    throw new Error(`formato de imagem não suportado no .pptx: ${semPrefixo.slice(0, 30)}`);
+  }
 
-  return {
-    // pptxgenjs quer "image/png;base64,..." -- sem o prefixo "data:"
-    data: String(dataUrl).replace(/^data:/, ""),
-    width: dimensoes.width,
-    height: dimensoes.height,
-  };
+  // pptxgenjs quer "image/png;base64,..." -- sem o prefixo "data:"
+  return { data: semPrefixo, width, height };
 }
 
 export async function baixarApresentacaoCompleta(acoes, onProgress) {

@@ -15,6 +15,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [acoes, setAcoes] = useState(initialAcoes);
   const [query, setQuery] = useState("");
   const [apenasOpen, setApenasOpen] = useState(false);
+  const [apenasInvestimento, setApenasInvestimento] = useState(false);
   const [deptoFiltro, setDeptoFiltro] = useState("");
   const [selected, setSelected] = useState(0);
   const [presenting, setPresenting] = useState(false);
@@ -36,16 +37,22 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     const q = query.trim().toLowerCase();
     return acoes.filter((a) => {
       if (apenasOpen && a.status !== "open") return false;
+      if (apenasInvestimento && a.investmentFlag !== "yes") return false;
       if (deptoFiltro && a.dept !== deptoFiltro) return false;
       if (q && !(a.no.toLowerCase().includes(q) || (a.item || "").toLowerCase().includes(q) || (a.dept || "").toLowerCase().includes(q))) {
         return false;
       }
       return true;
     });
-  }, [acoes, query, apenasOpen, deptoFiltro]);
+  }, [acoes, query, apenasOpen, apenasInvestimento, deptoFiltro]);
 
   function alternarApenasOpen(v) {
     setApenasOpen(v);
+    setSelected(0);
+  }
+
+  function alternarApenasInvestimento(v) {
+    setApenasInvestimento(v);
     setSelected(0);
   }
 
@@ -158,6 +165,15 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campo]: valor } : a)));
   }
 
+  // Chamado depois que o editor confirma o salvamento relendo a acao da
+  // planilha -- troca o objeto inteiro em vez de remendar campo a campo,
+  // entao slide, banco de dados e PPT passam a refletir exatamente o que
+  // ficou gravado (inclusive campos derivados, como target/investmentFlag).
+  function substituirAcao(noAntigo, nova) {
+    setAcoes((prev) => prev.map((a) => (a.no === noAntigo ? nova : a)));
+    setEditando((atual) => (atual && atual.no === noAntigo ? nova : atual));
+  }
+
   function acaoDeletada(no) {
     setAcoes((prev) => prev.filter((a) => a.no !== no));
     setEditando(null);
@@ -174,6 +190,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       setAcoes(data.acoes);
       setQuery("");
       setApenasOpen(false);
+      setApenasInvestimento(false);
       setDeptoFiltro("");
       const idx = data.acoes.findIndex((a) => a.no === no);
       setSelected(idx >= 0 ? idx : 0);
@@ -290,6 +307,8 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
         <FilterMenu
           apenasOpen={apenasOpen}
           onToggleApenasOpen={alternarApenasOpen}
+          apenasInvestimento={apenasInvestimento}
+          onToggleApenasInvestimento={alternarApenasInvestimento}
           departamentos={departamentos}
           deptoFiltro={deptoFiltro}
           onChangeDepto={mudarDeptoFiltro}
@@ -300,7 +319,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           onBaixarTudo={baixarTudo}
           onBaixarFiltrados={baixarFiltrados}
           podeBaixarUm={Boolean(acaoAtual)}
-          filtroAtivo={apenasOpen || Boolean(deptoFiltro) || Boolean(query.trim())}
+          filtroAtivo={apenasOpen || apenasInvestimento || Boolean(deptoFiltro) || Boolean(query.trim())}
           totalFiltrado={filtradas.length}
           gerando={Boolean(gerandoDeck)}
         />
@@ -397,6 +416,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           acao={editando}
           onClose={() => setEditando(null)}
           onFieldChanged={aplicarMudancaLocal}
+          onSaved={substituirAcao}
           onDeleted={acaoDeletada}
         />
       )}

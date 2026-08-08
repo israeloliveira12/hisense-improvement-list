@@ -7,11 +7,11 @@ import { useLanguage } from "../lib/i18n";
 // Closed), e um seletor de departamento -- os dois combinam com a busca
 // por texto que ja existia. Fica num dropdown do topbar, com uma bolinha
 // mostrando quantos filtros estao ativos.
-export default function FilterMenu({ apenasOpen, onToggleApenasOpen, departamentos, deptoFiltro, onChangeDepto }) {
+export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInvestimento, onToggleApenasInvestimento, departamentos, deptoFiltro, onChangeDepto }) {
   const { t } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
-  const ativos = (apenasOpen ? 1 : 0) + (deptoFiltro ? 1 : 0);
+  const ativos = (apenasOpen ? 1 : 0) + (apenasInvestimento ? 1 : 0) + (deptoFiltro ? 1 : 0);
 
   useEffect(() => {
     function onClickFora(e) {
@@ -44,6 +44,14 @@ export default function FilterMenu({ apenasOpen, onToggleApenasOpen, departament
             </span>
           </label>
 
+          <label className="filter-switch-row">
+            <span>{t("pres.somenteInvestimento")}</span>
+            <span className="switch-wrap">
+              <input type="checkbox" checked={apenasInvestimento} onChange={(e) => onToggleApenasInvestimento(e.target.checked)} />
+              <span className="switch-track"><span className="switch-knob" /></span>
+            </span>
+          </label>
+
           <div className="filter-divider" />
 
           <div className="filter-label">{t("pres.departamento")}</div>
@@ -60,6 +68,7 @@ export default function FilterMenu({ apenasOpen, onToggleApenasOpen, departament
               className="filter-clear"
               onClick={() => {
                 onToggleApenasOpen(false);
+                onToggleApenasInvestimento(false);
                 onChangeDepto("");
               }}
             >

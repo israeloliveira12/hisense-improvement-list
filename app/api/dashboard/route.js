@@ -8,7 +8,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || "";
     const dept = searchParams.get("dept") || "";
-    const stats = await getDashboardStats({ status, dept });
+    const investimento = searchParams.get("investimento") || "";
+    const stats = await getDashboardStats({ status, dept, investimento });
     return NextResponse.json(stats);
   } catch (e) {
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });

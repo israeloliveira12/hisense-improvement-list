@@ -9,11 +9,11 @@ import { useLanguage } from "../lib/i18n";
 // dashboard, sempre a que estiver selecionada no momento. Mesmo padrao
 // visual do FilterMenu da Apresentacao (dropdown no topbar, bolinha com
 // contagem de filtros ativos).
-export default function DashboardFilterMenu({ status, onChangeStatus, departamentos, dept, onChangeDept }) {
+export default function DashboardFilterMenu({ status, onChangeStatus, investimento, onChangeInvestimento, departamentos, dept, onChangeDept }) {
   const { t } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
-  const ativos = (status ? 1 : 0) + (dept ? 1 : 0);
+  const ativos = (status ? 1 : 0) + (investimento ? 1 : 0) + (dept ? 1 : 0);
 
   useEffect(() => {
     function onClickFora(e) {
@@ -47,6 +47,15 @@ export default function DashboardFilterMenu({ status, onChangeStatus, departamen
 
           <div className="filter-divider" />
 
+          <div className="filter-label">{t("dash.filtroInvestimento")}</div>
+          <select className="filter-select" value={investimento} onChange={(e) => onChangeInvestimento(e.target.value)}>
+            <option value="">{t("dash.filtroInvestTodos")}</option>
+            <option value="yes">{t("dash.filtroInvestSim")}</option>
+            <option value="no">{t("dash.filtroInvestNao")}</option>
+          </select>
+
+          <div className="filter-divider" />
+
           <div className="filter-label">{t("pres.departamento")}</div>
           <select className="filter-select" value={dept} onChange={(e) => onChangeDept(e.target.value)}>
             <option value="">{t("pres.todosDeptos")}</option>
@@ -61,6 +70,7 @@ export default function DashboardFilterMenu({ status, onChangeStatus, departamen
               className="filter-clear"
               onClick={() => {
                 onChangeStatus("");
+                onChangeInvestimento("");
                 onChangeDept("");
               }}
             >

@@ -44,13 +44,14 @@ function investimentoDisplayClient(itens) {
   return `${totalBRL} · ${situacao}`;
 }
 
-export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted }) {
+export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, onDeleted }) {
   const { t, dateInputLang } = useLanguage();
   const [tab, setTab] = useState("geral");
   const [status, setStatus] = useState({}); // { [key]: "saving"|"saved"|"error" }
   const [local, setLocal] = useState(acao);
   const [excluindo, setExcluindo] = useState(false);
   const [novoInv, setNovoInv] = useState(null); // null = form fechado; objeto = form aberto com os valores digitados
+  const [salvando, setSalvando] = useState(null); // texto do passo atual do salvamento, ou null
   // NADA sai do editor (nem PATCH pro servidor, nem propagacao pro
   // componente pai/apresentacao) antes de "Salvar e fechar" -- pedido
   // explicito do usuario, em duas rodadas: primeiro so os campos de texto,
@@ -107,9 +108,42 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   // Devolve false se algo falhou, pra quem chamou decidir NAO fechar (evita
   // perder a edicao silenciosamente).
   async function salvarPendentes() {
+    // FASE 0 -- troca de ID PRIMEIRO, nao por ultimo.
+    // Antes o rename era a ultima etapa e todo o resto usava o ID antigo;
+    // bastava a planilha ja ter sido tocada por outro caminho pra alguma
+    // chamada cair em "ação não encontrada" no meio do lote. Renomeando
+    // antes de tudo, existe UM unico ID valido dali pra frente (o novo) e
+    // todas as etapas seguintes usam ele. renameAcaoId (servidor) leva
+    // junto PPT_Detalhes (fotos, comentarios) e PPT_Passos, entao nada
+    // "descola" da acao.
+    const renomeio = pendentesRef.current["acao.no"];
+    delete pendentesRef.current["acao.no"];
+    const noOriginal = idOriginalRef.current;
+    if (renomeio) {
+      setSalvando(t("edit.salvandoId"));
+      try {
+        const res = await fetch(renomeio.url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(renomeio.body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        // ja vale a partir daqui -- se uma etapa seguinte falhar e o
+        // usuario tentar salvar de novo, nao tenta renomear duas vezes
+        idOriginalRef.current = data.no || renomeio.body.value;
+        setStatus((s) => ({ ...s, "acao.no": "saved" }));
+      } catch (e) {
+        setStatus((s) => ({ ...s, "acao.no": "error" }));
+        alert(`${t("common.error")}: ${e.message}`);
+        return false;
+      }
+    }
+
     const no = idOriginalRef.current;
 
     // FASE 1 -- passos marcados pra excluir (ja existiam no servidor).
+    setSalvando(t("common.saving"));
     for (const row of passosRemovidosRef.current) {
       try {
         const res = await fetch(`/api/passos/${row}`, { method: "DELETE" });
@@ -181,11 +215,12 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
     }
 
     // FASE 4 -- edicoes de campo simples (acao/detalhe/passo/investimento JA
-    // existentes), tudo em paralelo -- exceto troca de ID, tratada por
-    // ultimo (as outras URLs usam sempre o ID original, que so deixa de
-    // valer depois que a troca acontecer de verdade no servidor).
-    const renomeio = pendentesRef.current["acao.no"];
-    const entradas = Object.entries(pendentesRef.current).filter(([k]) => k !== "acao.no");
+    // existentes). O ID ja foi resolvido la na FASE 0, entao aqui basta
+    // reapontar as URLs que tinham sido agendadas com o ID antigo.
+    const entradas = Object.entries(pendentesRef.current).map(([k, v]) => [
+      k,
+      renomeio ? { ...v, url: v.url.replace(encodeURIComponent(noOriginal), encodeURIComponent(no)) } : v,
+    ]);
     pendentesRef.current = {};
 
     if (entradas.length) {
@@ -229,42 +264,43 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
       }, 1500);
     }
 
-    // FASE 5 -- troca de ID (se pendente), por ultimo.
-    let idFinal = no;
-    if (renomeio) {
-      try {
-        const res = await fetch(renomeio.url, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(renomeio.body),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-        idFinal = renomeio.body.value;
-      } catch (e) {
-        alert(`${t("common.error")}: ${e.message}`);
-        return false;
-      }
+    // FASE 5 -- CONFIRMACAO: le a acao de volta da planilha e usa ESSE
+    // resultado como verdade, em vez de remendar o estado da tela campo a
+    // campo torcendo pra ter dado certo. E isso que garante que reabrir o
+    // editor logo depois mostre o texto novo, e nao o antigo: tela, slide e
+    // PPT passam todos a refletir o que de fato ficou gravado.
+    setSalvando(t("edit.confirmandoSalvamento"));
+    let fresca = null;
+    try {
+      const res = await fetch(`/api/acoes/${encodeURIComponent(no)}`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      fresca = data.acao;
+    } catch (e) {
+      // O gravar em si ja deu certo -- so a releitura falhou (rede caindo,
+      // etc). Nao trava o usuario: cai pro remendo campo a campo e segue.
+      console.error("Releitura de confirmacao falhou", e);
     }
 
     // FASE 6 -- SO AGORA propaga pro componente pai (Apresentacao/Banco de
     // Dados). Nada disso aparecia la antes de chegar aqui.
-    if (renomeio) onFieldChanged && onFieldChanged(no, "no", idFinal);
-    Object.entries(parentUpdatesRef.current).forEach(([field, value]) => {
-      onFieldChanged && onFieldChanged(idFinal, field, value);
-    });
+    if (fresca) {
+      setLocal(fresca);
+      onSaved && onSaved(noOriginal, fresca);
+    } else {
+      if (renomeio) onFieldChanged && onFieldChanged(noOriginal, "no", no);
+      Object.entries(parentUpdatesRef.current).forEach(([field, value]) => {
+        onFieldChanged && onFieldChanged(no, field, value);
+      });
+      if (passosSujoRef.current) onFieldChanged && onFieldChanged(no, "steps", stepsParaArray(stepsAtual));
+      if (investimentoSujoRef.current || investimentoCriado) {
+        onFieldChanged && onFieldChanged(no, "investment", investimentoDisplayClient(itensAtual) || "Sem investimento");
+      }
+      if (investimentoCriado) onFieldChanged && onFieldChanged(no, "investmentFlag", "yes");
+    }
     parentUpdatesRef.current = {};
-    if (passosSujoRef.current) {
-      onFieldChanged && onFieldChanged(idFinal, "steps", stepsParaArray(stepsAtual));
-      passosSujoRef.current = false;
-    }
-    if (investimentoSujoRef.current || investimentoCriado) {
-      onFieldChanged && onFieldChanged(idFinal, "investment", investimentoDisplayClient(itensAtual) || "Sem investimento");
-      investimentoSujoRef.current = false;
-    }
-    if (investimentoCriado) onFieldChanged && onFieldChanged(idFinal, "investmentFlag", "yes");
-
-    idOriginalRef.current = idFinal;
+    passosSujoRef.current = false;
+    investimentoSujoRef.current = false;
     return true;
   }
 
@@ -274,11 +310,20 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   // digitado, ainda nao "commitado" via onBlur, entra na fila) e so fecha
   // de verdade se o flush inteiro deu certo.
   async function salvarEFechar() {
+    if (salvando) return; // ja esta salvando -- clique duplo nao dispara um 2o lote
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
-    const ok = await salvarPendentes();
-    if (ok) onClose();
+    // deixa o onBlur acima rodar (ele agenda o campo que estava focado)
+    // antes de ler a fila de pendencias
+    await new Promise((r) => setTimeout(r, 0));
+    setSalvando(t("common.saving"));
+    try {
+      const ok = await salvarPendentes();
+      if (ok) onClose();
+    } finally {
+      setSalvando(null);
+    }
   }
 
   function salvarAcao(field, value) {
@@ -366,14 +411,23 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
   }
 
   return (
-    <div className="editor-overlay" onClick={salvarEFechar}>
+    // Clicar FORA do popup nao fecha nada, de proposito: ja aconteceu de um
+    // clique fora sem querer fechar o editor no meio de uma edicao. So o X e
+    // o "Salvar e fechar" fecham.
+    <div className="editor-overlay">
       <div className="editor-drawer" onClick={(e) => e.stopPropagation()}>
+        {salvando && (
+          <div className="editor-salvando" role="status" aria-live="polite">
+            <span className="editor-salvando-spinner" />
+            {salvando}
+          </div>
+        )}
         <div className="editor-head">
           <div>
             <div className="editor-no">{t("edit.acaoNo")} {local.no}</div>
             <h4>{local.item}</h4>
           </div>
-          <button type="button" className="editor-close" onClick={salvarEFechar}>✕</button>
+          <button type="button" className="editor-close" onClick={salvarEFechar} disabled={Boolean(salvando)}>✕</button>
         </div>
 
         <div className="editor-status-row">
@@ -445,29 +499,29 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
                   <input defaultValue={local.process} onBlur={(e) => salvarAcao("process", e.target.value)} />
                 </div>
               </div>
+              {/* O campo "Target" saiu daqui: era o unico so-leitura no meio
+                  de campos editaveis e ja e calculado sozinho (ver
+                  computeTarget no servidor) -- quem precisa dele ve no
+                  Dashboard. Os campos foram reagrupados em pares. */}
               <div className="editor-row2">
                 <div className="editor-field">
                   <label>{t("edit.fieldOccur")} <SaveDot status={status["acao.occur"]} /></label>
                   <input type="date" lang={dateInputLang} defaultValue={local.occur} onChange={(e) => salvarAcao("occur", e.target.value)} />
                 </div>
                 <div className="editor-field">
-                  <label>{t("edit.fieldTarget")}</label>
-                  <div className="editor-readonly">{local.target ? t("edit.valueTarget") : t("edit.valueNonTarget")} <span className="hint">{t("edit.targetHint")}</span></div>
+                  <label>{t("edit.fieldDeadlineOriginal")} <SaveDot status={status["acao.deadlineOriginal"]} /></label>
+                  <input type="date" lang={dateInputLang} defaultValue={local.deadlineOriginal} onChange={(e) => salvarAcao("deadlineOriginal", e.target.value)} />
                 </div>
               </div>
               <div className="editor-row2">
                 <div className="editor-field">
-                  <label>{t("edit.fieldDeadlineOriginal")} <SaveDot status={status["acao.deadlineOriginal"]} /></label>
-                  <input type="date" lang={dateInputLang} defaultValue={local.deadlineOriginal} onChange={(e) => salvarAcao("deadlineOriginal", e.target.value)} />
-                </div>
-                <div className="editor-field">
                   <label>{t("edit.fieldNewDeadline")} <SaveDot status={status["acao.deadline"]} /></label>
                   <input type="date" lang={dateInputLang} defaultValue={local.deadline} onChange={(e) => salvarAcao("deadline", e.target.value)} />
                 </div>
-              </div>
-              <div className="editor-field">
-                <label>{t("edit.fieldDelayReason")} <SaveDot status={status["acao.delayReason"]} /></label>
-                <input defaultValue={local.delayReason} onBlur={(e) => salvarAcao("delayReason", e.target.value)} />
+                <div className="editor-field">
+                  <label>{t("edit.fieldDelayReason")} <SaveDot status={status["acao.delayReason"]} /></label>
+                  <input defaultValue={local.delayReason} onBlur={(e) => salvarAcao("delayReason", e.target.value)} />
+                </div>
               </div>
             </>
           )}
@@ -632,11 +686,11 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
         </div>
 
         <div className="editor-footer">
-          <button type="button" className="btn btn-primary editor-save-btn" onClick={salvarEFechar}>
+          <button type="button" className="btn btn-primary editor-save-btn" onClick={salvarEFechar} disabled={Boolean(salvando)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
             </svg>
-            {t("pres.salvarEFechar")}
+            {salvando || t("pres.salvarEFechar")}
           </button>
         </div>
 

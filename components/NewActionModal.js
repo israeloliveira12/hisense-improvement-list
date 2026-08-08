@@ -40,7 +40,9 @@ export default function NewActionModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="editor-overlay" onClick={onClose}>
+    // Igual ao editor de acao: clicar fora NAO fecha, pra nao perder o que
+    // ja foi digitado num clique sem querer.
+    <div className="editor-overlay">
       <div className="editor-drawer" onClick={(e) => e.stopPropagation()}>
         <div className="editor-head">
           <div>
