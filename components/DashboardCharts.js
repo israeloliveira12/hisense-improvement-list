@@ -35,7 +35,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
   if (!stats) {
     return (
       <>
-        <Topbar title={t("dash.title")} sub={t("dash.sub")} />
+        <Topbar title={t("dash.title")} />
         <div className="config-banner">
           <b>{t("config.title")}</b>
           {t("config.desc")}
@@ -47,7 +47,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
 
   return (
     <>
-      <Topbar title={t("dash.title")} sub={t("dash.sub")}>
+      <Topbar title={t("dash.title")}>
         <button className="btn btn-ghost" onClick={atualizar} disabled={loading}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path

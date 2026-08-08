@@ -86,7 +86,7 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
 
   return (
     <>
-      <Topbar title={t("db.title")} sub={t("db.sub")}>
+      <Topbar title={t("db.title")}>
         <a className="btn btn-outline" href={SHEET_URL} target="_blank" rel="noopener noreferrer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

@@ -37,7 +37,7 @@ export default function AppShell({ children }) {
           </svg>
         </button>
       )}
-      <div className="main">{children}</div>
+      <div className={"main" + (pronto && collapsed ? " sidebar-hidden" : "")}>{children}</div>
     </div>
   );
 }

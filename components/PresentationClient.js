@@ -216,7 +216,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
 
   return (
     <>
-      <Topbar title={t("pres.title")} sub={t("pres.sub", { n: acoes.length })}>
+      <Topbar title={t("pres.title")}>
         <FilterMenu
           apenasOpen={apenasOpen}
           onToggleApenasOpen={alternarApenasOpen}

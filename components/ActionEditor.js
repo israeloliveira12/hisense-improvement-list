@@ -141,14 +141,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
             <div className="editor-no">AÇÃO Nº {local.no}</div>
             <h4>{local.item}</h4>
           </div>
-          <div className="editor-head-actions">
-            <button type="button" className="editor-delete" onClick={excluirAcao} disabled={excluindo} title={t("pres.excluirAcao")}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h12z" />
-              </svg>
-            </button>
-            <button type="button" className="editor-close" onClick={onClose}>✕</button>
-          </div>
+          <button type="button" className="editor-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="editor-status-row">
@@ -347,6 +340,15 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onDeleted 
               <p className="editor-note">Adicionar um item de investimento novo ainda não é possível pelo site — edite direto na planilha por enquanto.</p>
             </>
           )}
+        </div>
+
+        <div className="editor-danger-zone">
+          <button type="button" className="editor-delete-full" onClick={excluirAcao} disabled={excluindo}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h12z" />
+            </svg>
+            {t("pres.excluirAcao")}
+          </button>
         </div>
       </div>
     </div>

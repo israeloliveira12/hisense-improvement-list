@@ -66,11 +66,14 @@ a { color: inherit; }
 }
 .sidebar-collapse-btn:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-tint); }
 .sidebar-reopen {
-  position: fixed; left: 12px; top: 16px; z-index: 30; width: 30px; height: 30px; border-radius: 8px;
+  position: fixed; left: 15px; top: 15px; z-index: 30; width: 30px; height: 30px; border-radius: 8px;
   border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
   display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow);
 }
 .sidebar-reopen:hover { color: var(--purple); border-color: var(--purple); }
+/* com a sidebar oculta, reserva um respiro no topbar pra seta de reabrir
+   nao ficar em cima do titulo da pagina. */
+.main.sidebar-hidden .topbar { padding-left: 60px; }
 .brand-mark {
   width: 26px; height: 26px; border-radius: 7px;
   background: linear-gradient(135deg, var(--purple), var(--blue));
@@ -595,8 +598,12 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   display: flex; justify-content: center; align-items: center; padding: 28px;
 }
 .editor-drawer {
-  width: min(920px, 100%); max-height: min(88vh, 800px); background: var(--surface);
-  overflow-y: auto; border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
+  /* altura FIXA (nao max-height) -- o popup fica sempre do mesmo tamanho
+     grande, nao encolhe/cresce conforme a aba selecionada tem mais ou
+     menos campo. So o corpo (.editor-body) rola por dentro quando o
+     conteudo da aba nao cabe -- cabecalho/abas ficam fixos no lugar. */
+  width: min(920px, 100%); height: min(88vh, 800px); background: var(--surface);
+  border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.3);
   display: flex; flex-direction: column; animation: editorPop .16s ease-out;
 }
 @keyframes editorPop {
@@ -609,14 +616,22 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .editor-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .editor-no { font-size: 10.5px; font-weight: 700; color: var(--text-faint); letter-spacing: .03em; }
 .editor-head h4 { margin: 3px 0 0; font-size: 15px; }
-.editor-head-actions { display: flex; align-items: center; gap: 6px; flex: none; }
-.editor-close, .editor-delete {
+.editor-close {
   display: flex; align-items: center; justify-content: center;
   border: none; background: var(--bg); color: var(--text-muted); width: 28px; height: 28px; border-radius: 8px; cursor: pointer; flex: none;
 }
 .editor-close:hover { background: var(--purple-tint); color: var(--purple); }
-.editor-delete:hover { background: var(--red-tint, #fbeaea); color: var(--red); }
-.editor-delete:disabled { opacity: .5; cursor: not-allowed; }
+
+/* excluir a acao mora longe do X de proposito (rodape, nao no cabecalho) --
+   ficava facil de clicar sem querer perto do fechar. */
+.editor-danger-zone { padding: 12px 20px; border-top: 1px solid var(--border); flex: none; }
+.editor-delete-full {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 0; border-radius: 8px; border: 1px solid var(--border); background: none;
+  color: var(--text-faint); font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.editor-delete-full:hover { background: var(--red-tint, #fbeaea); color: var(--red); border-color: var(--red); }
+.editor-delete-full:disabled { opacity: .5; cursor: not-allowed; }
 
 .editor-status-row { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
 .editor-status-row select { font-size: 12px; border-radius: 7px; border: 1px solid var(--border); padding: 6px 8px; background: var(--bg); color: var(--text); }
@@ -625,14 +640,14 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .editor-tabs button { border: none; background: none; padding: 8px 10px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; }
 .editor-tabs button.active { color: var(--purple); border-color: var(--purple); }
 
-.editor-body { padding: 16px 20px 30px; flex: 1; }
+.editor-body { padding: 16px 20px 30px; flex: 1; min-height: 0; overflow-y: auto; }
 .editor-field { margin-bottom: 14px; }
 .editor-field label { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--purple); letter-spacing: .03em; text-transform: uppercase; margin-bottom: 5px; }
 .editor-field input, .editor-field textarea, .editor-field select {
   width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
   background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit;
 }
-.editor-field textarea { min-height: 110px; resize: vertical; }
+.editor-field textarea { min-height: 64px; resize: vertical; }
 .editor-row2 { display: flex; gap: 10px; }
 .editor-row2 .editor-field { flex: 1; }
 .editor-readonly { padding: 8px 10px; border-radius: 8px; background: var(--bg); font-size: 12.5px; color: var(--text-muted); }
