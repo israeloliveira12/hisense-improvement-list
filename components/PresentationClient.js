@@ -324,12 +324,6 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
               uploadingSlot={uploadingSlot}
               onLightboxOpenChange={(aberto) => { lightboxAbertoRef.current = aberto; }}
             />
-            {presenting && (
-              <div className="present-hint">
-                ← → · Esc · {selected + 1} / {filtradas.length}
-                {Math.round(fsZoom * 100) !== 100 ? ` · ${Math.round(fsZoom * 100)}%` : ""}
-              </div>
-            )}
           </div>
         </div>
       </div>

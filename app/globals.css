@@ -511,7 +511,9 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .kpi-sub.warn { color: var(--amber); }
 .kpi-sub.muted { color: var(--text-faint); }
 
-.chart-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 14px; margin-bottom: 14px; }
+.chart-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 14px; margin-bottom: 14px; align-items: stretch; }
+.chart-grid > .chart-card { display: flex; flex-direction: column; height: 100%; }
+.chart-grid > .chart-card .footer-note { margin-top: auto; }
 .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
 .chart-card + .chart-card { margin-top: 14px; }
 .chart-card h3 { margin: 0 0 3px; font-size: 13.5px; }
@@ -527,6 +529,9 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
 .bar-row .b-label { width: 96px; flex: none; font-size: 11.5px; color: var(--text-muted); font-weight: 600; text-align: right; }
 .bar-row .b-track { flex: 1; background: var(--bg); border-radius: 5px; height: 16px; position: relative; overflow: hidden; }
 .bar-row .b-fill { height: 100%; border-radius: 5px; background: var(--purple); }
+.bar-row .b-track-stacked { display: flex; }
+.bar-row .b-fill-closed { height: 100%; background: var(--green); }
+.bar-row .b-fill-open { height: 100%; background: var(--amber); }
 .bar-row .b-val { width: 30px; flex: none; font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .auditor-rate { width: 40px; flex: none; font-size: 11px; font-weight: 700; color: var(--green); text-align: right; }
 
@@ -602,13 +607,6 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 920px; }
   background: var(--bg); color: var(--text); font-size: 13.5px; margin-bottom: 12px;
 }
 .login-error { font-size: 12px; color: var(--red); margin: -4px 0 12px; }
-
-/* ================= APRESENTAR (tela cheia) ================= */
-.present-hint {
-  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
-  color: #a99cd6; font-size: 12px; font-weight: 600; background: rgba(23,21,31,.7);
-  padding: 5px 12px; border-radius: 20px;
-}
 
 /* ================= EDITOR DE AÇÃO (modal) ================= */
 .editor-overlay {

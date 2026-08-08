@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Topbar from "./Topbar";
+import DashboardFilterMenu from "./DashboardFilterMenu";
 import DashboardPrincipal from "./dashboard/DashboardPrincipal";
 import DashboardInvestimentos from "./dashboard/DashboardInvestimentos";
 import DashboardForecast from "./dashboard/DashboardForecast";
@@ -16,11 +17,24 @@ export default function DashboardCharts({ initialStats, initialError }) {
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("principal");
+  const [status, setStatus] = useState("");
+  const [dept, setDept] = useState("");
+  // Lista de departamentos pro seletor vem SEMPRE da carga inicial (sem
+  // filtro) -- assim continua completa mesmo depois de filtrar por um
+  // departamento so, permitindo trocar de departamento sem precisar limpar
+  // o filtro primeiro.
+  const [departamentos] = useState(() =>
+    [...new Set((initialStats?.departamentosDetalhe || []).map((d) => d.label))].sort((a, b) => a.localeCompare(b))
+  );
 
-  async function atualizar() {
+  async function carregar(novoStatus, novoDept) {
     setLoading(true);
     try {
-      const res = await fetch("/api/dashboard");
+      const params = new URLSearchParams();
+      if (novoStatus) params.set("status", novoStatus);
+      if (novoDept) params.set("dept", novoDept);
+      const qs = params.toString();
+      const res = await fetch("/api/dashboard" + (qs ? `?${qs}` : ""));
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setStats(data);
@@ -30,6 +44,20 @@ export default function DashboardCharts({ initialStats, initialError }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function atualizar() {
+    return carregar(status, dept);
+  }
+
+  function mudarStatus(v) {
+    setStatus(v);
+    carregar(v, dept);
+  }
+
+  function mudarDept(v) {
+    setDept(v);
+    carregar(status, v);
   }
 
   if (!stats) {
@@ -48,6 +76,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
   return (
     <>
       <Topbar title={t("dash.title")}>
+        <DashboardFilterMenu status={status} onChangeStatus={mudarStatus} departamentos={departamentos} dept={dept} onChangeDept={mudarDept} />
         <button className="btn btn-ghost" onClick={atualizar} disabled={loading}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path
