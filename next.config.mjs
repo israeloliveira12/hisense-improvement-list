@@ -5,7 +5,7 @@ const nextConfig = {
   // da funcao serverless -- marcando como "external" ele so faz
   // require() normal em tempo de execucao, sem tentar empacotar.
   experimental: {
-    serverComponentsExternalPackages: ["pptxgenjs", "image-size"],
+    serverComponentsExternalPackages: ["pptxgenjs", "image-size", "exceljs"],
   },
   // pptxgenjs agora tambem roda no NAVEGADOR (baixar apresentacao completa,
   // ver components/baixarDeck.js). O build do lado do cliente quebrava com

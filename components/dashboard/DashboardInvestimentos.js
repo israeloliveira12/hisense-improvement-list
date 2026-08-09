@@ -29,10 +29,19 @@ function MoneyRow({ label, color, pct, valor }) {
   );
 }
 
-export default function DashboardInvestimentos({ stats }) {
+export default function DashboardInvestimentos({ stats, mostrarRecusados }) {
   const { t } = useLanguage();
-  const { investimento, total } = stats;
-  const { valorTotal, aprovado, recusado, pendente, totalItens, acoesComInvestimento, acoesSemInvestimento } = investimento;
+  const { investimento, total, itensDetalhados } = stats;
+  const { aprovado, recusado, pendente, acoesComInvestimento, acoesSemInvestimento } = investimento;
+
+  // "Recusado" e uma preferencia de EXIBICAO (toggle no topbar do
+  // Dashboard, ver DashboardCharts.js), nao um filtro de servidor -- os
+  // itens ja vieram todos em `itensDetalhados`, aqui so decide se entram
+  // nas somas/contagens. Com o toggle desligado, Valor Total/qtd de itens
+  // somam SOMENTE Aprovado+Pendente (nao inclui Recusado); ligado, some tudo.
+  const itensRecusados = (itensDetalhados || []).filter((it) => it.requestApproval === "Declined");
+  const totalItensVisiveis = (itensDetalhados || []).length - (mostrarRecusados ? 0 : itensRecusados.length);
+  const valorTotal = aprovado + pendente + (mostrarRecusados ? recusado : 0);
   const pctAprovado = valorTotal ? (aprovado / valorTotal) * 100 : 0;
   const pctRecusado = valorTotal ? (recusado / valorTotal) * 100 : 0;
   const pctPendente = valorTotal ? (pendente / valorTotal) * 100 : 0;
@@ -40,34 +49,38 @@ export default function DashboardInvestimentos({ stats }) {
 
   return (
     <>
-      <div className="kpi-row">
+      <div className="kpi-row" style={{ gridTemplateColumns: `repeat(${mostrarRecusados ? 4 : 3}, 1fr)` }}>
         <div className="kpi-card">
           <div className="kpi-label">{t("dash.valorTotal")}</div>
           <div className="kpi-value" style={{ fontSize: 22 }}>{formatBRL(valorTotal)}</div>
-          <div className="kpi-sub muted">{totalItens} {t("dash.itens")}</div>
+          <div className="kpi-sub muted">{totalItensVisiveis} {t("dash.itens")}</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">{t("dash.aprovado")}</div>
           <div className="kpi-value" style={{ fontSize: 22, color: "var(--green)" }}>{formatBRL(aprovado)}</div>
         </div>
-        <div className="kpi-card">
-          <div className="kpi-label">{t("dash.recusado")}</div>
-          <div className="kpi-value" style={{ fontSize: 22, color: "var(--red)" }}>{formatBRL(recusado)}</div>
-        </div>
+        {mostrarRecusados && (
+          <div className="kpi-card">
+            <div className="kpi-label">{t("dash.recusado")}</div>
+            <div className="kpi-value" style={{ fontSize: 22, color: "var(--red)" }}>{formatBRL(recusado)}</div>
+          </div>
+        )}
         <div className="kpi-card">
           <div className="kpi-label">{t("dash.pendente")}</div>
           <div className="kpi-value" style={{ fontSize: 22, color: "var(--amber)" }}>{formatBRL(pendente)}</div>
         </div>
       </div>
 
-      <DashboardInvestimentoKanban stats={stats} />
+      <DashboardInvestimentoKanban stats={stats} mostrarRecusados={mostrarRecusados} />
 
       <div className="chart-card">
         <h3>{t("dash.investimento")}</h3>
-        <div className="chart-sub">{t("dash.itensSolicitados", { n: totalItens, valor: formatBRL(valorTotal) })}</div>
+        <div className="chart-sub">{t("dash.itensSolicitados", { n: totalItensVisiveis, valor: formatBRL(valorTotal) })}</div>
         <MoneyRow label={t("dash.aprovado")} color="var(--green)" pct={pctAprovado} valor={formatBRL(aprovado)} />
         <MoneyRow label={t("dash.pendente")} color="var(--amber)" pct={pctPendente} valor={formatBRL(pendente)} />
-        <MoneyRow label={t("dash.recusado")} color="var(--red)" pct={pctRecusado} valor={formatBRL(recusado)} />
+        {mostrarRecusados && (
+          <MoneyRow label={t("dash.recusado")} color="var(--red)" pct={pctRecusado} valor={formatBRL(recusado)} />
+        )}
       </div>
 
       <div className="chart-card">

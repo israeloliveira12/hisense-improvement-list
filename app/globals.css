@@ -568,16 +568,8 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 .kanban-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
 .kanban-person { font-size: 10.5px; color: var(--text-muted); }
 
-.kanban-decisao-titulo { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-faint); margin: 14px 0 6px; }
-.kanban-pipeline-titulo { margin-top: 18px; }
-/* Pendente/Recusado: so 2 colunas, entao usa a largura das 2 primeiras
-   colunas do pipeline (2/3 do card) em vez de esticar pra ocupar tudo --
-   fica visualmente mais "leve" que o pipeline de 3, que e o bloco principal. */
-.kanban-board-decisao { grid-template-columns: repeat(2, 1fr); max-width: 66%; }
-
 @media (max-width: 900px) {
-  .kanban-board { grid-template-columns: 1fr; }
-  .kanban-board-decisao { max-width: 100%; }
+  .kanban-board { grid-template-columns: 1fr !important; }
 }
 
 .forecast-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; padding-top: 20px; overflow-x: auto; }

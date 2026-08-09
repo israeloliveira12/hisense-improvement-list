@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Topbar from "./Topbar";
 import DashboardFilterMenu from "./DashboardFilterMenu";
 import DashboardPrincipal from "./dashboard/DashboardPrincipal";
@@ -20,6 +20,19 @@ export default function DashboardCharts({ initialStats, initialError }) {
   const [status, setStatus] = useState("");
   const [dept, setDept] = useState("");
   const [investimento, setInvestimento] = useState("");
+  // Preferencia de exibicao (nao e um filtro que muda a chamada ao servidor
+  // -- so decide se os itens "Declined" aparecem nos cartoes e no kanban de
+  // Investimentos). Comeca desligada (o pedido do usuario foi "geralmente
+  // eu nao mostro") e fica salva no navegador, igual o tema.
+  const [mostrarRecusados, setMostrarRecusados] = useState(false);
+  useEffect(() => {
+    const salvo = localStorage.getItem("hisense_mostrar_recusados");
+    if (salvo === "1") setMostrarRecusados(true);
+  }, []);
+  function alternarMostrarRecusados(v) {
+    setMostrarRecusados(v);
+    localStorage.setItem("hisense_mostrar_recusados", v ? "1" : "0");
+  }
   // Lista de departamentos pro seletor vem SEMPRE da carga inicial (sem
   // filtro) -- assim continua completa mesmo depois de filtrar por um
   // departamento so, permitindo trocar de departamento sem precisar limpar
@@ -83,7 +96,12 @@ export default function DashboardCharts({ initialStats, initialError }) {
   return (
     <>
       <Topbar title={t("dash.title")}>
-        <DashboardFilterMenu status={status} onChangeStatus={mudarStatus} investimento={investimento} onChangeInvestimento={mudarInvestimento} departamentos={departamentos} dept={dept} onChangeDept={mudarDept} />
+        <DashboardFilterMenu
+          status={status} onChangeStatus={mudarStatus}
+          investimento={investimento} onChangeInvestimento={mudarInvestimento}
+          departamentos={departamentos} dept={dept} onChangeDept={mudarDept}
+          mostrarRecusados={mostrarRecusados} onToggleMostrarRecusados={alternarMostrarRecusados}
+        />
         <button className="btn btn-ghost" onClick={atualizar} disabled={loading}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path
@@ -115,7 +133,7 @@ export default function DashboardCharts({ initialStats, initialError }) {
           </div>
 
           {tab === "principal" && <DashboardPrincipal stats={stats} />}
-          {tab === "investimentos" && <DashboardInvestimentos stats={stats} />}
+          {tab === "investimentos" && <DashboardInvestimentos stats={stats} mostrarRecusados={mostrarRecusados} />}
           {tab === "forecast" && <DashboardForecast stats={stats} />}
           {tab === "auditor" && <DashboardAuditor stats={stats} />}
           {tab === "aging" && <DashboardAging stats={stats} />}

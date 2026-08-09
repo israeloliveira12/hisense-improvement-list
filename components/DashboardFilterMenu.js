@@ -9,7 +9,7 @@ import { useLanguage } from "../lib/i18n";
 // dashboard, sempre a que estiver selecionada no momento. Mesmo padrao
 // visual do FilterMenu da Apresentacao (dropdown no topbar, bolinha com
 // contagem de filtros ativos).
-export default function DashboardFilterMenu({ status, onChangeStatus, investimento, onChangeInvestimento, departamentos, dept, onChangeDept }) {
+export default function DashboardFilterMenu({ status, onChangeStatus, investimento, onChangeInvestimento, departamentos, dept, onChangeDept, mostrarRecusados, onToggleMostrarRecusados }) {
   const { t, tv } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
@@ -53,6 +53,16 @@ export default function DashboardFilterMenu({ status, onChangeStatus, investimen
             <option value="yes">{t("dash.filtroInvestSim")}</option>
             <option value="no">{t("dash.filtroInvestNao")}</option>
           </select>
+
+          <div className="filter-divider" />
+
+          <label className="filter-switch-row">
+            <span>{t("dash.mostrarRecusados")}</span>
+            <span className="switch-wrap">
+              <input type="checkbox" checked={mostrarRecusados} onChange={(e) => onToggleMostrarRecusados(e.target.checked)} />
+              <span className="switch-track"><span className="switch-knob" /></span>
+            </span>
+          </label>
 
           <div className="filter-divider" />
 

@@ -70,7 +70,12 @@ function KanbanColuna({ titulo, cor, itens }) {
   );
 }
 
-export default function DashboardInvestimentoKanban({ stats }) {
+// Uma unica fileira de cartoes: Recusado (so quando o toggle "mostrar
+// recusados" do topbar do Dashboard esta ligado, entrando ANTES de
+// Pendente) + Pendente + as 3 etapas do pipeline de compra. Antes eram 2
+// fileiras separadas (decisao + pipeline) -- virou uma so, seguindo o
+// pedido do usuario de ver tudo lado a lado num unico bloco.
+export default function DashboardInvestimentoKanban({ stats, mostrarRecusados }) {
   const { t } = useLanguage();
   const itens = stats.itensDetalhados || [];
 
@@ -78,23 +83,29 @@ export default function DashboardInvestimentoKanban({ stats }) {
   const recusados = itens.filter((it) => it.requestApproval === "Declined");
   const pendentes = itens.filter((it) => it.requestApproval !== "Approved" && it.requestApproval !== "Declined");
 
+  const colunas = [];
+  if (mostrarRecusados) {
+    colunas.push({ key: "declined", titulo: t("dash.recusado"), cor: "var(--red)", itens: recusados });
+  }
+  colunas.push({ key: "pending", titulo: t("dash.etapaPendenteAnalise"), cor: "var(--amber)", itens: pendentes });
+  COLUNAS_PIPELINE.forEach((col) => {
+    colunas.push({
+      key: col.key,
+      titulo: t(col.labelKey),
+      cor: col.color,
+      itens: aprovados.filter((it) => normalizarEtapa(it.stage) === col.key),
+    });
+  });
+
   return (
     <div className="chart-card">
       <h3>{t("dash.kanbanTitulo")}</h3>
       <div className="chart-sub">{t("dash.kanbanSub")}</div>
 
-      <div className="kanban-decisao-titulo">{t("dash.kanbanDecisaoTitulo")}</div>
-      <div className="kanban-board kanban-board-decisao">
-        <KanbanColuna titulo={t("dash.pendenteAprovacao")} cor="var(--amber)" itens={pendentes} />
-        <KanbanColuna titulo={t("dash.recusado")} cor="var(--red)" itens={recusados} />
-      </div>
-
-      <div className="kanban-decisao-titulo kanban-pipeline-titulo">{t("dash.kanbanPipelineTitulo")}</div>
-      <div className="kanban-board">
-        {COLUNAS_PIPELINE.map((col) => {
-          const itensColuna = aprovados.filter((it) => normalizarEtapa(it.stage) === col.key);
-          return <KanbanColuna key={col.key} titulo={t(col.labelKey)} cor={col.color} itens={itensColuna} />;
-        })}
+      <div className="kanban-board" style={{ gridTemplateColumns: `repeat(${colunas.length}, 1fr)` }}>
+        {colunas.map((col) => (
+          <KanbanColuna key={col.key} titulo={col.titulo} cor={col.cor} itens={col.itens} />
+        ))}
       </div>
     </div>
   );
