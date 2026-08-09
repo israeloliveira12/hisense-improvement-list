@@ -1,6 +1,6 @@
 import { getAcoes } from "../../../../lib/googleSheets";
 import { buildAuditWorkbook } from "../../../../lib/excelExport";
-import { translate } from "../../../../lib/i18n";
+import { translate } from "../../../../lib/i18nCore";
 
 export const maxDuration = 30;
 
