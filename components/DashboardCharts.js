@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Topbar from "./Topbar";
 import DashboardFilterMenu from "./DashboardFilterMenu";
 import DashboardPrincipal from "./dashboard/DashboardPrincipal";
@@ -11,12 +12,28 @@ import DashboardAging from "./dashboard/DashboardAging";
 import DashboardDepartamentos from "./dashboard/DashboardDepartamentos";
 import { useLanguage } from "../lib/i18n";
 
+const TABS_VALIDAS = ["principal", "investimentos", "forecast", "auditor", "aging", "departamentos"];
+
 export default function DashboardCharts({ initialStats, initialError }) {
   const { t } = useLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [stats, setStats] = useState(initialStats);
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState("principal");
+  // A aba fica refletida na URL (?tab=...) -- assim um F5 volta pra mesma
+  // aba em vez de sempre resetar pra "Principal" (useState sozinho nao
+  // sobrevive a um reload de pagina de verdade).
+  const tabDaUrl = searchParams.get("tab");
+  const [tab, setTab] = useState(TABS_VALIDAS.includes(tabDaUrl) ? tabDaUrl : "principal");
+
+  function mudarTab(novaTab) {
+    setTab(novaTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", novaTab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
   const [status, setStatus] = useState("");
   const [dept, setDept] = useState("");
   const [investimento, setInvestimento] = useState("");
@@ -124,12 +141,12 @@ export default function DashboardCharts({ initialStats, initialError }) {
       <div className="view">
         <div className="view-inner">
           <div className="dash-tabs">
-            <button className={tab === "principal" ? "active" : ""} onClick={() => setTab("principal")}>{t("dash.tabPrincipal")}</button>
-            <button className={tab === "investimentos" ? "active" : ""} onClick={() => setTab("investimentos")}>{t("dash.tabInvestimentos")}</button>
-            <button className={tab === "forecast" ? "active" : ""} onClick={() => setTab("forecast")}>{t("dash.tabForecast")}</button>
-            <button className={tab === "auditor" ? "active" : ""} onClick={() => setTab("auditor")}>{t("dash.tabAuditor")}</button>
-            <button className={tab === "aging" ? "active" : ""} onClick={() => setTab("aging")}>{t("dash.tabAging")}</button>
-            <button className={tab === "departamentos" ? "active" : ""} onClick={() => setTab("departamentos")}>{t("dash.tabDepartamentos")}</button>
+            <button className={tab === "principal" ? "active" : ""} onClick={() => mudarTab("principal")}>{t("dash.tabPrincipal")}</button>
+            <button className={tab === "investimentos" ? "active" : ""} onClick={() => mudarTab("investimentos")}>{t("dash.tabInvestimentos")}</button>
+            <button className={tab === "forecast" ? "active" : ""} onClick={() => mudarTab("forecast")}>{t("dash.tabForecast")}</button>
+            <button className={tab === "auditor" ? "active" : ""} onClick={() => mudarTab("auditor")}>{t("dash.tabAuditor")}</button>
+            <button className={tab === "aging" ? "active" : ""} onClick={() => mudarTab("aging")}>{t("dash.tabAging")}</button>
+            <button className={tab === "departamentos" ? "active" : ""} onClick={() => mudarTab("departamentos")}>{t("dash.tabDepartamentos")}</button>
           </div>
 
           {tab === "principal" && <DashboardPrincipal stats={stats} />}

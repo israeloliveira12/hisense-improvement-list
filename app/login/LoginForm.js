@@ -25,7 +25,7 @@ export default function LoginForm() {
         setError(data.error || "Não foi possível entrar.");
         return;
       }
-      const next = searchParams.get("next") || "/apresentacao";
+      const next = searchParams.get("next") || "/dashboard";
       router.push(next);
       router.refresh();
     } finally {
