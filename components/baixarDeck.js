@@ -89,7 +89,7 @@ async function blobParaFoto(blob) {
   return { data: semPrefixo, width, height };
 }
 
-export async function baixarApresentacaoCompleta(acoes, onProgress) {
+export async function baixarApresentacaoCompleta(acoes, onProgress, lang = "en", stats = null) {
   // import dinamico: pptxgenjs tem ~1 MB, nao faz sentido carregar isso no
   // bundle inicial de quem so quer ver os slides na tela
   const { default: PptxGenJS } = await import("pptxgenjs");

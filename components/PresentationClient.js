@@ -11,7 +11,7 @@ import FilterMenu from "./FilterMenu";
 import { useLanguage } from "../lib/i18n";
 
 export default function PresentationClient({ acoes: initialAcoes, error }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [acoes, setAcoes] = useState(initialAcoes);
   const [query, setQuery] = useState("");
   const [apenasOpen, setApenasOpen] = useState(false);
@@ -132,20 +132,31 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
 
   function baixarPpt() {
     if (!acaoAtual) return;
-    window.open(`/api/ppt/${encodeURIComponent(acaoAtual.no)}`, "_blank");
+    window.open(`/api/ppt/${encodeURIComponent(acaoAtual.no)}?lang=${lang}`, "_blank");
   }
 
   // O deck completo e montado no NAVEGADOR, nao no servidor -- ver
   // components/baixarDeck.js pro motivo (limite de resposta/tempo da funcao
   // serverless nao cabe um arquivo de 25 MB com ~100 fotos). `lista` e
   // `acoes` inteiro ("Baixar tudo") ou `filtradas` ("Baixar com filtro").
+  // Busca as stats do dashboard pra montar o slide "Improvement Overview"
+  // logo apos a capa -- mesmo numero que a tela do Dashboard mostra, so que
+  // sem nenhum filtro aplicado (visao geral, independente do que estava
+  // filtrado na apresentacao).
   async function gerarDeck(lista, confirmKey) {
     if (gerandoDeck || !lista.length) return;
     if (!window.confirm(t(confirmKey, { n: lista.length }))) return;
     setGerandoDeck({ feito: 0, total: lista.length });
     try {
       const { baixarApresentacaoCompleta } = await import("./baixarDeck");
-      await baixarApresentacaoCompleta(lista, (feito, total) => setGerandoDeck({ feito, total }));
+      let stats = null;
+      try {
+        const res = await fetch("/api/dashboard");
+        if (res.ok) stats = await res.json();
+      } catch (e) {
+        stats = null; // sem stats o deck sai igual, so sem o slide de overview
+      }
+      await baixarApresentacaoCompleta(lista, (feito, total) => setGerandoDeck({ feito, total }), lang, stats);
     } catch (e) {
       alert(`${t("common.error")}: ${e.message}`);
     } finally {

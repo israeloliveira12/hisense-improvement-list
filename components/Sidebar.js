@@ -26,9 +26,9 @@ const ICONS = {
 };
 
 const ITEMS = [
+  { href: "/dashboard", key: "dashboard" },
   { href: "/apresentacao", key: "apresentacao" },
   { href: "/banco-de-dados", key: "banco" },
-  { href: "/dashboard", key: "dashboard" },
 ];
 
 export default function Sidebar({ onCollapse }) {

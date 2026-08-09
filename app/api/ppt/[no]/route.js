@@ -5,6 +5,8 @@ export const maxDuration = 30;
 
 export async function GET(request, { params }) {
   const { no } = params;
+  const { searchParams } = new URL(request.url);
+  const lang = ["pt", "en", "zh"].includes(searchParams.get("lang")) ? searchParams.get("lang") : "en";
 
   try {
     const acoes = await getAcoes();
@@ -13,7 +15,7 @@ export async function GET(request, { params }) {
       return new Response(`Ação ${no} não encontrada.`, { status: 404 });
     }
 
-    const buffer = await buildActionPptx(acao);
+    const buffer = await buildActionPptx(acao, lang);
     return new Response(buffer, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation",

@@ -13,8 +13,9 @@ function semanaAtualISO() {
 }
 
 export default function DashboardForecast({ stats }) {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const forecast = stats.forecast || [];
+  const forecastDeptos = stats.forecastDeptos || [];
   const hoje = semanaAtualISO();
   const max = Math.max(...forecast.map((f) => f.count), 1);
   const atrasadas = forecast.filter((f) => f.semana < hoje).reduce((acc, f) => acc + f.count, 0);
@@ -60,6 +61,43 @@ export default function DashboardForecast({ stats }) {
           <div className="legend-item"><span className="sw" style={{ background: "var(--purple)" }} />{t("dash.forecastProximas")}</div>
         </div>
       </div>
+
+      {forecastDeptos.length > 0 && (
+        <div className="chart-card">
+          <h3>{t("dash.forecastMatrizTitulo")}</h3>
+          <div className="chart-sub">{t("dash.forecastMatrizSub")}</div>
+          <div className="forecast-matrix-wrap">
+            <table className="forecast-matrix">
+              <thead>
+                <tr>
+                  <th className="fm-dept-head"></th>
+                  {forecast.map((f) => (
+                    <th key={f.semana} className={f.semana < hoje ? "fm-atrasada" : f.semana === hoje ? "fm-atual" : ""}>
+                      {f.semana.replace(/^\d+-/, "")}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {forecastDeptos.map((dept) => (
+                  <tr key={dept}>
+                    <td className="fm-dept-label">{tv(dept)}</td>
+                    {forecast.map((f) => {
+                      const n = f.porDepto[dept] || 0;
+                      const atrasada = f.semana < hoje;
+                      return (
+                        <td key={f.semana} className={"fm-cell" + (n ? " fm-tem" : "") + (n && atrasada ? " fm-atrasada" : "")}>
+                          {n || "—"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   );
 }

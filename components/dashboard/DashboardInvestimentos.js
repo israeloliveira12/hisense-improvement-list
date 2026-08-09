@@ -7,6 +7,28 @@ function formatBRL(v) {
   return "R$ " + (v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Barra estreita demais pro valor caber dentro dela (com letra branca) --
+// nesse caso o valor sai pra fora da barra, à direita, na cor da propria
+// categoria (continua legivel, so muda de dentro/branco pra fora/colorido).
+const BARRA_ESTREITA = 16; // %
+
+function MoneyRow({ label, color, pct, valor }) {
+  const estreita = pct < BARRA_ESTREITA;
+  return (
+    <div className="money-row">
+      <div className="m-label" style={{ color }}>{label}</div>
+      <div className="m-track">
+        <div className="m-fill" style={{ width: `${pct}%`, background: color }}>
+          {!estreita && valor}
+        </div>
+        {estreita && (
+          <span className="m-fill-valor-fora" style={{ left: `calc(${pct}% + 8px)`, color }}>{valor}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardInvestimentos({ stats }) {
   const { t } = useLanguage();
   const { investimento, total } = stats;
@@ -43,18 +65,9 @@ export default function DashboardInvestimentos({ stats }) {
       <div className="chart-card">
         <h3>{t("dash.investimento")}</h3>
         <div className="chart-sub">{t("dash.itensSolicitados", { n: totalItens, valor: formatBRL(valorTotal) })}</div>
-        <div className="money-row">
-          <div className="m-label" style={{ color: "var(--green)" }}>{t("dash.aprovado")}</div>
-          <div className="m-track"><div className="m-fill" style={{ width: `${pctAprovado}%`, background: "var(--green)" }}>{formatBRL(aprovado)}</div></div>
-        </div>
-        <div className="money-row">
-          <div className="m-label" style={{ color: "var(--amber)" }}>{t("dash.pendente")}</div>
-          <div className="m-track"><div className="m-fill" style={{ width: `${pctPendente}%`, background: "var(--amber)" }}>{formatBRL(pendente)}</div></div>
-        </div>
-        <div className="money-row">
-          <div className="m-label" style={{ color: "var(--red)" }}>{t("dash.recusado")}</div>
-          <div className="m-track"><div className="m-fill" style={{ width: `${pctRecusado}%`, background: "var(--red)" }}>{formatBRL(recusado)}</div></div>
-        </div>
+        <MoneyRow label={t("dash.aprovado")} color="var(--green)" pct={pctAprovado} valor={formatBRL(aprovado)} />
+        <MoneyRow label={t("dash.pendente")} color="var(--amber)" pct={pctPendente} valor={formatBRL(pendente)} />
+        <MoneyRow label={t("dash.recusado")} color="var(--red)" pct={pctRecusado} valor={formatBRL(recusado)} />
       </div>
 
       <div className="chart-card">

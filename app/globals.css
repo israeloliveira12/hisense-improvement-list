@@ -542,8 +542,12 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 
 .money-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .money-row .m-label { width: 88px; flex: none; font-size: 12px; font-weight: 700; }
-.money-row .m-track { flex: 1; background: var(--bg); border-radius: 6px; height: 22px; overflow: hidden; }
-.money-row .m-fill { height: 100%; display: flex; align-items: center; padding: 0 9px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; }
+/* overflow visible de proposito: o valor de uma barra estreita sai pra fora
+   dela (ver .m-fill-valor-fora) -- clipar aqui faria metade do valor
+   sumir, ilegivel, em vez de aparecer do lado de fora. */
+.money-row .m-track { position: relative; flex: 1; background: var(--bg); border-radius: 6px; height: 22px; overflow: visible; }
+.money-row .m-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding: 0 9px; font-size: 11px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; }
+.money-row .m-fill-valor-fora { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; white-space: nowrap; }
 
 .footer-note { font-size: 11px; color: var(--text-faint); text-align: center; margin-top: 18px; }
 
@@ -565,22 +569,15 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 .kanban-person { font-size: 10.5px; color: var(--text-muted); }
 
 .kanban-decisao-titulo { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text-faint); margin: 14px 0 6px; }
-.kanban-decisao-row { display: flex; gap: 10px; }
-.kanban-decisao-card { flex: 1; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px dashed var(--border); border-radius: 10px; padding: 9px 13px; min-width: 0; }
-.kanban-decisao-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; }
-.kanban-decisao-label .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.kanban-decisao-label .dot.pending { background: var(--amber); }
-.kanban-decisao-label .dot.declined { background: var(--red); }
-.kanban-decisao-nums { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
-.kanban-decisao-nums b { font-size: 14px; }
-.kanban-decisao-total { font-size: 10.5px; color: var(--text-muted); }
 .kanban-pipeline-titulo { margin-top: 18px; }
-@media (max-width: 640px) {
-  .kanban-decisao-row { flex-direction: column; }
-}
+/* Pendente/Recusado: so 2 colunas, entao usa a largura das 2 primeiras
+   colunas do pipeline (2/3 do card) em vez de esticar pra ocupar tudo --
+   fica visualmente mais "leve" que o pipeline de 3, que e o bloco principal. */
+.kanban-board-decisao { grid-template-columns: repeat(2, 1fr); max-width: 66%; }
 
 @media (max-width: 900px) {
   .kanban-board { grid-template-columns: 1fr; }
+  .kanban-board-decisao { max-width: 100%; }
 }
 
 .forecast-chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; padding-top: 20px; overflow-x: auto; }
@@ -590,6 +587,23 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 .forecast-bar.atrasada { background: var(--red); }
 .forecast-bar.atual { outline: 2px solid var(--text); outline-offset: 1px; }
 .forecast-label { font-size: 9.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+/* matriz semana x departamento -- mesma janela de semanas do grafico de
+   barras acima, so que quebrada por departamento em vez de so o total. */
+.forecast-matrix-wrap { overflow-x: auto; margin-top: 6px; }
+.forecast-matrix { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+.forecast-matrix th, .forecast-matrix td { padding: 5px 9px; text-align: center; border-bottom: 1px solid var(--border); }
+.forecast-matrix thead th { font-weight: 700; color: var(--text-muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.forecast-matrix thead th.fm-atrasada { color: var(--red); }
+.forecast-matrix thead th.fm-atual { color: var(--purple); }
+.forecast-matrix .fm-dept-head { position: sticky; left: 0; background: var(--surface); }
+.forecast-matrix .fm-dept-label {
+  text-align: left; font-weight: 600; padding-right: 16px;
+  position: sticky; left: 0; background: var(--surface);
+}
+.forecast-matrix .fm-cell { color: var(--text-faint); min-width: 30px; font-variant-numeric: tabular-nums; }
+.forecast-matrix .fm-cell.fm-tem { color: #fff; font-weight: 700; background: var(--purple); border-radius: 5px; }
+.forecast-matrix .fm-cell.fm-tem.fm-atrasada { background: var(--red); }
 
 .dash-tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
 .dash-tabs button { border: none; background: none; padding: 9px 4px; margin-right: 18px; font-size: 13px; font-weight: 700; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; }
