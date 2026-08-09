@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "googleapis": "^174.0.1",
     "image-size": "^2.0.2",
     "next": "14.2.5",

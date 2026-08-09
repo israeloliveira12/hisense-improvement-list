@@ -9,7 +9,7 @@ import { useLanguage } from "../lib/i18n";
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1SoK5AjfSUqI1XxHibq-nufrTKADgdRxVGFO5srXcehQ/edit";
 
 export default function DatabaseTable({ acoes: initialAcoes, error }) {
-  const { t, tv, dateInputLang } = useLanguage();
+  const { t, tv, lang, dateInputLang } = useLanguage();
   const [query, setQuery] = useState("");
   const [filtro, setFiltro] = useState("todas");
   const [linhas, setLinhas] = useState(initialAcoes);
@@ -100,6 +100,13 @@ export default function DatabaseTable({ acoes: initialAcoes, error }) {
             <rect x="4" y="17" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
           </svg>
           {t("db.abrirSheets")}
+        </a>
+        <a className="btn btn-outline" href={`/api/export/excel?lang=${lang}`} title={t("db.baixarExcel")}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <rect x="4" y="17" width="16" height="4" rx="1" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+          {t("db.baixarExcel")}
         </a>
         <button className="btn btn-primary" onClick={() => setCriandoNova(true)}>
           {t("db.novaAcao")}
