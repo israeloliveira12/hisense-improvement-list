@@ -188,8 +188,8 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
       }
     }
 
-    // FASE 3 -- item de investimento novo (no maximo 1, mesmo limite de
-    // addInvestimentoItem no servidor).
+    // FASE 3 -- itens de investimento novos (sem limite -- cada um vira
+    // um append independente em PPT_Investimentos).
     let itensAtual = local.itensInvestimento || [];
     let investimentoCriado = false;
     const novosItens = itensAtual.filter((it) => it.row < 0);
@@ -418,12 +418,10 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
     });
   }
 
-  // Adiciona so localmente -- funciona pro PRIMEIRO item de investimento da
-  // acao (escreve na propria linha-ancora, que fica livre nesse caso, no
-  // flush) -- ver o aviso em addInvestimentoItem (lib/googleSheets.js)
-  // sobre o limite de 1 (2o item em diante precisa ser feito direto na
-  // planilha por enquanto -- a tentativa de automatizar isso causou perda
-  // de dados em producao e foi revertida).
+  // Adiciona so localmente -- o flush (FASE 3 de salvarPendentes) manda
+  // pro servidor, que faz so um APPEND numa aba propria (PPT_Investimentos,
+  // ver addInvestimentoItem em lib/googleSheets.js) -- funciona pro 1o,
+  // 2o ou Nesimo item da mesma acao, sem limite.
   function adicionarInvestimento() {
     if (!novoInv?.item?.trim()) return;
     const tempRow = --tempIdRef.current;
@@ -668,9 +666,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                   </tbody>
                 </table>
               )}
-              {local.itensInvestimento && local.itensInvestimento.length > 0 ? (
-                <p className="editor-note">{t("edit.notaInvestimento")}</p>
-              ) : novoInv ? (
+              {novoInv ? (
                 <div className="editor-add-inv-form">
                   <input
                     placeholder={t("edit.invItemPlaceholder")}
