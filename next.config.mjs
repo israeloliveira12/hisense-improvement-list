@@ -6,6 +6,16 @@ const nextConfig = {
   // require() normal em tempo de execucao, sem tentar empacotar.
   experimental: {
     serverComponentsExternalPackages: ["pptxgenjs", "image-size", "exceljs"],
+    // Por padrao o App Router guarda a pagina no cache do NAVEGADOR por 30s
+    // depois de sair dela, mesmo em rota "force-dynamic" -- e um cache
+    // separado do servidor, so pra navegacao voltar/avancar ser instantanea.
+    // Era exatamente por isso que salvar uma acao, mudar de tela e voltar
+    // (ou so voltar pra Apresentacao/Banco de Dados vindo de outra aba)
+    // mostrava a versao de ANTES de salvar ate um F5 de verdade -- o F5
+    // ignora esse cache, uma navegacao normal nao. Zerado: toda navegacao
+    // entre paginas busca dado fresco de novo (o dado e pequeno, o custo
+    // disso e irrelevante perto do problema que resolve).
+    staleTimes: { dynamic: 0 },
   },
   // pptxgenjs agora tambem roda no NAVEGADOR (baixar apresentacao completa,
   // ver components/baixarDeck.js). O build do lado do cliente quebrava com

@@ -84,9 +84,15 @@ export default function DashboardForecast({ stats }) {
                     <td className="fm-dept-label">{tv(dept)}</td>
                     {forecast.map((f) => {
                       const n = f.porDepto[dept] || 0;
+                      const acoesDoCell = f.porDeptoAcoes?.[dept] || [];
                       const atrasada = f.semana < hoje;
+                      const titulo = acoesDoCell.map((a) => `${a.no} — ${a.item}`).join("\n");
                       return (
-                        <td key={f.semana} className={"fm-cell" + (n ? " fm-tem" : "") + (n && atrasada ? " fm-atrasada" : "")}>
+                        <td
+                          key={f.semana}
+                          className={"fm-cell" + (n ? " fm-tem" : "") + (n && atrasada ? " fm-atrasada" : "")}
+                          title={titulo || undefined}
+                        >
                           {n || "—"}
                         </td>
                       );

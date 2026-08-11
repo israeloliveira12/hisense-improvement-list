@@ -418,10 +418,9 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
     });
   }
 
-  // Adiciona so localmente -- funciona pro PRIMEIRO item de investimento da
-  // acao (escreve na propria linha-ancora, que fica livre nesse caso, no
-  // flush) -- ver o aviso em addInvestimentoItem (lib/googleSheets.js)
-  // sobre o limite de 1.
+  // Adiciona so localmente -- o flush (FASE 3 de salvarPendentes) decide
+  // se escreve na linha-ancora (1o item da acao) ou insere uma linha nova
+  // (2o item em diante) -- ver addInvestimentoItem em lib/googleSheets.js.
   function adicionarInvestimento() {
     if (!novoInv?.item?.trim()) return;
     const tempRow = --tempIdRef.current;
@@ -666,9 +665,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                   </tbody>
                 </table>
               )}
-              {local.itensInvestimento && local.itensInvestimento.length > 0 ? (
-                <p className="editor-note">{t("edit.notaInvestimento")}</p>
-              ) : novoInv ? (
+              {novoInv ? (
                 <div className="editor-add-inv-form">
                   <input
                     placeholder={t("edit.invItemPlaceholder")}

@@ -582,20 +582,21 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 
 /* matriz semana x departamento -- mesma janela de semanas do grafico de
    barras acima, so que quebrada por departamento em vez de so o total. */
-.forecast-matrix-wrap { overflow-x: auto; margin-top: 6px; }
-.forecast-matrix { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-.forecast-matrix th, .forecast-matrix td { padding: 5px 9px; text-align: center; border-bottom: 1px solid var(--border); }
-.forecast-matrix thead th { font-weight: 700; color: var(--text-muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.forecast-matrix-wrap { overflow-x: auto; margin-top: 10px; }
+.forecast-matrix { border-collapse: separate; border-spacing: 0; font-size: 13px; white-space: nowrap; }
+.forecast-matrix th, .forecast-matrix td { padding: 10px 15px; text-align: center; border-bottom: 1px solid var(--border); }
+.forecast-matrix thead th { font-weight: 700; color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .forecast-matrix thead th.fm-atrasada { color: var(--red); }
 .forecast-matrix thead th.fm-atual { color: var(--purple); }
 .forecast-matrix .fm-dept-head { position: sticky; left: 0; background: var(--surface); }
 .forecast-matrix .fm-dept-label {
-  text-align: left; font-weight: 600; padding-right: 16px;
-  position: sticky; left: 0; background: var(--surface);
+  text-align: left; font-weight: 600; padding-right: 20px; font-size: 12.5px;
+  position: sticky; left: 0; background: var(--surface); min-width: 140px;
 }
-.forecast-matrix .fm-cell { color: var(--text-faint); min-width: 30px; font-variant-numeric: tabular-nums; }
-.forecast-matrix .fm-cell.fm-tem { color: #fff; font-weight: 700; background: var(--purple); border-radius: 5px; }
+.forecast-matrix .fm-cell { color: var(--text-faint); min-width: 42px; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+.forecast-matrix .fm-cell.fm-tem { color: #fff; font-weight: 700; background: var(--purple); border-radius: 6px; cursor: help; }
 .forecast-matrix .fm-cell.fm-tem.fm-atrasada { background: var(--red); }
+.forecast-matrix .fm-cell.fm-tem:hover { filter: brightness(1.12); }
 
 .dash-tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
 .dash-tabs button { border: none; background: none; padding: 9px 4px; margin-right: 18px; font-size: 13px; font-weight: 700; color: var(--text-muted); border-bottom: 2px solid transparent; cursor: pointer; }
