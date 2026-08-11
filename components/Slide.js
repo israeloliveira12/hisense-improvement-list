@@ -286,9 +286,7 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
         <div className="m">
           <label>{t("pres.slideInvestment")}</label>
           <div>
-            {acao.investmentInfo
-              ? `${formatBRL(acao.investmentInfo.total)} · ${tv(acao.investmentInfo.situacao)}`
-              : t("common.semInvestimento")}
+            {acao.investmentInfo ? formatBRL(acao.investmentInfo.total) : t("common.semInvestimento")}
           </div>
         </div>
       </div>
