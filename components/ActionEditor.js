@@ -555,6 +555,16 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                   <input defaultValue={local.delayReason} onBlur={(e) => salvarAcao("delayReason", e.target.value)} />
                 </div>
               </div>
+              <div className="editor-field">
+                <label>{t("edit.fieldSpmLink")} <SaveDot status={status["det.spmLink"]} /></label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  defaultValue={local.spmLink}
+                  onBlur={(e) => salvarDetalhe("spmLink", e.target.value.trim())}
+                />
+                <p className="editor-hint">{t("edit.fieldSpmLinkHint")}</p>
+              </div>
             </>
           )}
 

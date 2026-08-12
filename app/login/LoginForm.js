@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLanguage } from "../../lib/i18n";
 
 export default function LoginForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
@@ -22,7 +24,7 @@ export default function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Não foi possível entrar.");
+        setError(data.error || t("login.erroGenerico"));
         return;
       }
       const next = searchParams.get("next") || "/dashboard";
@@ -38,14 +40,14 @@ export default function LoginForm() {
       <input
         type="password"
         className="login-input"
-        placeholder="Senha"
+        placeholder={t("login.senha")}
         autoFocus
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
       {error && <div className="login-error">{error}</div>}
       <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
-        {loading ? "Entrando…" : "Entrar"}
+        {loading ? t("login.entrando") : t("login.entrar")}
       </button>
     </form>
   );

@@ -220,7 +220,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       fd.append("slot", slot);
       const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Falha no upload");
+      if (!res.ok) throw new Error(data.error || t("pres.uploadFalhou"));
       setAcoes((prev) =>
         prev.map((a) => (a.no === no ? { ...a, [campo]: [...(a[campo] || []), data.fileId] } : a))
       );

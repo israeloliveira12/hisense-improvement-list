@@ -1,4 +1,5 @@
 import "./globals.css";
+import { LanguageProvider } from "../lib/i18n";
 
 export const metadata = {
   title: "(Hisense) Improvement List",
@@ -23,7 +24,11 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Aqui na raiz, nao so nas paginas protegidas -- o login precisa
+            seguir o idioma salvo tambem, ver app/(protected)/layout.js */}
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

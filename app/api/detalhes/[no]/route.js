@@ -9,6 +9,7 @@ const CAMPO_PARA_COLUNA = {
   abrangency: "Abrangency",
   factory: "Factory Comment",
   hisense: "Hisense Comment",
+  spmLink: "SPM Link",
   fotoBeforeAjuste: "Foto Before Ajuste",
   fotoImprovementAjuste: "Foto Improvement Ajuste",
   // reordenar fotos (arrastar/mover) -- o cliente manda a lista inteira ja

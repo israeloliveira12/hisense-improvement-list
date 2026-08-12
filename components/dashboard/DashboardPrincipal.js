@@ -56,7 +56,7 @@ export default function DashboardPrincipal({ stats }) {
               <circle r="60" fill="none" stroke="var(--amber)" strokeWidth="22" strokeDasharray={`${openLen} ${CIRC}`} strokeDashoffset={-closedLen} transform="rotate(-90)" />
               <circle r="60" fill="none" stroke="var(--green)" strokeWidth="22" strokeDasharray={`${closedLen} ${CIRC}`} strokeDashoffset="0" transform="rotate(-90)" />
               <text textAnchor="middle" y="-2" fontSize="26" fontWeight="700" fill="var(--text)">{total}</text>
-              <text textAnchor="middle" y="16" fontSize="10" fill="var(--text-muted)">ações</text>
+              <text textAnchor="middle" y="16" fontSize="10" fill="var(--text-muted)">{t("pptDeck.actionsSuffix")}</text>
             </g>
           </svg>
           <div className="legend">
