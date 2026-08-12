@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
 
-function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
+// `tipos` = mesmo mapa que vem de acao.fotosBeforeMeta/fotosImprovementMeta
+// ({ [fileId]: { tipo, nome } }) -- so entra quem NAO e foto (esparso).
+function PhotoLightbox({ ids, rotacoes, tipos, startIndex, onClose }) {
   const [index, setIndex] = useState(startIndex || 0);
   const [zoom, setZoom] = useState(1);
   const { t } = useLanguage();
@@ -22,6 +24,7 @@ function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
 
   if (!ids || ids.length === 0) return null;
   const id = ids[index];
+  const isVideo = tipos?.[id]?.tipo === "video";
 
   return (
     <div className="lightbox-overlay" onClick={onClose}>
@@ -37,11 +40,15 @@ function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
         </button>
       )}
       <div className="lightbox-stage" onClick={(e) => e.stopPropagation()}>
-        <img
-          src={`/api/drive/file/${id}?v=${id}`}
-          alt=""
-          style={{ transform: `rotate(${rotacoes?.[id] || 0}deg) scale(${zoom})` }}
-        />
+        {isVideo ? (
+          <video src={`/api/drive/file/${id}?v=${id}`} controls autoPlay />
+        ) : (
+          <img
+            src={`/api/drive/file/${id}?v=${id}`}
+            alt=""
+            style={{ transform: `rotate(${rotacoes?.[id] || 0}deg) scale(${zoom})` }}
+          />
+        )}
       </div>
       {ids.length > 1 && (
         <button
@@ -52,11 +59,13 @@ function PhotoLightbox({ ids, rotacoes, startIndex, onClose }) {
           ›
         </button>
       )}
-      <div className="lightbox-zoom" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}>−</button>
-        <span>{Math.round(zoom * 100)}%</span>
-        <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))}>+</button>
-      </div>
+      {!isVideo && (
+        <div className="lightbox-zoom" onClick={(e) => e.stopPropagation()}>
+          <button type="button" onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}>−</button>
+          <span>{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))}>+</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -67,6 +76,18 @@ const MAX_FOTOS_POR_LADO = 8;
 // rotulo de interface.
 function formatBRL(v) {
   return "R$ " + (Number(v) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Aceita foto, video e um punhado de formatos de documento comuns no
+// mesmo campo de upload -- o Drive/o proxy que ja serve o conteudo
+// (/api/drive/file/[id]) sao agnosticos de tipo, entao nao precisa de
+// pipeline novo nenhum pra guardar/servir, so pra EXIBIR direito.
+const ACCEPT_ANEXO = "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt";
+
+function detectarTipoArquivo(file) {
+  if (file.type.startsWith("image/")) return "foto";
+  if (file.type.startsWith("video/")) return "video";
+  return "doc";
 }
 
 function UploadTile({ className, uploading, label, onFile, dropavel }) {
@@ -90,7 +111,7 @@ function UploadTile({ className, uploading, label, onFile, dropavel }) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPT_ANEXO}
         style={{ display: "none" }}
         onChange={(e) => e.target.files[0] && onFile(e.target.files[0])}
       />
@@ -112,26 +133,36 @@ function UploadTile({ className, uploading, label, onFile, dropavel }) {
   );
 }
 
-// Uma foto (principal grande ou miniatura), com os controles de mover
-// (troca de posicao com a vizinha -- promove miniatura a principal quando
-// move o suficiente pra esquerda, e vice-versa), excluir e ver em tela
-// grande. `podeMoverEsq`/`podeMoverDir` desabilitam nas pontas da lista.
-function FotoItem({ id, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand, onRotate }) {
+// Uma foto/video (principal grande ou miniatura), com os controles de
+// mover (troca de posicao com a vizinha -- promove miniatura a principal
+// quando move o suficiente pra esquerda, e vice-versa), excluir e ver em
+// tela grande. `podeMoverEsq`/`podeMoverDir` desabilitam nas pontas da
+// lista. Video nao mostra imagem nenhuma (nao da pra gerar thumbnail sem
+// processar o arquivo no servidor) -- so um retangulo escuro com um
+// triangulo de play; o video de verdade so toca ao clicar (lightbox).
+function FotoItem({ id, tipo, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand, onRotate }) {
   const { t } = useLanguage();
+  const isVideo = tipo === "video";
   return (
     <div className={grande ? "drop drop-photo" : "ba-thumb"}>
-      <div
-        className={grande ? "drop-photo-img" : "ba-thumb-img"}
-        style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})`, transform: rotacao ? `rotate(${rotacao}deg)` : undefined }}
-        onClick={onExpand}
-      />
+      {isVideo ? (
+        <div className={(grande ? "drop-photo-img" : "ba-thumb-img") + " ba-video-tile"} onClick={onExpand}>
+          <span className="ba-video-play">▶</span>
+        </div>
+      ) : (
+        <div
+          className={grande ? "drop-photo-img" : "ba-thumb-img"}
+          style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})`, transform: rotacao ? `rotate(${rotacao}deg)` : undefined }}
+          onClick={onExpand}
+        />
+      )}
       <div className="foto-controls">
         {podeMoverEsq && (
           <button type="button" title={t("pres.moverEsquerda")} onClick={(e) => { e.stopPropagation(); onMover(-1); }}>
             ‹
           </button>
         )}
-        {grande && (
+        {grande && !isVideo && (
           <button type="button" title={t("pres.rotacionarFoto")} onClick={(e) => { e.stopPropagation(); onRotate(); }}>
             ⟳
           </button>
@@ -162,23 +193,65 @@ function FotoItem({ id, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, on
   );
 }
 
-// Grupo completo de fotos de um lado (Before OU After): ate 2 "principais"
-// lado a lado (grandes, sem cortar -- os 2 primeiros IDs da lista), e o
-// resto em miniatura embaixo. Mover uma foto reescreve a lista inteira na
-// ordem nova -- e isso, sozinho, decide quem e principal e quem e miniatura.
-function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onExpand, onReorder, onRotate }) {
+// Chip pequeno pra documento anexado -- bem menor que os tiles de
+// foto/video de proposito (pedido explicito do usuario: um documento nao
+// tem conteudo visual pra mostrar em miniatura, entao nao faz sentido
+// ocupar o mesmo espaco). Clique abre/baixa o arquivo original via o
+// mesmo proxy que ja serve fotos.
+function DocChip({ id, nome, onDelete }) {
+  const { t } = useLanguage();
+  return (
+    <div className="doc-chip">
+      <a
+        className="doc-chip-link"
+        href={`/api/drive/file/${id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={nome || t("pres.documento")}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M14 2v6h6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="doc-chip-nome">{nome || t("pres.documento")}</span>
+      </a>
+      <button
+        type="button"
+        className="doc-chip-remove"
+        title={t("pres.excluirFoto")}
+        onClick={() => { if (window.confirm(t("pres.confirmarExclusao"))) onDelete(); }}
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
+// Grupo completo de anexos de um lado (Before OU After): ate 2 fotos/videos
+// "principais" lado a lado (grandes, sem cortar -- os 2 primeiros da
+// lista, contando so foto+video), o resto de foto/video em miniatura
+// embaixo, e documentos numa fileira propria e pequena por baixo de tudo
+// (nunca entram na ordem de principal/miniatura -- nao tem conteudo
+// visual pra mostrar em destaque). Mover uma foto reescreve so a ordem
+// das midias visuais; documentos ficam sempre no fim da lista guardada
+// (posicao deles no array nao importa, ja que sempre renderizam na
+// propria fileira separada).
+function PhotoGroup({ ids, rotacoes, meta, slot, no, uploading, onFile, onDelete, onExpand, onReorder, onRotate }) {
   const { t } = useLanguage();
   const lista = ids || [];
-  const principais = lista.slice(0, 2);
-  const extras = lista.slice(2);
+  const tipoDe = (id) => meta?.[id]?.tipo || "foto";
+  const midia = lista.filter((id) => tipoDe(id) !== "doc");
+  const documentos = lista.filter((id) => tipoDe(id) === "doc");
+  const principais = midia.slice(0, 2);
+  const extras = midia.slice(2);
   const podeAdicionar = lista.length < MAX_FOTOS_POR_LADO;
 
   function mover(index, delta) {
     const alvo = index + delta;
-    if (alvo < 0 || alvo >= lista.length) return;
-    const nova = [...lista];
-    [nova[index], nova[alvo]] = [nova[alvo], nova[index]];
-    onReorder(no, slot, nova);
+    if (alvo < 0 || alvo >= midia.length) return;
+    const novaMidia = [...midia];
+    [novaMidia[index], novaMidia[alvo]] = [novaMidia[alvo], novaMidia[index]];
+    onReorder(no, slot, [...novaMidia, ...documentos]);
   }
 
   if (lista.length === 0) {
@@ -200,10 +273,11 @@ function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onEx
           <FotoItem
             key={id}
             id={id}
+            tipo={tipoDe(id)}
             grande
             rotacao={rotacoes?.[id]}
             podeMoverEsq={i > 0}
-            podeMoverDir={i < lista.length - 1}
+            podeMoverDir={i < midia.length - 1}
             onMover={(delta) => mover(i, delta)}
             onDelete={() => onDelete(no, slot, id)}
             onExpand={() => onExpand(id)}
@@ -219,9 +293,10 @@ function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onEx
               <FotoItem
                 key={id}
                 id={id}
+                tipo={tipoDe(id)}
                 rotacao={rotacoes?.[id]}
                 podeMoverEsq
-                podeMoverDir={i < lista.length - 1}
+                podeMoverDir={i < midia.length - 1}
                 onMover={(delta) => mover(i, delta)}
                 onDelete={() => onDelete(no, slot, id)}
                 onExpand={() => onExpand(id)}
@@ -234,13 +309,20 @@ function PhotoGroup({ ids, rotacoes, slot, no, uploading, onFile, onDelete, onEx
           )}
         </div>
       )}
+      {documentos.length > 0 && (
+        <div className="doc-chip-row">
+          {documentos.map((id) => (
+            <DocChip key={id} id={id} nome={meta?.[id]?.nome} onDelete={() => onDelete(no, slot, id)} />
+          ))}
+        </div>
+      )}
     </>
   );
 }
 
 export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto, onRotateFoto, onEditCaption, uploadingSlot, onLightboxOpenChange }) {
   const { t, tv, formatDate } = useLanguage();
-  const [lightbox, setLightbox] = useState(null); // { ids, rotacoes, index }
+  const [lightbox, setLightbox] = useState(null); // { ids, rotacoes, tipos, index }
 
   useEffect(() => {
     onLightboxOpenChange && onLightboxOpenChange(Boolean(lightbox));
@@ -355,12 +437,13 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
             <PhotoGroup
               ids={beforeIds}
               rotacoes={acao.fotosBeforeRotacao}
+              meta={acao.fotosBeforeMeta}
               slot="before"
               no={acao.no}
               uploading={uploadingSlot === "before"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
-              onExpand={(id) => setLightbox({ ids: beforeIds, rotacoes: acao.fotosBeforeRotacao, index: Math.max(0, beforeIds.indexOf(id)) })}
+              onExpand={(id) => setLightbox({ ids: beforeIds, rotacoes: acao.fotosBeforeRotacao, tipos: acao.fotosBeforeMeta, index: Math.max(0, beforeIds.indexOf(id)) })}
               onReorder={onReorderFoto}
               onRotate={onRotateFoto}
             />
@@ -380,12 +463,13 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
             <PhotoGroup
               ids={afterIds}
               rotacoes={acao.fotosImprovementRotacao}
+              meta={acao.fotosImprovementMeta}
               slot="improvement"
               no={acao.no}
               uploading={uploadingSlot === "improvement"}
               onFile={onUploadFoto}
               onDelete={onDeleteFoto}
-              onExpand={(id) => setLightbox({ ids: afterIds, rotacoes: acao.fotosImprovementRotacao, index: Math.max(0, afterIds.indexOf(id)) })}
+              onExpand={(id) => setLightbox({ ids: afterIds, rotacoes: acao.fotosImprovementRotacao, tipos: acao.fotosImprovementMeta, index: Math.max(0, afterIds.indexOf(id)) })}
               onReorder={onReorderFoto}
               onRotate={onRotateFoto}
             />
@@ -405,8 +489,10 @@ export default function Slide({ acao, onUploadFoto, onDeleteFoto, onReorderFoto,
       </div>
     </div>
     {lightbox && (
-      <PhotoLightbox ids={lightbox.ids} rotacoes={lightbox.rotacoes} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+      <PhotoLightbox ids={lightbox.ids} rotacoes={lightbox.rotacoes} tipos={lightbox.tipos} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
     )}
     </>
   );
 }
+
+export { detectarTipoArquivo };

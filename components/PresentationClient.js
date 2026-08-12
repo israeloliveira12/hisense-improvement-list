@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
-import Slide from "./Slide";
+import Slide, { detectarTipoArquivo } from "./Slide";
 import Topbar from "./Topbar";
 import ActionEditor from "./ActionEditor";
 import NewActionModal from "./NewActionModal";
@@ -210,9 +210,21 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     }
   }
 
+  // Mesmo formato esparso "id:tipo:nomeCodificado,..." que o servidor
+  // espera (ver parseAnexoMeta em lib/googleSheets.js) -- so entra quem
+  // NAO e foto (o tipo default nao precisa de entrada nenhuma).
+  function formatarAnexoMeta(mapa) {
+    return Object.entries(mapa)
+      .map(([id, m]) => `${id}:${m.tipo}:${encodeURIComponent(m.nome || "")}`)
+      .join(",");
+  }
+
   async function uploadFoto(no, slot, file) {
     setUploadingSlot(slot);
     const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
+    const campoMeta = slot === "before" ? "fotosBeforeMeta" : "fotosImprovementMeta";
+    const campoMetaApi = slot === "before" ? "fotoBeforeTipo" : "fotoImprovementTipo";
+    const tipo = detectarTipoArquivo(file);
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -224,6 +236,20 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       setAcoes((prev) =>
         prev.map((a) => (a.no === no ? { ...a, [campo]: [...(a[campo] || []), data.fileId] } : a))
       );
+      // video/documento precisam da marcacao de tipo -- foto e o default,
+      // nao precisa gravar nada (mesma logica esparsa da rotacao).
+      if (tipo !== "foto") {
+        const acaoAtual = acoes.find((a) => a.no === no);
+        const novoMapa = { ...(acaoAtual?.[campoMeta] || {}), [data.fileId]: { tipo, nome: file.name } };
+        setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campoMeta]: novoMapa } : a)));
+        const resMeta = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field: campoMetaApi, value: formatarAnexoMeta(novoMapa) }),
+        });
+        const dataMeta = await resMeta.json().catch(() => ({}));
+        if (!resMeta.ok) throw new Error(dataMeta.error || `HTTP ${resMeta.status}`);
+      }
     } catch (e) {
       alert(t("common.error") + ": " + e.message);
     } finally {

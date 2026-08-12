@@ -373,6 +373,33 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: center;
 }
 .ba-thumb-add:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-tint); }
+
+/* Video: nao da pra gerar thumbnail real sem processar o arquivo no
+   servidor -- so um retangulo escuro com um triangulo de play. O video de
+   verdade so toca ao clicar (lightbox), nunca pre-carrega aqui. */
+.ba-video-tile {
+  width: 100%; height: 100%; background: #17151f; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ba-video-play { color: #fff; font-size: 22px; opacity: 0.85; }
+.ba-thumb .ba-video-play { font-size: 11px; }
+
+/* Documentos: chip pequeno (nao um tile de foto) -- pedido explicito do
+   usuario, um documento nao tem conteudo visual pra mostrar em destaque. */
+.doc-chip-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.doc-chip {
+  display: flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 6px 3px 8px; max-width: 100%;
+}
+.doc-chip-link { display: flex; align-items: center; gap: 4px; min-width: 0; color: var(--purple); text-decoration: none; }
+.doc-chip-nome { font-size: 8.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+.doc-chip-remove {
+  width: 13px; height: 13px; border-radius: 50%; border: none; padding: 0; flex: none;
+  background: transparent; color: var(--text-faint); font-size: 9px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.doc-chip-remove:hover { background: var(--red); color: #fff; }
+
 .ba-caption { font-size: 8.6px; color: var(--text-muted); font-style: italic; margin-top: 4px; line-height: 1.25; }
 .ba-caption b { font-style: normal; color: var(--text); display: block; font-size: 7.6px; letter-spacing: 0.04em; }
 .ba-caption-editable { cursor: text; border-radius: 3px; padding: 1px 2px; margin: -1px -2px; }
@@ -401,6 +428,7 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) { .lightbox-overlay { animation: none; } }
 .lightbox-stage { max-width: 88vw; max-height: 82vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .lightbox-stage img { max-width: 88vw; max-height: 82vh; object-fit: contain; transition: transform .12s ease; border-radius: 4px; }
+.lightbox-stage video { max-width: 88vw; max-height: 82vh; border-radius: 4px; background: #000; }
 .lightbox-close {
   position: absolute; top: 18px; right: 20px; width: 36px; height: 36px; border-radius: 50%;
   border: none; background: rgba(255,255,255,.12); color: #fff; font-size: 15px; cursor: pointer;

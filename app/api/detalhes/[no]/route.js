@@ -21,6 +21,10 @@ const CAMPO_PARA_COLUNA = {
   // (mesmo padrao do fotoBeforeOrdem: o cliente manda o valor final pronto).
   fotoBeforeRotacao: "Foto Before Rotacao",
   fotoImprovementRotacao: "Foto Improvement Rotacao",
+  // Tipo de anexo (video/documento) + nome original -- mesmo padrao dos
+  // dois campos acima, cliente ja manda a string esparsa pronta.
+  fotoBeforeTipo: "Foto Before Tipo",
+  fotoImprovementTipo: "Foto Improvement Tipo",
 };
 
 export async function PATCH(request, { params }) {
