@@ -219,6 +219,35 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       .join(",");
   }
 
+  // Video/documento vao DIRETO pro Drive a partir do navegador -- nunca
+  // passam pela nossa funcao serverless, que tem um teto de ~4.5MB de
+  // corpo de requisicao imposto pela propria Vercel (mesmo teto do lado
+  // da resposta, ja documentado em lib/pptBuilder.js). Foto continua no
+  // caminho antigo (uploadFoto abaixo) porque ja e redimensionada antes
+  // de enviar e cabe tranquilo nesse teto. Ver lib/googleDrive.js
+  // (criarSessaoUploadResumavel) pro detalhe de como a URL de sessao
+  // funciona sem expor nossas credenciais OAuth pro navegador.
+  async function uploadDireto(file) {
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+    const filename = `anexo_${Date.now()}.${ext}`;
+    const resInit = await fetch("/api/drive/upload-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename, mimeType: file.type || "application/octet-stream" }),
+    });
+    const dataInit = await resInit.json();
+    if (!resInit.ok) throw new Error(dataInit.error || t("pres.uploadFalhou"));
+
+    const resUpload = await fetch(dataInit.uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    });
+    if (!resUpload.ok) throw new Error(t("pres.uploadFalhou"));
+    const uploaded = await resUpload.json();
+    return uploaded.id;
+  }
+
   async function uploadFoto(no, slot, file) {
     setUploadingSlot(slot);
     const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
@@ -226,21 +255,34 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     const campoMetaApi = slot === "before" ? "fotoBeforeTipo" : "fotoImprovementTipo";
     const tipo = detectarTipoArquivo(file);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("no", no);
-      fd.append("slot", slot);
-      const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t("pres.uploadFalhou"));
+      let fileId;
+      if (tipo === "foto") {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("no", no);
+        fd.append("slot", slot);
+        const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || t("pres.uploadFalhou"));
+        fileId = data.fileId;
+      } else {
+        fileId = await uploadDireto(file);
+        const resFinish = await fetch("/api/drive/upload-finish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ no, slot, fileId }),
+        });
+        const dataFinish = await resFinish.json().catch(() => ({}));
+        if (!resFinish.ok) throw new Error(dataFinish.error || `HTTP ${resFinish.status}`);
+      }
       setAcoes((prev) =>
-        prev.map((a) => (a.no === no ? { ...a, [campo]: [...(a[campo] || []), data.fileId] } : a))
+        prev.map((a) => (a.no === no ? { ...a, [campo]: [...(a[campo] || []), fileId] } : a))
       );
       // video/documento precisam da marcacao de tipo -- foto e o default,
       // nao precisa gravar nada (mesma logica esparsa da rotacao).
       if (tipo !== "foto") {
         const acaoAtual = acoes.find((a) => a.no === no);
-        const novoMapa = { ...(acaoAtual?.[campoMeta] || {}), [data.fileId]: { tipo, nome: file.name } };
+        const novoMapa = { ...(acaoAtual?.[campoMeta] || {}), [fileId]: { tipo, nome: file.name } };
         setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campoMeta]: novoMapa } : a)));
         const resMeta = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
           method: "PATCH",
