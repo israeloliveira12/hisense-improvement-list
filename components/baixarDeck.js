@@ -97,6 +97,13 @@ export async function baixarApresentacaoCompleta(acoes, onProgress, lang = "en",
   // uma foto usada em duas acoes so e baixada uma vez
   const cache = new Map();
 
+  // Diagnostico: antes disto, uma foto que falhasse (rede, Drive, formato)
+  // sumia em silencio -- o deck saia "normal" e sem imagem nenhuma, sem
+  // pista nenhuma de por que. Agora toda falha fica registrada aqui (motivo
+  // real, nao so "nao carregou") e e devolvida pro chamador pra mostrar pro
+  // usuario -- ver PresentationClient.js.
+  const falhasFoto = [];
+
   async function loadPhoto(fileId) {
     if (cache.has(fileId)) return cache.get(fileId);
     let resultado = null;
@@ -104,18 +111,25 @@ export async function baixarApresentacaoCompleta(acoes, onProgress, lang = "en",
       const res = await fetch(`/api/drive/file/${fileId}`);
       if (res.ok) {
         resultado = await blobParaFoto(await res.blob());
+      } else {
+        falhasFoto.push(`${fileId}: HTTP ${res.status}`);
       }
     } catch (e) {
       resultado = null; // foto apagada no Drive por fora nao derruba o deck
+      falhasFoto.push(`${fileId}: ${e?.message || e}`);
     }
     cache.set(fileId, resultado);
     return resultado;
   }
 
   const pptx = setupPresentation(new PptxGenJS());
-  await buildDeck(pptx, acoes, loadPhoto, onProgress);
+  await buildDeck(pptx, acoes, loadPhoto, onProgress, lang, stats);
+
+  if (falhasFoto.length) {
+    console.error(`[baixarDeck] ${falhasFoto.length} foto(s)/video(s) falharam ao carregar:`, falhasFoto);
+  }
 
   const nome = `Improvement_List_${new Date().toISOString().slice(0, 10)}.pptx`;
   await pptx.writeFile({ fileName: nome });
-  return nome;
+  return { nome, falhasFoto };
 }

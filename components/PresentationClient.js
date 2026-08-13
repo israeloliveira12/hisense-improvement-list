@@ -156,7 +156,10 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       } catch (e) {
         stats = null; // sem stats o deck sai igual, so sem o slide de overview
       }
-      await baixarApresentacaoCompleta(lista, (feito, total) => setGerandoDeck({ feito, total }), lang, stats);
+      const { falhasFoto } = await baixarApresentacaoCompleta(lista, (feito, total) => setGerandoDeck({ feito, total }), lang, stats);
+      if (falhasFoto && falhasFoto.length) {
+        alert(`${t("pres.fotosFalharamNoDeck")}\n\n${falhasFoto.length}x:\n${falhasFoto.slice(0, 8).join("\n")}${falhasFoto.length > 8 ? "\n…" : ""}`);
+      }
     } catch (e) {
       alert(`${t("common.error")}: ${e.message}`);
     } finally {
@@ -219,14 +222,20 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       .join(",");
   }
 
-  // Video/documento vao DIRETO pro Drive a partir do navegador -- nunca
-  // passam pela nossa funcao serverless, que tem um teto de ~4.5MB de
-  // corpo de requisicao imposto pela propria Vercel (mesmo teto do lado
-  // da resposta, ja documentado em lib/pptBuilder.js). Foto continua no
-  // caminho antigo (uploadFoto abaixo) porque ja e redimensionada antes
-  // de enviar e cabe tranquilo nesse teto. Ver lib/googleDrive.js
-  // (criarSessaoUploadResumavel) pro detalhe de como a URL de sessao
-  // funciona sem expor nossas credenciais OAuth pro navegador.
+  // Video/documento nao passam pelo upload antigo (que manda o arquivo
+  // inteiro de uma vez) porque toda funcao serverless da Vercel tem um
+  // teto de ~4.5MB de corpo de requisicao imposto pela propria plataforma
+  // (mesmo teto do lado da resposta, ja documentado em lib/pptBuilder.js)
+  // -- foto escapa disso porque e redimensionada antes de enviar, video
+  // nao tem como ser "redimensionado" do mesmo jeito.
+  //
+  // O navegador manda o arquivo em PEDACOS pequenos pra nossa PROPRIA
+  // rota (mesma origem, nunca esbarra em CORS), que repassa cada pedaco
+  // pro Drive server-a-servidor -- ver lib/googleDrive.js
+  // (criarSessaoUploadResumavel/enviarPedacoResumavel) pro protocolo
+  // completo e o motivo de nao ser o navegador falando direto com o
+  // Google (tentativa anterior, revertida por falhar com "Failed to
+  // fetch" -- bem provavelmente CORS na sessao de upload).
   async function uploadDireto(file) {
     const ext = (file.name.split(".").pop() || "bin").toLowerCase();
     const filename = `anexo_${Date.now()}.${ext}`;
@@ -238,14 +247,30 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     const dataInit = await resInit.json();
     if (!resInit.ok) throw new Error(dataInit.error || t("pres.uploadFalhou"));
 
-    const resUpload = await fetch(dataInit.uploadUrl, {
-      method: "PUT",
-      headers: { "Content-Type": file.type || "application/octet-stream" },
-      body: file,
-    });
-    if (!resUpload.ok) throw new Error(t("pres.uploadFalhou"));
-    const uploaded = await resUpload.json();
-    return uploaded.id;
+    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB -- folga confortavel abaixo do teto de ~4.5MB da Vercel
+    const total = file.size;
+    let inicio = 0;
+    let fileId = null;
+    while (inicio < total) {
+      const fim = Math.min(inicio + CHUNK_SIZE, total);
+      const pedaco = file.slice(inicio, fim);
+      const resChunk = await fetch("/api/drive/upload-chunk", {
+        method: "POST",
+        headers: {
+          "X-Upload-Url": dataInit.uploadUrl,
+          "X-Chunk-Start": String(inicio),
+          "X-Total-Bytes": String(total),
+          "Content-Type": "application/octet-stream",
+        },
+        body: pedaco,
+      });
+      const dataChunk = await resChunk.json().catch(() => ({}));
+      if (!resChunk.ok) throw new Error(dataChunk.error || t("pres.uploadFalhou"));
+      if (dataChunk.completo) fileId = dataChunk.fileId;
+      inicio = fim;
+    }
+    if (!fileId) throw new Error(t("pres.uploadFalhou"));
+    return fileId;
   }
 
   async function uploadFoto(no, slot, file) {
