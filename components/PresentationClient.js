@@ -220,8 +220,69 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   // NAO e foto (o tipo default nao precisa de entrada nenhuma).
   function formatarAnexoMeta(mapa) {
     return Object.entries(mapa)
-      .map(([id, m]) => `${id}:${m.tipo}:${encodeURIComponent(m.nome || "")}`)
+      .map(([id, m]) => {
+        const base = `${id}:${m.tipo}:${encodeURIComponent(m.nome || "")}`;
+        return m.poster ? `${base}:${m.poster}` : base;
+      })
       .join(",");
+  }
+
+  // Pega UM quadro do video pra servir de capa. Sem isso o video aparecia
+  // como um retangulo preto ate alguem clicar pra tocar -- tanto na tela
+  // quanto no .pptx baixado (que nem toca video, entao ficava preto pra
+  // sempre). Roda 100% no navegador, com <video> + <canvas>: nao precisa
+  // de ffmpeg nem de nada no servidor.
+  //
+  // Devolve null (em vez de estourar) se o navegador nao souber decodificar
+  // aquele codec -- nesse caso o upload segue normal e o video so fica sem
+  // capa, como era antes.
+  function extrairCapaDeVideo(file) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      let resolvido = false;
+      function terminar(valor) {
+        if (resolvido) return;
+        resolvido = true;
+        URL.revokeObjectURL(url);
+        video.removeAttribute("src");
+        resolve(valor);
+      }
+      // Rede de seguranca: video problematico nao pode travar o upload.
+      const limite = setTimeout(() => terminar(null), 15000);
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.onerror = () => { clearTimeout(limite); terminar(null); };
+      video.onloadeddata = () => {
+        // 1s pra dentro costuma evitar o fade-in preto com que muito video
+        // comeca; se o video for curto demais, fica no meio dele.
+        const alvo = Math.min(1, (video.duration || 1) / 2);
+        const capturar = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            if (!canvas.width || !canvas.height) { clearTimeout(limite); return terminar(null); }
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            canvas.toBlob(
+              (blob) => { clearTimeout(limite); terminar(blob || null); },
+              "image/jpeg",
+              0.85
+            );
+          } catch (e) {
+            clearTimeout(limite);
+            terminar(null); // canvas "sujo" (raro aqui, o arquivo e local)
+          }
+        };
+        if (Math.abs(video.currentTime - alvo) < 0.01) capturar();
+        else {
+          video.onseeked = capturar;
+          video.currentTime = alvo;
+        }
+      };
+      video.src = url;
+    });
   }
 
   // Caminho em PEDACOS, usado so por arquivo GRANDE (ver uploadFoto).
@@ -299,11 +360,12 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   // mesmo que as fotos ja usam em producao todo dia, entao e o caminho
   // mais confiavel que existe aqui. Serve pra QUALQUER tipo de arquivo: a
   // rota /api/drive/upload nunca olhou o mimeType, so repassa pro Drive.
-  async function uploadSimples(no, slot, file) {
+  async function uploadSimples(no, slot, file, registrar = true) {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("no", no);
     fd.append("slot", slot);
+    if (!registrar) fd.append("registrar", "0");
     const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
     const bruto = await res.text();
     let data = {};
@@ -347,8 +409,27 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       // video/documento precisam da marcacao de tipo -- foto e o default,
       // nao precisa gravar nada (mesma logica esparsa da rotacao).
       if (tipo !== "foto") {
+        // Capa do video: extrai um quadro e sobe como imagem separada (sem
+        // registrar na lista de fotos -- ela nao e um anexo, so a capa).
+        // Se falhar, segue sem capa: o video continua funcionando.
+        let posterId = "";
+        if (tipo === "video") {
+          try {
+            const capa = await extrairCapaDeVideo(file);
+            if (capa) {
+              posterId = await uploadSimples(
+                no,
+                slot,
+                new File([capa], `capa_${Date.now()}.jpg`, { type: "image/jpeg" }),
+                false
+              );
+            }
+          } catch (e) {
+            posterId = "";
+          }
+        }
         const acaoAtual = acoes.find((a) => a.no === no);
-        const novoMapa = { ...(acaoAtual?.[campoMeta] || {}), [fileId]: { tipo, nome: file.name } };
+        const novoMapa = { ...(acaoAtual?.[campoMeta] || {}), [fileId]: { tipo, nome: file.name, poster: posterId } };
         setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campoMeta]: novoMapa } : a)));
         const resMeta = await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
           method: "PATCH",
@@ -368,6 +449,9 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   async function deletarFoto(no, slot, fileId) {
     if (!fileId) return;
     const campo = slot === "before" ? "fotosBefore" : "fotosImprovement";
+    const campoMeta = slot === "before" ? "fotosBeforeMeta" : "fotosImprovementMeta";
+    const campoMetaApi = slot === "before" ? "fotoBeforeTipo" : "fotoImprovementTipo";
+    const metaDoItem = acoes.find((a) => a.no === no)?.[campoMeta]?.[fileId];
     try {
       const res = await fetch("/api/drive/upload", {
         method: "DELETE",
@@ -379,6 +463,33 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       setAcoes((prev) =>
         prev.map((a) => (a.no === no ? { ...a, [campo]: (a[campo] || []).filter((id) => id !== fileId) } : a))
       );
+      // Video/documento tem entrada no metadado esparso -- sem tirar de la,
+      // sobra lixo apontando pra um arquivo que nao existe mais. E a capa
+      // do video (que nao esta na lista de fotos) so pode ser apagada aqui:
+      // ninguem mais tem referencia pra ela. Falha nessa limpeza nao
+      // desfaz a exclusao, que ja aconteceu -- so registra no console.
+      if (metaDoItem) {
+        try {
+          if (metaDoItem.poster) {
+            await fetch("/api/drive/upload", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ no, slot, fileId: metaDoItem.poster }),
+            });
+          }
+          const acaoAtual = acoes.find((a) => a.no === no);
+          const novoMapa = { ...(acaoAtual?.[campoMeta] || {}) };
+          delete novoMapa[fileId];
+          setAcoes((prev) => prev.map((a) => (a.no === no ? { ...a, [campoMeta]: novoMapa } : a)));
+          await fetch(`/api/detalhes/${encodeURIComponent(no)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ field: campoMetaApi, value: formatarAnexoMeta(novoMapa) }),
+          });
+        } catch (e) {
+          console.error("Falha ao limpar metadado/capa do anexo removido", e);
+        }
+      }
     } catch (e) {
       alert(t("common.error") + ": " + e.message);
     }

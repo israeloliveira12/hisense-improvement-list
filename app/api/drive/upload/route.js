@@ -21,8 +21,15 @@ export async function POST(request) {
     const filename = `${no}_${slot}_${Date.now()}.${ext}`;
 
     const fileId = await uploadFile(buffer, filename, file.type || "image/jpeg");
-    const campo = slot === "before" ? "Foto Before" : "Foto Improvement";
-    await appendPptDetalhesFoto(no, campo, fileId);
+    // "registrar=0" sobe o arquivo pro Drive mas NAO o adiciona na lista de
+    // fotos da acao. Usado pela capa de video (um quadro extraido do
+    // proprio video): ela precisa existir no Drive pra ser exibida, mas
+    // nao e um anexo separado -- quem aponta pra ela e o metadado do
+    // video. Sem o parametro, o comportamento e o de sempre (registra).
+    if (formData.get("registrar") !== "0") {
+      const campo = slot === "before" ? "Foto Before" : "Foto Improvement";
+      await appendPptDetalhesFoto(no, campo, fileId);
+    }
     return NextResponse.json({ ok: true, fileId, url: `/api/drive/file/${fileId}` });
   } catch (e) {
     return NextResponse.json({ error: String(e.message || e) }, { status: 500 });

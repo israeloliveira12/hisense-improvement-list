@@ -41,7 +41,12 @@ function PhotoLightbox({ ids, rotacoes, tipos, startIndex, onClose }) {
       )}
       <div className="lightbox-stage" onClick={(e) => e.stopPropagation()}>
         {isVideo ? (
-          <video src={`/api/drive/file/${id}?v=${id}`} controls autoPlay />
+          <video
+            src={`/api/drive/file/${id}?v=${id}`}
+            poster={tipos?.[id]?.poster ? `/api/drive/file/${tipos[id].poster}?v=${tipos[id].poster}` : undefined}
+            controls
+            autoPlay
+          />
         ) : (
           <img
             src={`/api/drive/file/${id}?v=${id}`}
@@ -137,16 +142,21 @@ function UploadTile({ className, uploading, label, onFile, dropavel }) {
 // mover (troca de posicao com a vizinha -- promove miniatura a principal
 // quando move o suficiente pra esquerda, e vice-versa), excluir e ver em
 // tela grande. `podeMoverEsq`/`podeMoverDir` desabilitam nas pontas da
-// lista. Video nao mostra imagem nenhuma (nao da pra gerar thumbnail sem
-// processar o arquivo no servidor) -- so um retangulo escuro com um
-// triangulo de play; o video de verdade so toca ao clicar (lightbox).
-function FotoItem({ id, tipo, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand, onRotate }) {
+// lista. Video mostra a CAPA (um quadro extraido dele no upload, ver
+// extrairCapaDeVideo em PresentationClient.js) com um triangulo de play
+// por cima; o video de verdade so toca ao clicar (lightbox). Video antigo,
+// enviado antes da capa existir, cai no retangulo escuro de antes.
+function FotoItem({ id, tipo, poster, grande, rotacao, podeMoverEsq, podeMoverDir, onMover, onDelete, onExpand, onRotate }) {
   const { t } = useLanguage();
   const isVideo = tipo === "video";
   return (
     <div className={grande ? "drop drop-photo" : "ba-thumb"}>
       {isVideo ? (
-        <div className={(grande ? "drop-photo-img" : "ba-thumb-img") + " ba-video-tile"} onClick={onExpand}>
+        <div
+          className={(grande ? "drop-photo-img" : "ba-thumb-img") + " ba-video-tile" + (poster ? " tem-capa" : "")}
+          style={poster ? { backgroundImage: `url(/api/drive/file/${poster}?v=${poster})` } : undefined}
+          onClick={onExpand}
+        >
           <span className="ba-video-play">▶</span>
         </div>
       ) : (
@@ -274,6 +284,7 @@ function PhotoGroup({ ids, rotacoes, meta, slot, no, uploading, onFile, onDelete
             key={id}
             id={id}
             tipo={tipoDe(id)}
+            poster={meta?.[id]?.poster}
             grande
             rotacao={rotacoes?.[id]}
             podeMoverEsq={i > 0}
@@ -294,6 +305,7 @@ function PhotoGroup({ ids, rotacoes, meta, slot, no, uploading, onFile, onDelete
                 key={id}
                 id={id}
                 tipo={tipoDe(id)}
+                poster={meta?.[id]?.poster}
                 rotacao={rotacoes?.[id]}
                 podeMoverEsq
                 podeMoverDir={i < midia.length - 1}
