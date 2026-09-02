@@ -197,6 +197,25 @@ a { color: inherit; }
   width: 100%; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--border);
   background: var(--bg); color: var(--text); font-size: 12.5px; font-family: inherit;
 }
+/* lista de departamentos com marcacao multipla (substituiu o <select> de
+   escolha unica). Rola dentro do proprio dropdown quando a fabrica tem
+   muitos departamentos, em vez de esticar o menu pra fora da tela. */
+.filter-check-list {
+  display: flex; flex-direction: column; max-height: 210px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 7px; background: var(--bg); padding: 3px;
+}
+.filter-check-row {
+  display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 5px;
+  font-size: 12.5px; color: var(--text); cursor: pointer; user-select: none;
+}
+.filter-check-row:hover { background: var(--purple-tint); }
+.filter-check-row input { accent-color: var(--purple); cursor: pointer; margin: 0; flex: none; }
+.filter-check-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filter-check-todos { font-weight: 700; border-bottom: 1px solid var(--border); border-radius: 5px 5px 0 0; margin-bottom: 2px; }
+.filter-label-count {
+  display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 9px;
+  background: var(--purple); color: #fff; font-size: 9.5px; line-height: 15px; font-weight: 700;
+}
 .filter-clear {
   width: 100%; padding: 7px 0; border-radius: 7px; border: none; background: none;
   color: var(--text-muted); font-size: 11.5px; font-weight: 700; cursor: pointer; text-align: center;

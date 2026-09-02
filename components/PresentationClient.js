@@ -16,7 +16,9 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
   const [query, setQuery] = useState("");
   const [apenasOpen, setApenasOpen] = useState(false);
   const [apenasInvestimento, setApenasInvestimento] = useState(false);
-  const [deptoFiltro, setDeptoFiltro] = useState("");
+  // Lista de departamentos marcados no filtro. Vazia = todos (mesma
+  // semantica do seletor unico que existia antes).
+  const [deptosFiltro, setDeptosFiltro] = useState([]);
   const [selected, setSelected] = useState(0);
   const [presenting, setPresenting] = useState(false);
   const [fsZoom, setFsZoom] = useState(1);
@@ -38,13 +40,13 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     return acoes.filter((a) => {
       if (apenasOpen && a.status !== "open") return false;
       if (apenasInvestimento && a.investmentFlag !== "yes") return false;
-      if (deptoFiltro && a.dept !== deptoFiltro) return false;
+      if (deptosFiltro.length && !deptosFiltro.includes(a.dept)) return false;
       if (q && !(a.no.toLowerCase().includes(q) || (a.item || "").toLowerCase().includes(q) || (a.dept || "").toLowerCase().includes(q))) {
         return false;
       }
       return true;
     });
-  }, [acoes, query, apenasOpen, apenasInvestimento, deptoFiltro]);
+  }, [acoes, query, apenasOpen, apenasInvestimento, deptosFiltro]);
 
   function alternarApenasOpen(v) {
     setApenasOpen(v);
@@ -56,8 +58,8 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     setSelected(0);
   }
 
-  function mudarDeptoFiltro(v) {
-    setDeptoFiltro(v);
+  function mudarDeptosFiltro(lista) {
+    setDeptosFiltro(lista);
     setSelected(0);
   }
 
@@ -205,7 +207,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       setQuery("");
       setApenasOpen(false);
       setApenasInvestimento(false);
-      setDeptoFiltro("");
+      setDeptosFiltro([]);
       const idx = data.acoes.findIndex((a) => a.no === no);
       setSelected(idx >= 0 ? idx : 0);
     } catch (e) {
@@ -222,12 +224,14 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       .join(",");
   }
 
-  // Video/documento nao passam pelo upload antigo (que manda o arquivo
-  // inteiro de uma vez) porque toda funcao serverless da Vercel tem um
+  // Caminho em PEDACOS, usado so por arquivo GRANDE (ver uploadFoto).
+  // Existe por um motivo unico: toda funcao serverless da Vercel tem um
   // teto de ~4.5MB de corpo de requisicao imposto pela propria plataforma
-  // (mesmo teto do lado da resposta, ja documentado em lib/pptBuilder.js)
-  // -- foto escapa disso porque e redimensionada antes de enviar, video
-  // nao tem como ser "redimensionado" do mesmo jeito.
+  // (mesmo teto do lado da resposta, ja documentado em lib/pptBuilder.js).
+  // Obs.: ao contrario do que este comentario dizia antes, foto NAO e
+  // redimensionada no navegador em lugar nenhum -- ela sobe do tamanho
+  // original. Ou seja, foto grande batia exatamente no mesmo teto; hoje
+  // ela tambem usa este caminho quando passa do limite.
   //
   // O navegador manda o arquivo em PEDACOS pequenos pra nossa PROPRIA
   // rota (mesma origem, nunca esbarra em CORS), que repassa cada pedaco
@@ -244,10 +248,15 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filename, mimeType: file.type || "application/octet-stream" }),
     });
-    const dataInit = await resInit.json();
-    if (!resInit.ok) throw new Error(dataInit.error || t("pres.uploadFalhou"));
+    const dataInit = await resInit.json().catch(() => ({}));
+    if (!resInit.ok) throw new Error(dataInit.error || `HTTP ${resInit.status} ao abrir a sessão de upload`);
+    if (!dataInit.uploadUrl) throw new Error("O servidor não devolveu a URL de upload.");
 
-    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB -- folga confortavel abaixo do teto de ~4.5MB da Vercel
+    // 2MB por pedaco. Precisa ser MULTIPLO DE 256KB (exigencia do
+    // protocolo resumavel do Google pra todo pedaco que nao seja o
+    // ultimo) e ficar bem abaixo do teto de ~4.5MB de corpo de
+    // requisicao da Vercel. 2MB = 8 x 256KB.
+    const CHUNK_SIZE = 2 * 1024 * 1024;
     const total = file.size;
     let inicio = 0;
     let fileId = null;
@@ -264,13 +273,43 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
         },
         body: pedaco,
       });
-      const dataChunk = await resChunk.json().catch(() => ({}));
-      if (!resChunk.ok) throw new Error(dataChunk.error || t("pres.uploadFalhou"));
-      if (dataChunk.completo) fileId = dataChunk.fileId;
-      inicio = fim;
+      // Erro da plataforma (ex.: corpo grande demais) volta como texto
+      // puro, nao JSON -- ler como texto evita mascarar o motivo real com
+      // um "Unexpected token" de parse.
+      const bruto = await resChunk.text();
+      let dataChunk = {};
+      try { dataChunk = JSON.parse(bruto); } catch { /* resposta nao-JSON, ver abaixo */ }
+      if (!resChunk.ok) {
+        throw new Error(dataChunk.error || `HTTP ${resChunk.status}: ${bruto.slice(0, 200)}`);
+      }
+      if (dataChunk.completo) {
+        fileId = dataChunk.fileId;
+        break;
+      }
+      // Continua exatamente de onde o Google confirmou ter gravado (pode
+      // ser menos do que enviamos) -- ver enviarPedacoResumavel.
+      const proximo = Number(dataChunk.proximoInicio);
+      inicio = Number.isFinite(proximo) && proximo > inicio ? proximo : fim;
     }
     if (!fileId) throw new Error(t("pres.uploadFalhou"));
     return fileId;
+  }
+
+  // Caminho simples (uma requisicao so, com FormData) -- e EXATAMENTE o
+  // mesmo que as fotos ja usam em producao todo dia, entao e o caminho
+  // mais confiavel que existe aqui. Serve pra QUALQUER tipo de arquivo: a
+  // rota /api/drive/upload nunca olhou o mimeType, so repassa pro Drive.
+  async function uploadSimples(no, slot, file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("no", no);
+    fd.append("slot", slot);
+    const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
+    const bruto = await res.text();
+    let data = {};
+    try { data = JSON.parse(bruto); } catch { /* idem acima */ }
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}: ${bruto.slice(0, 200)}`);
+    return data.fileId;
   }
 
   async function uploadFoto(no, slot, file) {
@@ -281,15 +320,17 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
     const tipo = detectarTipoArquivo(file);
     try {
       let fileId;
-      if (tipo === "foto") {
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("no", no);
-        fd.append("slot", slot);
-        const res = await fetch("/api/drive/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || t("pres.uploadFalhou"));
-        fileId = data.fileId;
+      // Decide pelo TAMANHO, nao pelo tipo. O motivo do caminho em pedacos
+      // existir e um so: o teto de ~4.5MB de corpo de requisicao da
+      // Vercel. Documento (PDF/planilha/Word) e video curto quase sempre
+      // ficam bem abaixo disso, entao passam pelo mesmo caminho simples e
+      // ja comprovado das fotos, em vez de um fluxo de 3 etapas que so
+      // arquivo grande realmente precisa. Foto GRANDE tambem passa a usar
+      // o caminho em pedacos -- antes ela ia sempre pelo simples e batia
+      // no mesmo teto de 4.5MB sem ninguem perceber.
+      const LIMITE_SIMPLES = 4 * 1024 * 1024;
+      if (file.size <= LIMITE_SIMPLES) {
+        fileId = await uploadSimples(no, slot, file);
       } else {
         fileId = await uploadDireto(file);
         const resFinish = await fetch("/api/drive/upload-finish", {
@@ -414,8 +455,8 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           apenasInvestimento={apenasInvestimento}
           onToggleApenasInvestimento={alternarApenasInvestimento}
           departamentos={departamentos}
-          deptoFiltro={deptoFiltro}
-          onChangeDepto={mudarDeptoFiltro}
+          deptosFiltro={deptosFiltro}
+          onChangeDeptos={mudarDeptosFiltro}
         />
         <SlideZoomControl />
         <DownloadMenu
@@ -423,7 +464,7 @@ export default function PresentationClient({ acoes: initialAcoes, error }) {
           onBaixarTudo={baixarTudo}
           onBaixarFiltrados={baixarFiltrados}
           podeBaixarUm={Boolean(acaoAtual)}
-          filtroAtivo={apenasOpen || apenasInvestimento || Boolean(deptoFiltro) || Boolean(query.trim())}
+          filtroAtivo={apenasOpen || apenasInvestimento || deptosFiltro.length > 0 || Boolean(query.trim())}
           totalFiltrado={filtradas.length}
           gerando={Boolean(gerandoDeck)}
         />

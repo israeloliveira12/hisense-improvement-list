@@ -7,11 +7,18 @@ import { useLanguage } from "../lib/i18n";
 // Closed), e um seletor de departamento -- os dois combinam com a busca
 // por texto que ja existia. Fica num dropdown do topbar, com uma bolinha
 // mostrando quantos filtros estao ativos.
-export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInvestimento, onToggleApenasInvestimento, departamentos, deptoFiltro, onChangeDepto }) {
+export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInvestimento, onToggleApenasInvestimento, departamentos, deptosFiltro, onChangeDeptos }) {
   const { t, tv } = useLanguage();
   const [aberto, setAberto] = useState(false);
   const ref = useRef(null);
-  const ativos = (apenasOpen ? 1 : 0) + (apenasInvestimento ? 1 : 0) + (deptoFiltro ? 1 : 0);
+  const selecionados = deptosFiltro || [];
+  const ativos = (apenasOpen ? 1 : 0) + (apenasInvestimento ? 1 : 0) + (selecionados.length ? 1 : 0);
+
+  function alternarDepto(d) {
+    onChangeDeptos(
+      selecionados.includes(d) ? selecionados.filter((x) => x !== d) : [...selecionados, d]
+    );
+  }
 
   useEffect(() => {
     function onClickFora(e) {
@@ -54,13 +61,37 @@ export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInves
 
           <div className="filter-divider" />
 
-          <div className="filter-label">{t("pres.departamento")}</div>
-          <select className="filter-select" value={deptoFiltro} onChange={(e) => onChangeDepto(e.target.value)}>
-            <option value="">{t("pres.todosDeptos")}</option>
+          <div className="filter-label">
+            {t("pres.departamento")}
+            {selecionados.length > 0 && (
+              <span className="filter-label-count">{selecionados.length}</span>
+            )}
+          </div>
+          {/* Lista de marcacao (nao mais um <select> de escolha unica) --
+              da pra combinar quantos departamentos quiser. Nenhum marcado
+              = todos, mesma semantica de antes. */}
+          <div className="filter-check-list">
+            <label className="filter-check-row filter-check-todos">
+              <input
+                type="checkbox"
+                checked={selecionados.length === 0}
+                // Marcar "todos" limpa a selecao; desmarcar nao faz sentido
+                // (viraria "nenhum departamento", que nao mostra nada).
+                onChange={() => onChangeDeptos([])}
+              />
+              <span>{t("pres.todosDeptos")}</span>
+            </label>
             {departamentos.map((d) => (
-              <option key={d} value={d}>{tv(d)}</option>
+              <label className="filter-check-row" key={d}>
+                <input
+                  type="checkbox"
+                  checked={selecionados.includes(d)}
+                  onChange={() => alternarDepto(d)}
+                />
+                <span>{tv(d)}</span>
+              </label>
             ))}
-          </select>
+          </div>
 
           {ativos > 0 && (
             <button
@@ -69,7 +100,7 @@ export default function FilterMenu({ apenasOpen, onToggleApenasOpen, apenasInves
               onClick={() => {
                 onToggleApenasOpen(false);
                 onToggleApenasInvestimento(false);
-                onChangeDepto("");
+                onChangeDeptos([]);
               }}
             >
               {t("pres.limparFiltros")}
