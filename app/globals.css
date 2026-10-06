@@ -755,6 +755,15 @@ table.db-table { width: 100%; border-collapse: collapse; min-width: 1040px; }
 }
 .editor-inv-table input:hover, .editor-inv-table select:hover { background: var(--purple-tint); }
 .editor-etapa-disabled { display: inline-block; padding: 3px 4px; font-size: 11.5px; color: var(--text-faint); cursor: help; }
+/* Coluna de excluir item de investimento: discreta por padrao (nao compete
+   com os campos editaveis) e so "acende" em vermelho no hover, mesmo
+   espirito do botao de excluir foto. */
+.editor-inv-table td:last-child { width: 26px; padding-right: 0; }
+.editor-inv-remove {
+  border: none; background: none; cursor: pointer; color: var(--text-faint);
+  font-size: 12px; line-height: 1; padding: 4px 5px; border-radius: 5px;
+}
+.editor-inv-remove:hover { color: var(--red); background: var(--red-tint, #fbeaea); }
 
 .editor-plano-table td:nth-child(2) { min-width: 260px; }
 .editor-plano-table textarea {

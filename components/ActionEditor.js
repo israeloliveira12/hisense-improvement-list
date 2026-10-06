@@ -62,6 +62,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
   const pendentesRef = useRef({}); // { statusKey: {url, body} } -- edicoes de campo simples (acao/detalhe/passo existente/investimento existente)
   const parentUpdatesRef = useRef({}); // { field: value } -- o que propagar pro componente pai no flush
   const passosRemovidosRef = useRef(new Set()); // rows (reais, >0) de passos marcados pra excluir no flush
+  const investimentosRemovidosRef = useRef(new Set()); // idem, pra itens de investimento
   const passosSujoRef = useRef(false); // true = precisa recalcular "steps" (formato de exibicao) no flush
   const investimentoSujoRef = useRef(false); // true = precisa recalcular "investment" (resumo) no flush
   const tempIdRef = useRef(0); // gera IDs temporarios negativos pra passo/item ainda nao criado no servidor
@@ -188,6 +189,24 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
       }
     }
 
+    // FASE 2.5 -- itens de investimento marcados pra excluir (ja existiam
+    // no servidor). Antes dos novos, de proposito: se a acao ficar sem
+    // nenhum item, o servidor devolve "Investment" pra "No" -- e se logo
+    // em seguida um item novo entrar, o append marca "Yes" de volta. Na
+    // ordem inversa o "No" da exclusao sobrescreveria o "Yes" do novo.
+    for (const row of investimentosRemovidosRef.current) {
+      try {
+        const res = await fetch(`/api/investimento/${row}`, { method: "DELETE" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      } catch (e) {
+        alert(`${t("common.error")}: ${e.message}`);
+        return false;
+      }
+    }
+    const houveExclusaoInv = investimentosRemovidosRef.current.size > 0;
+    investimentosRemovidosRef.current = new Set();
+
     // FASE 3 -- itens de investimento novos (sem limite -- cada um vira
     // um append independente em PPT_Investimentos).
     let itensAtual = local.itensInvestimento || [];
@@ -293,10 +312,15 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
         onFieldChanged && onFieldChanged(no, field, value);
       });
       if (passosSujoRef.current) onFieldChanged && onFieldChanged(no, "steps", stepsParaArray(stepsAtual));
-      if (investimentoSujoRef.current || investimentoCriado) {
+      if (investimentoSujoRef.current || investimentoCriado || houveExclusaoInv) {
         onFieldChanged && onFieldChanged(no, "investment", investimentoDisplayClient(itensAtual) || "Sem investimento");
       }
       if (investimentoCriado) onFieldChanged && onFieldChanged(no, "investmentFlag", "yes");
+      // Excluiu e nao sobrou item nenhum: o servidor devolveu "Investment"
+      // pra "No" (ver deleteInvestimentoItem) -- a tela tem que acompanhar.
+      else if (houveExclusaoInv && itensAtual.length === 0) {
+        onFieldChanged && onFieldChanged(no, "investmentFlag", "no");
+      }
     }
     parentUpdatesRef.current = {};
     passosSujoRef.current = false;
@@ -315,6 +339,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
     return (
       Object.keys(pendentesRef.current).length > 0 ||
       passosRemovidosRef.current.size > 0 ||
+      investimentosRemovidosRef.current.size > 0 ||
       passosSujoRef.current ||
       investimentoSujoRef.current ||
       Boolean(novoInv && Object.values(novoInv).some((v) => String(v || "").trim()))
@@ -336,6 +361,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
     pendentesRef.current = {};
     parentUpdatesRef.current = {};
     passosRemovidosRef.current = new Set();
+    investimentosRemovidosRef.current = new Set();
     passosSujoRef.current = false;
     investimentoSujoRef.current = false;
     onClose();
@@ -422,6 +448,22 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
   // pro servidor, que faz so um APPEND numa aba propria (PPT_Investimentos,
   // ver addInvestimentoItem em lib/googleSheets.js) -- funciona pro 1o,
   // 2o ou Nesimo item da mesma acao, sem limite.
+  // Mesmo padrao de removerPasso: tira da tela na hora, mas so apaga de
+  // verdade no flush ("Salvar e fechar") -- cancelar descarta e a planilha
+  // nunca chega a ser tocada. Item novo (row < 0) nunca existiu no
+  // servidor, entao some so daqui.
+  function removerInvestimento(row) {
+    if (!window.confirm(t("edit.confirmarExcluirInvestimento"))) return;
+    const novosItens = (local.itensInvestimento || []).filter((it) => it.row !== row);
+    setLocal((prev) => ({ ...prev, itensInvestimento: novosItens }));
+    investimentoSujoRef.current = true;
+    if (row > 0) investimentosRemovidosRef.current.add(row);
+    // descarta edicao de campo ja agendada pra um item que nao vai existir
+    Object.keys(pendentesRef.current).forEach((k) => {
+      if (k.startsWith("inv." + row + ".")) delete pendentesRef.current[k];
+    });
+  }
+
   function adicionarInvestimento() {
     if (!novoInv?.item?.trim()) return;
     const tempRow = --tempIdRef.current;
@@ -645,7 +687,7 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
               {local.itensInvestimento && local.itensInvestimento.length > 0 && (
                 <table className="editor-inv-table">
                   <thead>
-                    <tr><th>{t("edit.colItem")}</th><th>{t("edit.colQtd")}</th><th>{t("edit.colCustoUn")}</th><th>{t("edit.colFornecedor")}</th><th>{t("edit.colAprovacao")}</th><th>{t("edit.colEtapa")}</th></tr>
+                    <tr><th>{t("edit.colItem")}</th><th>{t("edit.colQtd")}</th><th>{t("edit.colCustoUn")}</th><th>{t("edit.colFornecedor")}</th><th>{t("edit.colAprovacao")}</th><th>{t("edit.colEtapa")}</th><th aria-label={t("edit.excluirInvestimento")} /></tr>
                   </thead>
                   <tbody>
                     {local.itensInvestimento.map((it) => (
@@ -670,6 +712,16 @@ export default function ActionEditor({ acao, onClose, onFieldChanged, onSaved, o
                           ) : (
                             <span className="editor-etapa-disabled" title={t("edit.etapaRequerAprovacao")}>—</span>
                           )}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="editor-inv-remove"
+                            title={t("edit.excluirInvestimento")}
+                            onClick={() => removerInvestimento(it.row)}
+                          >
+                            ✕
+                          </button>
                         </td>
                       </tr>
                     ))}

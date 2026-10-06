@@ -102,8 +102,8 @@ export default function DashboardPrincipal({ stats }) {
               <div className="kpi-value" style={{ fontSize: 20, color: "var(--amber)" }}>{formatBRL(investimento.pendente)}</div>
             </div>
             <div className="kpi-card">
-              <div className="kpi-label">{t("dash.precisaInvestimento")}</div>
-              <div className="kpi-value" style={{ fontSize: 20 }}>{investimento.acoesComInvestimento}</div>
+              <div className="kpi-label">{t("dash.precisaInvestimentoAbertas")}</div>
+              <div className="kpi-value" style={{ fontSize: 20 }}>{investimento.acoesAbertasComInvestimento}</div>
             </div>
           </div>
         </div>
