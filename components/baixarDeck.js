@@ -14,6 +14,7 @@
 // pelo gate de senha), e o arquivo e montado e salvo localmente.
 
 import { setupPresentation, buildDeck } from "../lib/pptSlides";
+import { urlArquivoDrive } from "../lib/driveUrl";
 
 // converte o blob da foto em data URI + descobre largura/altura reais
 // (precisa das duas coisas: o data URI pro pptxgenjs, as dimensoes pra nao
@@ -108,7 +109,7 @@ export async function baixarApresentacaoCompleta(acoes, onProgress, lang = "en",
     if (cache.has(fileId)) return cache.get(fileId);
     let resultado = null;
     try {
-      const res = await fetch(`/api/drive/file/${fileId}`);
+      const res = await fetch(urlArquivoDrive(fileId));
       if (res.ok) {
         resultado = await blobParaFoto(await res.blob());
       } else {

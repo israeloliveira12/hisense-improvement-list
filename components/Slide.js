@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lib/i18n";
+import { urlArquivoDrive } from "../lib/driveUrl";
 
 // `tipos` = mesmo mapa que vem de acao.fotosBeforeMeta/fotosImprovementMeta
 // ({ [fileId]: { tipo, nome } }) -- so entra quem NAO e foto (esparso).
@@ -42,14 +43,14 @@ function PhotoLightbox({ ids, rotacoes, tipos, startIndex, onClose }) {
       <div className="lightbox-stage" onClick={(e) => e.stopPropagation()}>
         {isVideo ? (
           <video
-            src={`/api/drive/file/${id}?v=${id}`}
-            poster={tipos?.[id]?.poster ? `/api/drive/file/${tipos[id].poster}?v=${tipos[id].poster}` : undefined}
+            src={urlArquivoDrive(id)}
+            poster={tipos?.[id]?.poster ? urlArquivoDrive(tipos[id].poster) : undefined}
             controls
             autoPlay
           />
         ) : (
           <img
-            src={`/api/drive/file/${id}?v=${id}`}
+            src={urlArquivoDrive(id)}
             alt=""
             style={{ transform: `rotate(${rotacoes?.[id] || 0}deg) scale(${zoom})` }}
           />
@@ -154,7 +155,7 @@ function FotoItem({ id, tipo, poster, grande, rotacao, podeMoverEsq, podeMoverDi
       {isVideo ? (
         <div
           className={(grande ? "drop-photo-img" : "ba-thumb-img") + " ba-video-tile" + (poster ? " tem-capa" : "")}
-          style={poster ? { backgroundImage: `url(/api/drive/file/${poster}?v=${poster})` } : undefined}
+          style={poster ? { backgroundImage: `url(${urlArquivoDrive(poster)})` } : undefined}
           onClick={onExpand}
         >
           <span className="ba-video-play">▶</span>
@@ -162,7 +163,7 @@ function FotoItem({ id, tipo, poster, grande, rotacao, podeMoverEsq, podeMoverDi
       ) : (
         <div
           className={grande ? "drop-photo-img" : "ba-thumb-img"}
-          style={{ backgroundImage: `url(/api/drive/file/${id}?v=${id})`, transform: rotacao ? `rotate(${rotacao}deg)` : undefined }}
+          style={{ backgroundImage: `url(${urlArquivoDrive(id)})`, transform: rotacao ? `rotate(${rotacao}deg)` : undefined }}
           onClick={onExpand}
         />
       )}
@@ -214,7 +215,7 @@ function DocChip({ id, nome, onDelete }) {
     <div className="doc-chip">
       <a
         className="doc-chip-link"
-        href={`/api/drive/file/${id}`}
+        href={urlArquivoDrive(id)}
         target="_blank"
         rel="noopener noreferrer"
         title={nome || t("pres.documento")}
